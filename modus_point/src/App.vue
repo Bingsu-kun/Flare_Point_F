@@ -1,29 +1,22 @@
 <template>
   <div class="container">
-    <div id="main_logo">
-      <img alt="main_logo" title="모두의포인트" src="./assets/logo.png">
-    </div>
-    <header>
-      <div id="menu_bar">
-        <div id="fisher_profile">
-          여기에 프로필
-        </div>
-        <div id="filters">
-          여기에 필터들
-        </div>
-        <div id="search_bar">
-          <span>
-            <img id="search_button" src="" alt="search" title="검색버튼">
-            <input type="text" placeholder="검색어를 입력해주세요" />
-          </span>
-        </div>
+    <div id="menu_bar">
+      <a id="menu_logo" href="/">
+        <img alt="main_logo" title="플레어포인트" src="./assets/logo.png">
+      </a>
+      <ul id="menu_list">
+        <li id="marker_filter"></li>
+        <li id="my_markers"></li>
+      </ul>
+      <div id="profile">
+        <img alt="fisher" title="프로필" src="./assets/user.png">
       </div>
-    </header>
+    </div>
     <div class="map_marker_wrapper">
+      <!--
       <div id="map">
       </div>
-      <div id="marker_spec">
-      </div>
+      -->
     </div>
     <div class="footer">
     </div>
@@ -41,7 +34,6 @@ export default {
     }
     else {
       const script = document.createElement('script');
-      /* global kakao */
       script.onload = () => kakao.maps.load(this.initKakaoMap);
       script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=407b973edfee2735f163d9c7a5c03218'
       document.body.appendChild(script);
@@ -74,13 +66,6 @@ export default {
       const map = new kakao.maps.Map(mapContainer, options);
       map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
       
-      //마커 테스트
-      // const markerPosition = new kakao.maps.LatLng(35.19656853772262, 129.0807270648317);
-
-      // const marker = new kakao.maps.Marker({
-      //   position: markerPosition
-      // });
-      // marker.setMap(map)
 
     }
   }
@@ -93,16 +78,9 @@ html {
   font-size: 10px;
 }
 
-template {
+body {
   margin: 0px;
-}
-
-header {
-  width: 100%;
-  height: 7.5rem;
-  position: sticky;
-  top: 0;
-  z-index: 4;
+  padding: 0px;
 }
 
 #app {
@@ -113,46 +91,49 @@ header {
   color: #2c3e50;
 }
 
-#main_logo {
-  height: fit-content;
-  padding: 0px 5rem;
-  margin: 6rem 0px;
-}
-
 #menu_bar {
-  display: grid;
-  grid-template-columns: 1fr 3fr 1fr;
-  padding: 0px 3rem;
-  background-color: rgba(255,255,255,0.8);
-  
+  padding: 25px 0px;
+  width: 8rem;
+  background-color: rgb(44, 44, 44);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 5;
+  text-align: center;
 }
 
-#search_bar {
-  display: inline;
-  padding: 0px 1rem;
+#menu_bar img {
+  width: 80%;
+}
+
+#menu_logo {
+  height: fit-content;
+}
+
+#profile {
+  position: absolute;
+  left: 0px;
+  bottom: 25px;
 }
 
 #map_marker_wrapper {
-  margin: 5rem;
+  display: flex;
   width: 100%;
   height: fit-content;
 }
 
 #map {
+  margin: 2rem 2rem;
   text-align: center;
-  width: 80%;
+  width: 70%;
   height: 60rem;
+  float: left;
 }
 
 .container {
   height: 200rem;
   font-size: 2rem;
-
-}
-
-.container img {
-  max-width: 100%;
-  height: 30%;
 }
 
 </style>
