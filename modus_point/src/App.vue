@@ -4,22 +4,54 @@
       <a id="menu_logo" href="/">
         <img alt="main_logo" title="플레어포인트" src="./assets/logo.png">
       </a>
-      <ul id="menu_list">
-        <li id="marker_filter"></li>
-        <li id="my_markers"></li>
-      </ul>
-      <div id="profile">
-        <img alt="fisher" title="프로필" src="./assets/user.png">
+      <div id="menu_list">
+        <div id="marker_filter" @mouseover="FBON = true" @mouseout="FBON = False">
+          <img :src="FilterButtonSrc" v-if="!FBON">
+          <img :src="FilterButtonOnSrc" v-if="FBON">
+        </div>
+        <div id="my_markers" @mouseover="MBON = true" @mouseout="MBON = False">
+          <img :src="MarkerButtonSrc" v-if="!MBON">
+          <img :src="MarkerButtonOnSrc" v-if="MBON">
+        </div>
+      </div>
+      <div id="profile" v-if="!LOGIN" @mouseover="PBON = true" @mouseout="PBON = false" @click="SHOW_LOGIN_FORM = true">
+        <img :src="ProfileButtonOnSrc" v-if="PBON">
+        <img :src="ProfileButtonSrc" v-if="!PBON">
+      </div>
+      <div id="profile" v-if="LOGIN">
+        <img :src="ProfileButtonOnSrc">
       </div>
     </div>
-    <div class="map_marker_wrapper">
-      <!--
+    <div id="map_marker_wrapper">
       <div id="map">
       </div>
-      -->
+      <div id="footer">
+        <span>Copyright © 2021 Hephai All rights reserved.</span>
+        <span>Created By Hephai.</span>
+        <span>Character Design By </span>
+        <span>Contact - </span>
+      </div>
     </div>
-    <div class="footer">
+
+    <div id="login-background" v-if="SHOW_LOGIN_FORM">
+      <div id="login-foreground">
+        <transition name="fade">
+          <div id="login-form">
+            <div>로그인</div>
+            <input id="principal" placeholder="이메일">
+            <input id="credencial" placeholder="비밀번호">
+            <div id="login-form-buttons">
+              <button>로그인</button>
+              <button>회원가입</button>
+            </div>
+            <div>
+              <button @click="SHOW_LOGIN_FORM = false">임시 닫기 버튼</button>
+            </div>
+          </div>
+        </transition>
+      </div> 
     </div>
+
   </div>
 
 </template>
@@ -38,10 +70,24 @@ export default {
       script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=407b973edfee2735f163d9c7a5c03218'
       document.body.appendChild(script);
     }
+
   },
   data() {
     return {
-      
+      LOGIN: false,
+      SHOW_LOGIN_FORM: false,
+
+      PBON: false,
+      ProfileButtonSrc: require("./assets/user.png"),
+      ProfileButtonOnSrc: require("./assets/user_on.png"),
+
+      FBON: false,
+      FilterButtonSrc: require("./assets/filter.png"),
+      FilterButtonOnSrc: require("./assets/filter_on.png"),
+
+      MBON: false,
+      MarkerButtonSrc: require("./assets/flare.png"),
+      MarkerButtonOnSrc: require("./assets/flare_on.png")
     }
   },
   components: {
@@ -49,6 +95,7 @@ export default {
   },
   methods: {
 
+    // 카카오 맵 초기화 메서드
     initKakaoMap: function() {
 
       const mapContainer = document.querySelector("#map");
@@ -111,29 +158,86 @@ body {
   height: fit-content;
 }
 
+#menu_list {
+  margin: 2rem 0px;
+  width: 100%;
+  height: fit-content;
+  position: relative;
+  left: 0;
+  z-index: 6;
+}
+
+#menu_list div {
+  margin: 1rem 0px;
+}
+
 #profile {
+  background-color: rgb(44, 44, 44);
+  border-radius: 1rem;
   position: absolute;
   left: 0px;
   bottom: 25px;
 }
 
 #map_marker_wrapper {
-  display: flex;
+  position: fixed;
+  left: 8rem;
+  top: 0;
   width: 100%;
-  height: fit-content;
+  height: 100%;
+  z-index: 1;
 }
 
 #map {
-  margin: 2rem 2rem;
-  text-align: center;
-  width: 70%;
-  height: 60rem;
-  float: left;
+  width: 100%;
+  height: 95%;
+}
+
+#footer {
+  padding: 3px;
+  width: 100%;
+  height: 5%;
+  background-color: rgb(44, 44, 44);
+  font-size: 1.5rem;
+  color: rgb(136, 136, 136);
+}
+
+#footer span {
+  margin: 0 2rem;
+}
+
+#login-background {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 6;
+}
+
+#login-foreground {
+  padding: 50px 35px;
+  width: 350px;
+  height: 500px;
+  margin: 70px auto;
+  border-radius: 20px;
+  background-color: white;
+  z-index: 7;
 }
 
 .container {
-  height: 200rem;
+  width: 100%;
+  height: 100%;
   font-size: 2rem;
+}
+
+.fade-over-active, .fade-out-active {
+  transition: opacity .5s;
+}
+
+.fade-over, .fade-out-to /* .ease-out-active below version 2.1.8 */ {
+  opacity: 0;
 }
 
 </style>
