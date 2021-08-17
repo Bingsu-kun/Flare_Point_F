@@ -33,24 +33,23 @@
       </div>
     </div>
 
-    <div id="login-background" v-if="SHOW_LOGIN_FORM">
-      <div id="login-foreground">
-        <transition name="fade">
-          <div id="login-form">
-            <div>로그인</div>
-            <input id="principal" placeholder="이메일">
-            <input id="credencial" placeholder="비밀번호">
-            <div id="login-form-buttons">
-              <button>로그인</button>
-              <button>회원가입</button>
-            </div>
-            <div>
-              <button @click="SHOW_LOGIN_FORM = false">임시 닫기 버튼</button>
-            </div>
-          </div>
-        </transition>
-      </div> 
+    <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="SHOW_LOGIN_FORM = false">
     </div>
+    <div id="login-foreground" v-if="SHOW_LOGIN_FORM">
+        <div id="login-form">
+          <h1>로그인</h1>
+          <div id="login_input">
+            <input id="principal" placeholder="이메일">
+          </div>
+          <div id="login_input">
+            <input id="credencial" placeholder="비밀번호">
+          </div>
+          <div>
+            <button id="principal" class="login_button">로그인</button>
+            <button id="credential" class="login_button">회원가입</button>
+          </div>
+        </div>
+      </div> 
 
   </div>
 
@@ -70,6 +69,11 @@ export default {
       script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=407b973edfee2735f163d9c7a5c03218'
       document.body.appendChild(script);
     }
+
+    // auto login 
+    // 첫 화면 띄울 때 요청 받아와서 Header에 apiToken있는지 체크, 없으면 Cookie에 refreshToken있는지 체크.
+    // 둘 중 하나라도 있으면 백에 /login 요청.
+    // 로그인 성공시 data의 login 플래그 true로.
 
   },
   data() {
@@ -113,8 +117,20 @@ export default {
       const map = new kakao.maps.Map(mapContainer, options);
       map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
       
+    },
 
+    //-----------------------------login----------------------------------
+
+    login: function() {
+      const principal = document.getElementById('principal').value;
+      const credential = document.getElementById('credential').value;
+      //axios를 이용해서 백에 /login 
+
+      //response를 받아 Header에 apiToken을, Cookie에 refreshToken을, data의 fisher변수에 값을 저장.
+
+      //로그인 실패시 에러처리
     }
+
   }
 }
 </script>
@@ -217,13 +233,30 @@ body {
 }
 
 #login-foreground {
-  padding: 50px 35px;
+  
+  position: fixed;
+  top: 120px;
+  left: 38%;
   width: 350px;
-  height: 500px;
-  margin: 70px auto;
+  height: 400px;
   border-radius: 20px;
   background-color: white;
+  text-align: center;
   z-index: 7;
+}
+
+#login_input {
+  margin: 30px 0;
+}
+
+#login_input input {
+  width: 80%;
+  height: 40px;
+  font-size: 20px;
+}
+
+#login_form_buttons {
+  margin: 30px 0 0 0;
 }
 
 .container {
@@ -238,6 +271,23 @@ body {
 
 .fade-over, .fade-out-to /* .ease-out-active below version 2.1.8 */ {
   opacity: 0;
+}
+
+.login_button {
+  margin: 50px 30px 0 30px;
+  width: 80px;
+  height: 40px;
+  border-radius: 5px;
+  color: white;
+  background-color: rgb(237, 40, 40);
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  border: 2px solid rgb(237, 40, 40);
+}
+
+.login_button:hover {
+  background-color: rgb(255,255,255);
+  color: black;
 }
 
 </style>
