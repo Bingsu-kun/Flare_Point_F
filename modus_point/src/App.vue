@@ -36,26 +36,15 @@
     <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="SHOW_LOGIN_FORM = false">
     </div>
     <div id="login-foreground" v-if="SHOW_LOGIN_FORM">
-        <div id="login-form">
-          <h1>로그인</h1>
-          <div id="login_input">
-            <input id="principal" placeholder="이메일">
-          </div>
-          <div id="login_input">
-            <input id="credencial" placeholder="비밀번호">
-          </div>
-          <div>
-            <button id="principal" class="login_button">로그인</button>
-            <button id="credential" class="login_button">회원가입</button>
-          </div>
-        </div>
-      </div> 
-
+      <login-and-signup></login-and-signup>
+    </div>
   </div>
 
 </template>
 
 <script>
+import LoginAndSignup from './components/LoginAndSignup.vue'
+
 
 export default {
   name: 'App',
@@ -70,11 +59,8 @@ export default {
       document.body.appendChild(script);
     }
 
-    // auto login 
-    // 첫 화면 띄울 때 요청 받아와서 Header에 apiToken있는지 체크, 없으면 Cookie에 refreshToken있는지 체크.
-    // 둘 중 하나라도 있으면 백에 /login 요청.
-    // 로그인 성공시 data의 login 플래그 true로.
-
+    
+    
   },
   data() {
     return {
@@ -95,7 +81,7 @@ export default {
     }
   },
   components: {
-    
+    LoginAndSignup
   },
   methods: {
 
@@ -117,18 +103,6 @@ export default {
       const map = new kakao.maps.Map(mapContainer, options);
       map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
       
-    },
-
-    //-----------------------------login----------------------------------
-
-    login: function() {
-      const principal = document.getElementById('principal').value;
-      const credential = document.getElementById('credential').value;
-      //axios를 이용해서 백에 /login 
-
-      //response를 받아 Header에 apiToken을, Cookie에 refreshToken을, data의 fisher변수에 값을 저장.
-
-      //로그인 실패시 에러처리
     }
 
   }
@@ -263,31 +237,6 @@ body {
   width: 100%;
   height: 100%;
   font-size: 2rem;
-}
-
-.fade-over-active, .fade-out-active {
-  transition: opacity .5s;
-}
-
-.fade-over, .fade-out-to /* .ease-out-active below version 2.1.8 */ {
-  opacity: 0;
-}
-
-.login_button {
-  margin: 50px 30px 0 30px;
-  width: 80px;
-  height: 40px;
-  border-radius: 5px;
-  color: white;
-  background-color: rgb(237, 40, 40);
-  -webkit-transition-duration: 0.4s; /* Safari */
-  transition-duration: 0.4s;
-  border: 2px solid rgb(237, 40, 40);
-}
-
-.login_button:hover {
-  background-color: rgb(255,255,255);
-  color: black;
 }
 
 </style>
