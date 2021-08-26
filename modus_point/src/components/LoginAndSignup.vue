@@ -3,10 +3,12 @@
     <div class="login-form" v-if="isLogin">
       <h1>로그인</h1>
       <div id="login_input">
-        <input id="principal" placeholder="이메일">
+        <input placeholder="이메일" type="email" v-model="principal">
+        <p>{{ login_email_error }}</p>
       </div>
       <div id="login_input">
-        <input id="credencial" placeholder="비밀번호">
+        <input placeholder="비밀번호" type="password" v-model="credentials">
+        <p>{{ login_password_error }}</p>
       </div>
       <div>
         <button class="login_button" @click="login">로그인</button>
@@ -14,28 +16,31 @@
       </div>
     </div>
     <div class="signup-from" v-if="!isLogin">
-      <img class="back" :src="BackButtonSrc" @click="isLogin = true">
+      <img class="back" :src="BackButtonSrc" @click="isLogin = true" alt="뒤로가기">
       <h2>회원가입</h2>
       <div id="signup_input">
-        <input id="principal" placeholder="이메일" >
+        <input placeholder="이메일" type="email" v-model="principal" @change="emailChecked = false">
         <button id="e-check" class="signup_button" @click="emailCheck">중복확인</button>
       </div>
       <div id="signup_input">
-        <input style="margin-right: 65px" id="credential" placeholder="비밀번호">
+        <input style="margin-right: 65px; font-size: 12px;" placeholder="비밀번호(영문,숫자,특수문자 포함 6 ~ 20자)" type="password" v-model="credentials">
       </div>
       <div id="signup_input">
-        <input style="margin-right: 65px" id="checkCredential" placeholder="비밀번호 확인">
+        <input style="margin-right: 65px" placeholder="비밀번호 확인" type="password" v-model="checkCredentials">
       </div>
       <div id="signup_input">
-        <input id="fishername" placeholder="닉네임">
+        <input placeholder="닉네임(2~10자)" type="text" v-model="name" @change="nameChecked = false">
         <button id="n-check" class="signup_button" @click="nameCheck">중복확인</button>
       </div>
+      <p>{{ signup_error_message }}</p>
       <button style="margin: 15px 30px 0 30px" class="login_button" @click="signup">회원가입</button>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'Login',
 
@@ -49,37 +54,201 @@ export default {
 
   data() {
     return {
+      Logined: false,
+      SHOW: false,
+
       isLogin: true,
 
-      BackButtonSrc: require("./../assets/back.png")
+      BackButtonSrc: require("./../assets/back.png"),
+
+      login_email_error: null,
+      login_password_error: null,
+      signup_error_message: null,
+
+      principal: null,
+      credentials: null,
+      checkCredentials: null,
+      name: null,
+
+      emailChecked: false,
+      nameChecked: false,
+
+      COOKIE_NAME: 'refreshToken'
     }
   },
 
   methods: {
 
-    //-----------------------------login----------------------------------
+    //--------------------------- login -----------------------------------
 
-    login: function() {
-      const principal = document.getElementById('principal').value;
-      const credential = document.getElementById('credential').value;
+    login: async function() {
+      const principal = this.principal
+      const credentials = this.credentials
+
       //axios를 이용해서 백에 /login 
+      if (principal === null || credentials === null) {
+        if (principal === null)
+          this.login_email_error = "이메일은 필수로 입력해 주세요!"
+        if (credentials === null)
+          this.login_password_error = "비밀번호는 필수로 입력해 주세요!"
+      }
+      else {
+        this.login_email_error = null
+        this.login_password_error = null
+        try {
+          await axios({
+            method: 'POST',
+            url: 'http://localhost:8080/fisher/login',
+            data: { principal: principal, credentials: credentials }
+            })
+          .then((res) => {
+            const statusCode = res.status
 
-      //response를 받아 Header에 apiToken을, Cookie에 refreshToken을, data의 fisher변수에 값을 저장.
+            if (statusCode === 401)
+              //unauthorized -> 비밀번호 불일치
+              this.login_password_error = "비밀번호가 일치하지 않습니다."
+            else if (statusCode === 406)
+              //not_acceptable -> 이메일 형식 불일치
+              this.login_email_error = "이메일 형식에 맞지 않습니다."
+            else if (statusCode === 500)
+              this.login_email_error = "존재하지 않는 아이디입니다."
+            else {
+              //apiToken, refreshToken, FisherDTO
+              console.log(res.data)
 
-      //로그인 실패시 에러처리
+              sessionStorage.setItem("apiToken", res.data.apiToken)
+              sessionStorage.setItem("userDetail", res.data.FisherDto)
+
+              const expiryDate = new Date()
+              expiryDate.setDate(expiryDate.getDate() + 21)
+
+              document.cookie = `${this.COOKIE_NAME}=${res.data.refreshToken}; expires=${expiryDate.toUTCString()}`
+
+              alert(`어서오세요, ${ principal }님! :)`)
+
+              this.Logined = true
+            }
+
+          })
+        } catch (error) {
+          console.warn("unexpected error occured" + error)
+        }
+      }
+      
     },
 
-    signup: function() {
+    //-------------------------- signup -----------------------------------
+
+    signup: async function() {
       //회원가입 처리
-      //비밀번호 확인 체크 로직
+
+      const principal = this.principal
+      const credentials = this.credentials
+      const checkCredentials = this.checkCredentials
+      const name = this.name
+
+      // 비밀번호 확인 체크
+      if (credentials !== checkCredentials)
+        this.signup_error_message = "비밀번호와 비밀번호 확인이 일치하지 않습니다."
+      // email 또는 닉네임 중복 체크 안했을 때.
+      else if (this.emailChecked === false)
+        this.signup_error_message = "이메일 중복체크를 진행해 주세요!"
+      else if (this.nameChecked === false)
+        this.signup_error_message = "닉네임 중복체크를 진행해 주세요!"
+      else {
+        try {
+          await axios({
+            method: 'POST',
+            url: 'http://localhost:8080/fisher/join',
+            data: { principal: principal, credentials:credentials, name:name }
+          })
+          .then((res) => {
+            //apiToken, refreshToken, FisherDTO
+            const statusCode = res.status
+
+            if (statusCode === 400) {
+              this.signup_error_message = "이메일 또는 비밀번호가 형식에 맞지 않습니다."
+            }
+            else if (statusCode === 406) {
+              this.signup_error_message = "닉네임은 2자 이상 10자 이하여야 합니다."
+            }
+            else if (statusCode === 409) {
+              this.signup_error_message = "이메일 또는 비밀번호가 중복되었습니다."
+              console.warn("email, name 중복 검증 로직 오류")
+            }
+            else {
+              console.log(res.data)
+
+              sessionStorage.setItem("apiToken", res.data.apiToken)
+              sessionStorage.setItem("userDetail", res.data.FisherDto)
+
+              const expiryDate = new Date()
+              expiryDate.setDate(expiryDate.getDate() + 21)
+
+              document.cookie = `${this.COOKIE_NAME}=${res.data.refreshToken}; expires=${expiryDate.toUTCString()}`
+
+              alert(`가입되었습니다! 환영합니다 ${principal}님:)`)
+
+              this.isLogin = true
+            }
+          })
+        } catch (error) {
+          console.warn("unexpected error occured" + error)
+        }
+      }
+
     },
 
-    emailCheck: function() {
-      //email 중복첵
+    emailCheck: async function() {
+      //email 중복체크
+      const principal = this.principal
+
+      try {
+        await axios({
+          method: 'GET',
+          url: 'http://localhost:8080/fisher/join/exists',
+          data: { email: principal, name: null }
+        })
+        .then((res) => {
+          if (res.status === 200){
+            this.emailChecked = true
+            alert("사용 가능한 이메일입니다!")
+          }
+          else if (res.status === 400)
+            alert("닉네임 칸이 빈칸입니다.")
+          else {
+            alert("이미 같은 이메일이 존재합니다..")
+          }
+        })
+      } catch (error) {
+        console.warn("unexpected error occured" + error)
+      } 
     },
 
-    nameCheck: function() {
-      //닉넴 중복첵
+    nameCheck: async function() {
+      //닉넴 중복체크
+      const name = this.name
+
+      try {
+        await axios({
+          method: 'GET',
+          url: 'http://localhost:8080/fisher/join/exists',
+          data: { email: null, name: name }
+        })
+        .then((res) => {
+          if (res.status === 200){
+            this.nameChecked = true
+            alert("사용 가능한 닉네임입니다!")
+          }
+          else if (res.status === 400)
+            alert("닉네임 칸이 빈칸입니다.")
+          else {
+            alert("이미 같은 닉네임이 존재합니다..")
+          }
+        })
+      } catch (error) {
+        console.warn("unexpected error occured" + error)
+      } 
     }
 
   },
@@ -89,8 +258,11 @@ export default {
 
 <style>
 
-#login_input {
-  margin: 30px 0;
+p {
+  margin: 0 0 10px 30px;
+  text-align: left;
+  color: rgb(237, 40, 40);
+  font-size: 14px;
 }
 
 #login_input input {

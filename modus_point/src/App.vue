@@ -14,7 +14,7 @@
           <img :src="MarkerButtonOnSrc" v-if="MBON">
         </div>
       </div>
-      <div id="profile" v-if="!LOGIN" @mouseover="PBON = true" @mouseout="PBON = false" @click="SHOW_LOGIN_FORM = true">
+      <div id="profile" v-if="!LOGIN" @mouseover="PBON = true" @mouseout="PBON = false" @click="LoginAndSignup = true">
         <img :src="ProfileButtonOnSrc" v-if="PBON">
         <img :src="ProfileButtonSrc" v-if="!PBON">
       </div>
@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="SHOW_LOGIN_FORM = false">
+    <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="LoginAndSignup.SHOW = false">
     </div>
     <div id="login-foreground" v-if="SHOW_LOGIN_FORM">
       <login-and-signup></login-and-signup>
@@ -64,8 +64,8 @@ export default {
   },
   data() {
     return {
-      LOGIN: false,
-      SHOW_LOGIN_FORM: false,
+      LOGIN: LoginAndSignup.data.Logined,
+      SHOW_LOGIN_FORM: LoginAndSignup.data.SHOW,
 
       PBON: false,
       ProfileButtonSrc: require("./assets/user.png"),
@@ -217,20 +217,6 @@ body {
   background-color: white;
   text-align: center;
   z-index: 7;
-}
-
-#login_input {
-  margin: 30px 0;
-}
-
-#login_input input {
-  width: 80%;
-  height: 40px;
-  font-size: 20px;
-}
-
-#login_form_buttons {
-  margin: 30px 0 0 0;
 }
 
 .container {
