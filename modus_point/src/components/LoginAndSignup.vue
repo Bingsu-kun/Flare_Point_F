@@ -26,7 +26,7 @@
         <input style="margin-right: 65px; font-size: 12px;" placeholder="비밀번호(영문,숫자,특수문자 포함 6 ~ 20자)" type="password" v-model="credentials">
       </div>
       <div id="signup_input">
-        <input style="margin-right: 65px" placeholder="비밀번호 확인" type="password" v-model="checkCredentials">
+        <input style="margin-right: 65px; font-size: 12px;" placeholder="비밀번호 확인" type="password" v-model="checkCredentials">
       </div>
       <div id="signup_input">
         <input placeholder="닉네임(2~10자)" type="text" v-model="name" @change="nameChecked = false">
@@ -54,9 +54,6 @@ export default {
 
   data() {
     return {
-      Logined: false,
-      SHOW: false,
-
       isLogin: true,
 
       BackButtonSrc: require("./../assets/back.png"),
@@ -101,37 +98,35 @@ export default {
             url: 'http://localhost:8080/fisher/login',
             data: { principal: principal, credentials: credentials }
             })
-          .then((res) => {
-            const statusCode = res.status
+          .then((res) => { 
+            //apiToken, refreshToken, FisherDTO
+            console.debug(res.data)
 
-            if (statusCode === 401)
-              //unauthorized -> 비밀번호 불일치
-              this.login_password_error = "비밀번호가 일치하지 않습니다."
-            else if (statusCode === 406)
-              //not_acceptable -> 이메일 형식 불일치
-              this.login_email_error = "이메일 형식에 맞지 않습니다."
-            else if (statusCode === 500)
-              this.login_email_error = "존재하지 않는 아이디입니다."
-            else {
-              //apiToken, refreshToken, FisherDTO
-              console.log(res.data)
+            sessionStorage.setItem("apiToken", res.data.apiToken)
+            sessionStorage.setItem("userDetail", res.data.FisherDto)
 
-              sessionStorage.setItem("apiToken", res.data.apiToken)
-              sessionStorage.setItem("userDetail", res.data.FisherDto)
+            const expiryDate = new Date()
+            expiryDate.setDate(expiryDate.getDate() + 21)
 
-              const expiryDate = new Date()
-              expiryDate.setDate(expiryDate.getDate() + 21)
+            document.cookie = `${this.COOKIE_NAME}=${res.data.refreshToken}; expires=${expiryDate.toUTCString()}`
 
-              document.cookie = `${this.COOKIE_NAME}=${res.data.refreshToken}; expires=${expiryDate.toUTCString()}`
+            alert(`어서오세요, ${ principal }님! :)`)
 
-              alert(`어서오세요, ${ principal }님! :)`)
-
-              this.Logined = true
-            }
-
+            this.loginEvent()
           })
         } catch (error) {
-          console.warn("unexpected error occured" + error)
+          const statusCode = error.response.status
+
+          if (statusCode === 401)
+            //unauthorized -> 비밀번호 불일치
+            this.login_password_error = "비밀번호가 일치하지 않습니다."
+          else if (statusCode === 406)
+            //not_acceptable -> 이메일 형식 불일치
+            this.login_email_error = "이메일 형식에 맞지 않습니다."
+          else if (statusCode === 500)
+            this.login_email_error = "존재하지 않는 아이디입니다."
+          else
+            console.warn("unexpected error occured" + error)
         }
       }
       
@@ -164,36 +159,37 @@ export default {
           })
           .then((res) => {
             //apiToken, refreshToken, FisherDTO
-            const statusCode = res.status
+            
+            console.debug(res.data)
 
-            if (statusCode === 400) {
-              this.signup_error_message = "이메일 또는 비밀번호가 형식에 맞지 않습니다."
-            }
-            else if (statusCode === 406) {
-              this.signup_error_message = "닉네임은 2자 이상 10자 이하여야 합니다."
-            }
-            else if (statusCode === 409) {
-              this.signup_error_message = "이메일 또는 비밀번호가 중복되었습니다."
-              console.warn("email, name 중복 검증 로직 오류")
-            }
-            else {
-              console.log(res.data)
+            sessionStorage.setItem("apiToken", res.data.apiToken)
+            sessionStorage.setItem("userDetail", res.data.FisherDto)
 
-              sessionStorage.setItem("apiToken", res.data.apiToken)
-              sessionStorage.setItem("userDetail", res.data.FisherDto)
+            const expiryDate = new Date()
+            expiryDate.setDate(expiryDate.getDate() + 21)
 
-              const expiryDate = new Date()
-              expiryDate.setDate(expiryDate.getDate() + 21)
+            document.cookie = `${this.COOKIE_NAME}=${res.data.refreshToken}; expires=${expiryDate.toUTCString()}`
 
-              document.cookie = `${this.COOKIE_NAME}=${res.data.refreshToken}; expires=${expiryDate.toUTCString()}`
+            alert(`가입되었습니다! 환영합니다 ${name}님:)`)
 
-              alert(`가입되었습니다! 환영합니다 ${principal}님:)`)
-
-              this.isLogin = true
-            }
+            this.isLogin = true
+            
           })
         } catch (error) {
-          console.warn("unexpected error occured" + error)
+          const statusCode = error.response.status
+
+          if (statusCode === 400) {
+            this.signup_error_message = "이메일 또는 비밀번호가 형식에 맞지 않습니다."
+          }
+          else if (statusCode === 406) {
+            this.signup_error_message = "닉네임은 2자 이상 10자 이하여야 합니다."
+          }
+          else if (statusCode === 409) {
+            this.signup_error_message = "이메일 또는 비밀번호가 중복되었습니다."
+            console.warn("email, name 중복 검증 로직 오류")
+          }
+          else 
+            console.warn("unexpected error occured" + error)
         }
       }
 
@@ -207,21 +203,23 @@ export default {
         await axios({
           method: 'GET',
           url: 'http://localhost:8080/fisher/join/exists',
-          data: { email: principal, name: null }
+          data: { request: principal }
         })
         .then((res) => {
-          if (res.status === 200){
-            this.emailChecked = true
-            alert("사용 가능한 이메일입니다!")
-          }
-          else if (res.status === 400)
-            alert("닉네임 칸이 빈칸입니다.")
-          else {
-            alert("이미 같은 이메일이 존재합니다..")
-          }
         })
       } catch (error) {
-        console.warn("unexpected error occured" + error)
+        const statusCode = error.response.status
+
+        if (statusCode === 400)
+          this.signup_error_message = "이메일은 2자 이상 10자 이하여야 입니다."
+        else if (statusCode === 404){
+          this.emailChecked = true
+          this.signup_error_message = "사용 가능한 이메일입니다!"
+        }
+        else if (statusCode === 406) 
+          this.signup_error_message = "이미 같은 이메일이 존재합니다.."
+        else 
+          console.warn("unexpected error occured" + error)
       } 
     },
 
@@ -233,22 +231,28 @@ export default {
         await axios({
           method: 'GET',
           url: 'http://localhost:8080/fisher/join/exists',
-          data: { email: null, name: name }
+          data: { request: name }
         })
         .then((res) => {
-          if (res.status === 200){
-            this.nameChecked = true
-            alert("사용 가능한 닉네임입니다!")
-          }
-          else if (res.status === 400)
-            alert("닉네임 칸이 빈칸입니다.")
-          else {
-            alert("이미 같은 닉네임이 존재합니다..")
-          }
         })
       } catch (error) {
-        console.warn("unexpected error occured" + error)
+        const statusCode = error.response.status
+        
+        if (statusCode === 400)
+          this.signup_error_message = "닉네임은 2자 이상 10자 이하여야 입니다."
+        else if (statusCode === 404){
+          this.nameChecked = true
+          this.signup_error_message = "사용 가능한 닉네임입니다!"
+        }
+        else if (statusCode === 406) 
+          this.signup_error_message = "이미 같은 닉네임이 존재합니다.."
+        else 
+          console.warn("unexpected error occured" + error)
       } 
+    },
+
+    loginEvent: function() {
+      this.$emit("loginEvent")
     }
 
   },

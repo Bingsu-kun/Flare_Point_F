@@ -5,16 +5,16 @@
         <img alt="main_logo" title="플레어포인트" src="./assets/logo.png">
       </a>
       <div id="menu_list">
-        <div id="marker_filter" @mouseover="FBON = true" @mouseout="FBON = False">
+        <div id="marker_filter" @mouseenter="FBON = true" @mouseleave="FBON = False">
           <img :src="FilterButtonSrc" v-if="!FBON">
           <img :src="FilterButtonOnSrc" v-if="FBON">
         </div>
-        <div id="my_markers" @mouseover="MBON = true" @mouseout="MBON = False">
+        <div id="my_markers" @mouseenter="MBON = true" @mouseleave="MBON = False">
           <img :src="MarkerButtonSrc" v-if="!MBON">
           <img :src="MarkerButtonOnSrc" v-if="MBON">
         </div>
       </div>
-      <div id="profile" v-if="!LOGIN" @mouseover="PBON = true" @mouseout="PBON = false" @click="LoginAndSignup = true">
+      <div id="profile" v-if="!LOGIN" @mouseenter="PBON = true" @mouseleave="PBON = false" @click="SHOW_LOGIN_FORM = true">
         <img :src="ProfileButtonOnSrc" v-if="PBON">
         <img :src="ProfileButtonSrc" v-if="!PBON">
       </div>
@@ -33,10 +33,10 @@
       </div>
     </div>
 
-    <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="LoginAndSignup.SHOW = false">
+    <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="SHOW_LOGIN_FORM = false">
     </div>
     <div id="login-foreground" v-if="SHOW_LOGIN_FORM">
-      <login-and-signup></login-and-signup>
+      <login-and-signup v-on:loginEvent="setLogin"></login-and-signup>
     </div>
   </div>
 
@@ -64,8 +64,8 @@ export default {
   },
   data() {
     return {
-      LOGIN: LoginAndSignup.data.Logined,
-      SHOW_LOGIN_FORM: LoginAndSignup.data.SHOW,
+      LOGIN: false,
+      SHOW_LOGIN_FORM: false,
 
       PBON: false,
       ProfileButtonSrc: require("./assets/user.png"),
@@ -103,8 +103,12 @@ export default {
       const map = new kakao.maps.Map(mapContainer, options);
       map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
       
-    }
+    },
 
+    setLogin: function() {
+      this.LOGIN = true
+      this.SHOW_LOGIN_FORM = false
+    }
   }
 }
 </script>
