@@ -23,8 +23,7 @@
       </div>
     </div>
     <div id="map_marker_wrapper">
-      <div id="map">
-      </div>
+      <kakao-map></kakao-map>
       <div id="footer">
         <span>Copyright © 2021 Hephai All rights reserved.</span>
         <span>Created By Hephai.</span>
@@ -44,22 +43,11 @@
 
 <script>
 import LoginAndSignup from './components/LoginAndSignup.vue'
-
+import KakaoMap from './components/Map.vue'
 
 export default {
   name: 'App',
   mounted() {
-    if (window.kakao && window.kakao.maps) {
-      this.initKakaoMap();
-    }
-    else {
-      const script = document.createElement('script');
-      script.onload = () => kakao.maps.load(this.initKakaoMap);
-      script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=407b973edfee2735f163d9c7a5c03218'
-      document.body.appendChild(script);
-    }
-
-    
     
   },
   data() {
@@ -81,29 +69,10 @@ export default {
     }
   },
   components: {
-    LoginAndSignup
+    LoginAndSignup,
+    KakaoMap
   },
   methods: {
-
-    // 카카오 맵 초기화 메서드
-    initKakaoMap: function() {
-
-      const mapContainer = document.querySelector("#map");
-      let x,y;
-
-      //지도가 처음 표시될 때 좌표. TODO - 후에 geometry이용해서 x,y 값 사용자의 현재 위치로 받아들이기.
-      x = 33.450701;
-      y = 126.570667;
-
-      const options = {
-        center: new kakao.maps.LatLng(x,y),
-        level: 3
-      };
-
-      const map = new kakao.maps.Map(mapContainer, options);
-      map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
-      
-    },
 
     setLogin: function() {
       this.LOGIN = true
@@ -177,14 +146,9 @@ body {
   position: fixed;
   left: 8rem;
   top: 0;
-  width: 100%;
+  width: 95%;
   height: 100%;
   z-index: 1;
-}
-
-#map {
-  width: 100%;
-  height: 95%;
 }
 
 #footer {
