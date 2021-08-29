@@ -193,4 +193,41 @@ body {
   font-size: 2rem;
 }
 
+.slide-fade-enter-active {
+  transition: all .8s ease-out;
+}
+.slide-fade-leave-active {
+  transition: all .8s ease-out;
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateY(2rem);
+  opacity: 0;
+}
+
+@-webkit-keyframes fade-in-from-down {
+  0% {
+    -webkit-transform: translateY(-2rem);
+            transform: translateY(-2rem);
+            opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+            opacity: 1;
+  }
+}
+@keyframes fade-in-from-down {
+  0% {
+    -webkit-transform: translateY(-2rem);
+            transform: translateY(-2rem);
+            opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+            opacity: 1;
+  }
+}
+
 </style>

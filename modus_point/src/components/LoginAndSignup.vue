@@ -1,40 +1,44 @@
 <template>
   <div>
-    <div class="login-form" v-if="isLogin">
-      <h1>로그인</h1>
-      <div id="login_input">
-        <input placeholder="이메일" type="email" v-model="principal">
-        <p>{{ login_email_error }}</p>
+    <transition name="slide-fade">
+      <div class="login-form" v-if="isLogin">
+        <h1>로그인</h1>
+        <div id="login_input">
+          <input placeholder="이메일" type="email" v-model="principal">
+          <p>{{ login_email_error }}</p>
+        </div>
+        <div id="login_input">
+          <input placeholder="비밀번호" type="password" v-model="credentials">
+          <p>{{ login_password_error }}</p>
+        </div>
+        <div>
+          <button class="login_button" @click="login">로그인</button>
+          <button class="login_button" @click="isLogin = false">회원가입</button>
+        </div>
       </div>
-      <div id="login_input">
-        <input placeholder="비밀번호" type="password" v-model="credentials">
-        <p>{{ login_password_error }}</p>
+    </transition>
+    <transition name="slide-fade">
+      <div class="signup-from" v-if="!isLogin">
+        <img class="back" :src="BackButtonSrc" @click="isLogin = true" alt="뒤로가기">
+        <h2>회원가입</h2>
+        <div id="signup_input">
+          <input placeholder="이메일" type="email" v-model="principal" @change="emailChecked = false">
+          <button id="e-check" class="signup_button" @click="emailCheck">중복확인</button>
+        </div>
+        <div id="signup_input">
+          <input style="margin-right: 65px; font-size: 12px;" placeholder="비밀번호(영문,숫자,특수문자 포함 6 ~ 20자)" type="password" v-model="credentials">
+        </div>
+        <div id="signup_input">
+          <input style="margin-right: 65px; font-size: 12px;" placeholder="비밀번호 확인" type="password" v-model="checkCredentials">
+        </div>
+        <div id="signup_input">
+          <input placeholder="닉네임(2~10자)" type="text" v-model="name" @change="nameChecked = false">
+          <button id="n-check" class="signup_button" @click="nameCheck">중복확인</button>
+        </div>
+        <p>{{ signup_error_message }}</p>
+        <button style="margin: 15px 30px 0 30px" class="login_button" @click="signup">회원가입</button>
       </div>
-      <div>
-        <button class="login_button" @click="login">로그인</button>
-        <button class="login_button" @click="isLogin = false">회원가입</button>
-      </div>
-    </div>
-    <div class="signup-from" v-if="!isLogin">
-      <img class="back" :src="BackButtonSrc" @click="isLogin = true" alt="뒤로가기">
-      <h2>회원가입</h2>
-      <div id="signup_input">
-        <input placeholder="이메일" type="email" v-model="principal" @change="emailChecked = false">
-        <button id="e-check" class="signup_button" @click="emailCheck">중복확인</button>
-      </div>
-      <div id="signup_input">
-        <input style="margin-right: 65px; font-size: 12px;" placeholder="비밀번호(영문,숫자,특수문자 포함 6 ~ 20자)" type="password" v-model="credentials">
-      </div>
-      <div id="signup_input">
-        <input style="margin-right: 65px; font-size: 12px;" placeholder="비밀번호 확인" type="password" v-model="checkCredentials">
-      </div>
-      <div id="signup_input">
-        <input placeholder="닉네임(2~10자)" type="text" v-model="name" @change="nameChecked = false">
-        <button id="n-check" class="signup_button" @click="nameCheck">중복확인</button>
-      </div>
-      <p>{{ signup_error_message }}</p>
-      <button style="margin: 15px 30px 0 30px" class="login_button" @click="signup">회원가입</button>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -302,8 +306,8 @@ p {
 }
 
 .back:hover {
-  -webkit-animation: slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
-	animation: slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+  -webkit-animation: slide-left 0.5s ease-out alternate both;
+	animation: slide-left 0.5s ease-out alternate both;
 }
 
 .login_button {

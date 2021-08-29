@@ -68,14 +68,19 @@ export default {
         const markerImage = new kakao.maps.MarkerImage(markerImageUrl, markerImageSize, markerImageOptions);
 
         // 지도 클릭 이벤트를 등록한다 (좌클릭 : click, 우클릭 : rightclick, 더블클릭 : dblclick)
-        kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
-          // 지도에 마커를 생성하고 표시한다
-          const marker = new kakao.maps.Marker({
-            position: mouseEvent.latLng, // 마커의 좌표
-            image : markerImage, // 마커의 이미지
-            map: map // 마커를 표시할 지도 객체
-          });
-        });
+
+        // kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
+        //   // 지도에 마커를 생성하고 표시한다
+        //   const marker = new kakao.maps.Marker({
+        //     position: mouseEvent.latLng, // 마커의 좌표
+        //     image : markerImage, // 마커의 이미지
+        //     map: map // 마커를 표시할 지도 객체
+        //   });
+        // });
+
+        kakao.maps.event.addListener(map, 'rightclick', function(mouseEvent) {
+
+        })
         // 우클릭시 새로운 마커 생성 표시 후에 리스트로 하여 다른 기능 추가 할 수 있게 
         // 다른 곳 누르면 창 사라짐.
         // 새로운 마커 생성 버튼 누르면 마커 생성 모달 창 띄움
