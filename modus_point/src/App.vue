@@ -177,8 +177,8 @@ body {
 #login-foreground {
   
   position: fixed;
-  top: 120px;
-  left: 38%;
+  top: 30%;
+  left: 40%;
   width: 350px;
   height: 400px;
   border-radius: 20px;

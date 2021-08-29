@@ -50,6 +50,11 @@ export default {
     // 둘 중 하나라도 있으면 백에 /login 요청.
     // 로그인 성공시 data의 login 플래그 true로.
 
+    if (this.getCookie('refreshToken') !== null) {
+      // loginWithRefreshToken API 작성
+      // 쿠키 만들 때 samesite = NONE, secure 속성 추가.
+    }
+
   },
 
   data() {
@@ -251,8 +256,9 @@ export default {
     },
 
     getCookie: function(name) {
-      let matches = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-      return matches ? decodeURIComponent(matches[1]) : undefined;
+      const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+      console.log(value? value[2] : null);
+      return value? value[2] : null;
     }
   },
 
@@ -291,8 +297,8 @@ p {
   -webkit-transition-duration: 0.4;
   transition-duration: 0.4;
   position: fixed;
-  top: 135px;
-  left: 39%
+  top: 31%;
+  left: 40%
 }
 
 .back:hover {
