@@ -14,7 +14,7 @@
           <img :src="MarkerButtonOnSrc" v-if="MBON">
         </div>
       </div>
-      <div id="profile" v-if="!LOGIN" @mouseenter="PBON = true" @mouseleave="PBON = false" @click="SHOW_LOGIN_FORM = true">
+      <div id="profile" v-if="!LOGIN" @mouseenter="PBON = true" @mouseleave="PBON = false" @click="SHOW_LOGIN_FORM = !SHOW_LOGIN_FORM">
         <img :src="ProfileButtonOnSrc" v-if="PBON">
         <img :src="ProfileButtonSrc" v-if="!PBON">
       </div>
@@ -31,14 +31,16 @@
         <span>Contact - </span>
       </div>
     </div>
-
-    <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="SHOW_LOGIN_FORM = false">
-    </div>
-    <div id="login-foreground" v-if="SHOW_LOGIN_FORM">
-      <login-and-signup v-on:loginEvent="setLogin"></login-and-signup>
-    </div>
+    <transition name="fade">
+      <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="SHOW_LOGIN_FORM = !SHOW_LOGIN_FORM">
+      </div>
+    </transition>
+    <transition name="fade">
+      <div id="login-foreground" v-if="SHOW_LOGIN_FORM">
+        <login-and-signup v-on:loginEvent="setLogin"></login-and-signup>
+      </div>
+    </transition>
   </div>
-
 </template>
 
 <script>
@@ -193,40 +195,51 @@ body {
   font-size: 2rem;
 }
 
-.slide-fade-enter-active {
-  transition: all .8s ease-out;
-}
-.slide-fade-leave-active {
-  transition: all .8s ease-out;
-}
-.slide-fade-enter, .slide-fade-leave-to
-/* .slide-fade-leave-active below version 2.1.8 */ {
-  transform: translateY(2rem);
-  opacity: 0;
+.fade-in-enter-active {
+  -webkit-animation: fade-in 0.8s ease-out;
+  animation: fade-in 0.8s ease-out;
 }
 
-@-webkit-keyframes fade-in-from-down {
+.fade-enter-active {
+  -webkit-animation: fade-in 0.8s ease-out;
+  animation: fade-in 0.8s ease-out;
+}
+
+.fade-leave-active {
+  -webkit-animation: fade-out 0.8s ease-out;
+  animation: fade-out 0.8s ease-out;
+}
+
+@-webkit-keyframes fade-in {
   0% {
-    -webkit-transform: translateY(-2rem);
-            transform: translateY(-2rem);
             opacity: 0;
   }
   100% {
-    -webkit-transform: translateY(0);
-            transform: translateY(0);
             opacity: 1;
   }
 }
-@keyframes fade-in-from-down {
+@keyframes fade-in {
   0% {
-    -webkit-transform: translateY(-2rem);
-            transform: translateY(-2rem);
             opacity: 0;
   }
   100% {
-    -webkit-transform: translateY(0);
-            transform: translateY(0);
             opacity: 1;
+  }
+}
+@-webkit-keyframes fade-out {
+  0% {
+            opacity: 1;
+  }
+  100% {
+            opacity: 0;
+  }
+}
+@keyframes fade-out {
+  0% {
+            opacity: 1;
+  }
+  100% {
+            opacity: 0;
   }
 }
 

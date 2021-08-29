@@ -1,7 +1,7 @@
 <template>
   <div>
-    <transition name="slide-fade">
-      <div class="login-form" v-if="isLogin">
+    <transition name="fade-in">
+      <div v-if="isLogin">
         <h1>로그인</h1>
         <div id="login_input">
           <input placeholder="이메일" type="email" v-model="principal">
@@ -17,8 +17,8 @@
         </div>
       </div>
     </transition>
-    <transition name="slide-fade">
-      <div class="signup-from" v-if="!isLogin">
+    <transition name="fade-in">
+      <div v-if="!isLogin">
         <img class="back" :src="BackButtonSrc" @click="isLogin = true" alt="뒤로가기">
         <h2>회원가입</h2>
         <div id="signup_input">
