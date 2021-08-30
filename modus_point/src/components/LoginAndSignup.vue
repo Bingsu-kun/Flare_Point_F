@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
     <transition name="fade-in">
       <div v-if="isLogin">
         <h1>로그인</h1>
@@ -261,7 +261,6 @@ export default {
 
     getCookie: function(name) {
       const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-      console.log(value? value[2] : null);
       return value? value[2] : null;
     }
   },

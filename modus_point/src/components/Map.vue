@@ -1,9 +1,19 @@
 <template>
-  <div id="map">
+  <div id="map" @contextmenu="initMarkerButtonListener">
+    <transition name="fade">
+      <div id="sm-background" v-if="SHOW_SAVE_MAKER" @click="SHOW_SAVE_MAKER = !SHOW_SAVE_MAKER">
+      </div>
+    </transition>
+    <transition name="fade">
+      <div id="sm-foreground" v-if="SHOW_SAVE_MAKER">
+        <save-maker v-on:saveEvent="closeMakeWindow"></save-maker>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
+import SaveMaker from './SaveMaker.vue'
 
 export default {
 
@@ -21,8 +31,12 @@ export default {
   },
   data() {
     return {
-      
+      SHOW_SAVE_MAKER: false
     }
+  },
+  props: ['LOGIN'],
+  components: {
+    SaveMaker
   },
   methods: {
     // 카카오 맵 초기화 메서드
@@ -68,32 +82,72 @@ export default {
         const markerImage = new kakao.maps.MarkerImage(markerImageUrl, markerImageSize, markerImageOptions);
 
         // 지도 클릭 이벤트를 등록한다 (좌클릭 : click, 우클릭 : rightclick, 더블클릭 : dblclick)
+        // 맵 위 어디든지 좌클릭이 눌릴 시 이미 있는 마커메이커를 없앤다.
+        kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
+          const maker = document.querySelector('#marker-maker')
+          maker.remove()
+        });
 
-        // kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
-        //   // 지도에 마커를 생성하고 표시한다
+        // // 지도에 마커를 생성하고 표시한다
         //   const marker = new kakao.maps.Marker({
         //     position: mouseEvent.latLng, // 마커의 좌표
         //     image : markerImage, // 마커의 이미지
         //     map: map // 마커를 표시할 지도 객체
         //   });
-        // });
 
         kakao.maps.event.addListener(map, 'rightclick', function(mouseEvent) {
-
+          let beforeMaker = document.querySelector('#marker-maker')
+          if (beforeMaker === null) {
+            const markermaker = new kakao.maps.CustomOverlay({
+              map: map,
+              clickable: true, //커스텀 오버레이 클릭시 지도에 이벤트 전파 방지
+              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><div id="maker-button-list"><button id="marker-button">여기에 마커 만들기</button></div></div>',
+              position: new kakao.maps.LatLng(mouseEvent.latLng.Ma,mouseEvent.latLng.La),
+              xAnchor: 0,
+              yAnchor: 0
+            })
+          }
+          else {
+            beforeMaker.remove()
+            beforeMaker = new kakao.maps.CustomOverlay({
+              map: map,
+              clickable: true, //커스텀 오버레이 클릭시 지도에 이벤트 전파 방지
+              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><div id="maker-button-list"><button id="marker-button">여기에 마커 만들기</button></div></div>',
+              position: new kakao.maps.LatLng(mouseEvent.latLng.Ma,mouseEvent.latLng.La),
+              xAnchor: 0,
+              yAnchor: 0
+            })
+          }
         })
         // 우클릭시 새로운 마커 생성 표시 후에 리스트로 하여 다른 기능 추가 할 수 있게 
-        // 다른 곳 누르면 창 사라짐.
         // 새로운 마커 생성 버튼 누르면 마커 생성 모달 창 띄움
         // 모달창에서 마커 정보 입력후 저장 누르면 서버랑 통신하고 저장 완료.
         
         // 센터 기준으로 어디까지 마커 검색해서 불러올지 로직 작성
 
-        // 마커 클릭시 창 띄워야 되는데 마커 클릭 이벤트 있는지?
-
-        // 모달 창 생성 애니메이션 넣고 싶은데 방법을 찾아보자
 
         // 온 보딩 튜토리얼 간단하게.
       }
+    },
+    initMarkerButtonListener: function() {
+      setTimeout(() => {
+        const button = document.querySelector('#marker-button')
+        button.addEventListener("click",() => {
+          const maker = document.querySelector('#marker-maker')
+          maker.remove()
+          console.log(this.LOGIN)
+          if (this.LOGIN === false) {
+            alert('로그인이 필요한 서비스입니다.')
+            this.$emit("showLoginForm")
+          }
+          else {
+            this.SHOW_SAVE_MAKER = true
+          }
+        })
+      },100)
+    },
+    closeMakeWindow: function() {
+      this.SHOW_SAVE_MAKER = false
     }
   }
 }
@@ -104,6 +158,36 @@ export default {
 #map {
   width: 100%;
   height: 95%;
+  z-index: 2;
+}
+
+#marker-maker {
+  padding: 5px;
+  width: 100px;
+  height: fit-content;
+  background-color: rgb(44, 44, 44);
+  border-radius: 5px;
+  z-index: 3;
+  -webkit-animation: make-in 0.2 ease-out alternate both;
+  animation: make-in 0.2s ease-out alternate both;
+}
+
+#maker-button-list {
+  width: 100%;
+  height: fit-content;
+}
+
+#marker-button {
+  width: 100%;
+  height: 20px;
+  border-radius: 5px;
+  background-color: white;
+  overflow: hidden;
+}
+
+.make-marker-enter-active {
+  -webkit-animation: make-in 0.2s ease-out;
+  animation: make-in 0.2s ease-out;
 }
 
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div id="menu_bar">
+    <div id="menu_bar" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
       <a id="menu_logo" href="/">
         <img alt="main_logo" title="플레어포인트" src="./assets/logo.png">
       </a>
@@ -23,7 +23,7 @@
       </div>
     </div>
     <div id="map_marker_wrapper">
-      <kakao-map></kakao-map>
+      <kakao-map :LOGIN="LOGIN" v-on:showLoginForm="SHOW_LOGIN_FORM = true"></kakao-map>
       <div id="footer">
         <span>Copyright © 2021 Hephai All rights reserved.</span>
         <span>Created By Hephai.</span>
@@ -141,7 +141,7 @@ body {
   border-radius: 1rem;
   position: absolute;
   left: 0px;
-  bottom: 25px;
+  bottom: 5%;
 }
 
 #map_marker_wrapper {
@@ -242,5 +242,24 @@ body {
             opacity: 0;
   }
 }
-
+@-webkit-keyframes make-in {
+  0% {
+    width: 0%;
+    height: 0%;
+  }
+  100% {
+    width: 100%;
+    height: 100%;
+  }
+}
+@keyframes make-in {
+  0% {
+    width: 0;
+    height: 0;
+  }
+  100% {
+    width: 200px;
+    height: 40px;
+  }
+}
 </style>
