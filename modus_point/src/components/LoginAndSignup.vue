@@ -118,6 +118,7 @@ export default {
             sessionStorage.setItem("name", res.data.response.fisher.fishername)
             sessionStorage.setItem("role", res.data.response.fisher.role)
             sessionStorage.setItem("email", res.data.response.fisher.email)
+            sessionStorage.setItem("id", res.data.response.fisher.id)
 
             alert(`어서오세요, ${ this.name }님! :)`)
 
@@ -180,6 +181,7 @@ export default {
               sessionStorage.setItem("name", res.data.response.fisher.fishername)
               sessionStorage.setItem("role", res.data.response.fisher.role)
               sessionStorage.setItem("email", res.data.response.fisher.email)
+              sessionStorage.setItem("id", res.data.response.fisher.id)
 
               alert(`가입되었습니다! 환영합니다 ${name}님:)`)
 
@@ -299,9 +301,8 @@ p {
   height: 4rem;
   -webkit-transition-duration: 0.4;
   transition-duration: 0.4;
-  position: fixed;
-  top: 31%;
-  left: 40%
+  position: absolute;
+  left: 0%;
 }
 
 .back:hover {
@@ -319,6 +320,7 @@ p {
   -webkit-transition-duration: 0.4s; /* Safari */
   transition-duration: 0.4s;
   border: 2px solid rgb(237, 40, 40);
+  text-align: center;
 }
 
 .login_button:hover {

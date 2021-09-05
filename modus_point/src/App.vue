@@ -2,42 +2,40 @@
   <div class="container">
     <div id="menu_bar" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
       <a id="menu_logo" href="/">
-        <img alt="main_logo" title="플레어포인트" src="./assets/logo.png">
+        <img style="margin-top: 30px;" alt="main_logo" title="플레어포인트" src="./assets/logo.png">
       </a>
-      <div id="menu_list">
-        <div id="marker_filter" @mouseenter="FBON = true" @mouseleave="FBON = False">
-          <img :src="FilterButtonSrc" v-if="!FBON">
-          <img :src="FilterButtonOnSrc" v-if="FBON">
-        </div>
-        <div id="my_markers" @mouseenter="MBON = true" @mouseleave="MBON = False">
-          <img :src="MarkerButtonSrc" v-if="!MBON">
-          <img :src="MarkerButtonOnSrc" v-if="MBON">
-        </div>
-      </div>
-      <div id="profile" v-if="!LOGIN" @mouseenter="PBON = true" @mouseleave="PBON = false" @click="SHOW_LOGIN_FORM = !SHOW_LOGIN_FORM">
-        <img :src="ProfileButtonOnSrc" v-if="PBON">
-        <img :src="ProfileButtonSrc" v-if="!PBON">
+      <div id="profile" v-if="!LOGIN" @click="showLogin">
+        <button class="main-login"  v-if="!PBON">로그인</button>
       </div>
       <div id="profile" v-if="LOGIN">
-        <img :src="ProfileButtonOnSrc">
+        <img :src="ProfileButtonSrc">
       </div>
     </div>
     <div id="map_marker_wrapper">
-      <kakao-map :LOGIN="LOGIN" v-on:showLoginForm="SHOW_LOGIN_FORM = true"></kakao-map>
-      <div id="footer">
-        <span>Copyright © 2021 Hephai All rights reserved.</span>
-        <span>Created By Hephai.</span>
-        <span>Character Design By </span>
-        <span>Contact - </span>
-      </div>
+      <kakao-map :LOGIN="LOGIN" v-on:showLoginForm="showLogin"></kakao-map>
     </div>
-    <transition name="fade">
-      <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="SHOW_LOGIN_FORM = !SHOW_LOGIN_FORM">
+    <div id="login-box">
+      <transition name="fade">
+        <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="closeLogin">
+        </div>
+      </transition>
+      <transition name="fade">
+        <div id="login-foreground" v-if="SHOW_LOGIN_FORM">
+          <login-and-signup v-on:loginEvent="setLogin"></login-and-signup>
+        </div>
+      </transition>
+    </div>
+    <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
+      <img :src=SidebarButtonSrc alt="dot">
+    </div>
+    <transition name="dot-filter">
+      <div id="dot-filter" class="dots" v-if="DOTMENU">
+        <img :src=FilterButtonOnSrc alt="dotfilter">
       </div>
     </transition>
-    <transition name="fade">
-      <div id="login-foreground" v-if="SHOW_LOGIN_FORM">
-        <login-and-signup v-on:loginEvent="setLogin"></login-and-signup>
+    <transition name="dot-like">
+      <div id="dot-like" class="dots" v-if="DOTMENU">
+        <img :src=LikeButtonOnSrc alt="dotmarker">
       </div>
     </transition>
   </div>
@@ -56,18 +54,12 @@ export default {
     return {
       LOGIN: false,
       SHOW_LOGIN_FORM: false,
+      DOTMENU: false,
 
-      PBON: false,
       ProfileButtonSrc: require("./assets/user.png"),
-      ProfileButtonOnSrc: require("./assets/user_on.png"),
-
-      FBON: false,
-      FilterButtonSrc: require("./assets/filter.png"),
       FilterButtonOnSrc: require("./assets/filter_on.png"),
-
-      MBON: false,
-      MarkerButtonSrc: require("./assets/flare.png"),
-      MarkerButtonOnSrc: require("./assets/flare_on.png")
+      LikeButtonOnSrc: require("./assets/flare_on.png"),
+      SidebarButtonSrc: require("./assets/sidebar.png")
     }
   },
   components: {
@@ -79,6 +71,18 @@ export default {
     setLogin: function() {
       this.LOGIN = true
       this.SHOW_LOGIN_FORM = false
+    },
+
+    showLogin: function() {
+      const loginBox = document.querySelector('#login-box')
+      loginBox.style.zIndex = 6
+      this.SHOW_LOGIN_FORM = true
+    },
+
+    closeLogin: function() {
+      const loginBox = document.querySelector('#login-box')
+      this.SHOW_LOGIN_FORM = false
+      setTimeout(function() {loginBox.style.zIndex = 0},600)
     }
   }
 }
@@ -96,7 +100,7 @@ body {
 }
 
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -105,8 +109,11 @@ body {
 
 #menu_bar {
   padding: 25px 0px;
-  width: 8rem;
-  background-color: rgb(44, 44, 44);
+  min-width: 80px;
+  width: 7%;
+  background: rgb(233,114,114);
+  background: linear-gradient(180deg, rgba(233,114,114,1) 25%, rgba(79,13,144,1) 99%);
+  box-shadow: 2rem 0 2rem 5px rgba(100, 100, 100, 0.8);
   position: fixed;
   top: 0;
   left: 0;
@@ -116,54 +123,52 @@ body {
 }
 
 #menu_bar img {
-  width: 80%;
+  min-width: 50px;
+  width: 50%;
 }
 
 #menu_logo {
   height: fit-content;
 }
 
-#menu_list {
-  margin: 2rem 0px;
-  width: 100%;
-  height: fit-content;
-  position: relative;
-  left: 0;
-  z-index: 6;
-}
-
-#menu_list div {
-  margin: 1rem 0px;
-}
-
 #profile {
-  background-color: rgb(44, 44, 44);
-  border-radius: 1rem;
-  position: absolute;
-  left: 0px;
-  bottom: 5%;
+  position: relative;
+  top: 85%;
+  display: flex;
+  justify-content: center;
+  -webkit-box-pack: center;
+  align-items: center;
+  -webkit-box-align: center;
+}
+
+.main-login {
+  width: 80%;
+  min-width: 75px;
+  height: 40px;
+  border-radius: 10px;
+  color: black;
+  background-color: white;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  border: 0px;
+  box-shadow: 0 5px 5px 0 rgba(0,0,0,0.5);
+  text-align: center;
+  font-size: 100%;
+}
+
+.main-login:hover {
+  background-color: blueviolet;
+  color: white;
+  box-shadow: 0 5px 5px 3px (0,0,0,0.5);
 }
 
 #map_marker_wrapper {
   position: fixed;
-  left: 8rem;
+  left: 7%;
   top: 0;
-  width: 95%;
+  width: 93%;
   height: 100%;
   z-index: 1;
-}
-
-#footer {
-  padding: 3px;
-  width: 100%;
-  height: 5%;
-  background-color: rgb(44, 44, 44);
-  font-size: 1.5rem;
-  color: rgb(136, 136, 136);
-}
-
-#footer span {
-  margin: 0 2rem;
 }
 
 #login-background {
@@ -173,20 +178,73 @@ body {
   left: 0;
   top: 0;
   background-color: rgba(0,0,0,0.5);
-  z-index: 6;
+  z-index: 7;
+}
+
+#login-box {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  -webkit-box-pack: center;
+  align-items: center;
+  -webkit-box-align: center;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
 }
 
 #login-foreground {
-  
   position: fixed;
-  top: 30%;
-  left: 40%;
-  width: 350px;
-  height: 400px;
+  width: 450px;
+  height: 550px;
   border-radius: 20px;
   background-color: white;
+  box-shadow: 0 1rem 1rem 5px rgba(0,0,0,0.5);
   text-align: center;
-  z-index: 7;
+  z-index: 8;
+}
+
+#dot-menu {
+  position: fixed;
+  top: 85%;
+  left: 90%;
+  background: rgb(233,114,114);
+  background: linear-gradient(135deg, rgba(233,114,114,1) 0%, rgba(79,13,144,1) 99%);
+  z-index: 3;
+}
+
+#dot-filter {
+  position: fixed;
+  top: 61%;
+  left: 90%;
+  background: white;
+  z-index: 2;
+}
+
+#dot-like {
+  position: fixed;
+  top: 73%;
+  left: 90%;
+  background: white;
+  z-index: 2;
+}
+
+.dots {
+  border-radius: 100%;
+  width: 120px;
+  height: 120px;
+  box-shadow: 0 0 1rem 5px rgba(100, 100, 100, 0.8);
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+}
+
+.dots img {
+  margin-top: 30%;
+  width: 50%;
+}
+
+.dots:hover {
+  margin-top: -20px;
 }
 
 .container {
@@ -196,18 +254,35 @@ body {
 }
 
 .fade-in-enter-active {
-  -webkit-animation: fade-in 0.8s ease-out;
-  animation: fade-in 0.8s ease-out;
+  -webkit-animation: fade-in 0.4s ease-out;
+  animation: fade-in 0.4s ease-out;
 }
 
 .fade-enter-active {
-  -webkit-animation: fade-in 0.8s ease-out;
-  animation: fade-in 0.8s ease-out;
+  -webkit-animation: fade-in 0.4s ease-out;
+  animation: fade-in 0.4s ease-out;
 }
 
 .fade-leave-active {
-  -webkit-animation: fade-out 0.8s ease-out;
-  animation: fade-out 0.8s ease-out;
+  -webkit-animation: fade-out 0.4s ease-out;
+  animation: fade-out 0.4s ease-out;
+}
+
+.dot-filter-enter-active {
+  -webkit-animation: dot-filter-in 0.4s ease-out;
+  animation: dot-filter-in 0.4s ease-out;
+}
+.dot-filter-leave-active {
+  -webkit-animation: dot-filter-out 0.4s ease-out;
+  animation: dot-filter-out 0.4s ease-out;
+}
+.dot-like-enter-active {
+  -webkit-animation: dot-like-in 0.4s ease-out;
+  animation: dot-like-in 0.4s ease-out;
+}
+.dot-like-leave-active {
+  -webkit-animation: dot-like-out 0.4s ease-out;
+  animation: dot-like-out 0.4s ease-out;
 }
 
 @-webkit-keyframes fade-in {
@@ -244,12 +319,12 @@ body {
 }
 @-webkit-keyframes make-in {
   0% {
-    width: 0%;
-    height: 0%;
+    width: 0;
+    height: 0;
   }
   100% {
-    width: 100%;
-    height: 100%;
+    width: 150px;
+    height: 25px;
   }
 }
 @keyframes make-in {
@@ -258,8 +333,72 @@ body {
     height: 0;
   }
   100% {
-    width: 200px;
-    height: 40px;
+    width: 150px;
+    height: 25px;
+  }
+}
+@-webkit-keyframes dot-filter-in {
+  0% {
+    top: 85%;
+  }
+  100% {
+    top: 61%;
+  }
+}
+@keyframes dot-filter-in {
+  0% {
+    top: 85%;
+  }
+  100% {
+    top: 61%;
+  }
+}
+@-webkit-keyframes dot-like-in {
+  0% {
+    top: 85%;
+  }
+  100% {
+    top: 73%;
+  }
+}
+@keyframes dot-like-in {
+  0% {
+    top: 85%;
+  }
+  100% {
+    top: 73%;
+  }
+}
+@-webkit-keyframes dot-filter-out {
+  0% {
+    top: 61%;
+  }
+  100% {
+    top: 85%;
+  }
+}
+@keyframes dot-filter-out {
+  0% {
+    top: 61%;
+  }
+  100% {
+    top: 85%;
+  }
+}
+@-webkit-keyframes dot-like-out {
+  0% {
+    top: 73%;
+  }
+  100% {
+    top: 85%;
+  }
+}
+@keyframes dot-like-out {
+  0% {
+    top: 73%;
+  }
+  100% {
+    top: 85%;
   }
 }
 </style>

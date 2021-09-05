@@ -101,7 +101,7 @@ export default {
             const markermaker = new kakao.maps.CustomOverlay({
               map: map,
               clickable: true, //커스텀 오버레이 클릭시 지도에 이벤트 전파 방지
-              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><div id="maker-button-list"><button id="marker-button">여기에 마커 만들기</button></div></div>',
+              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><div id="maker-button-list"><button class="marker-button">여기에 마커 만들기</button></div></div>',
               position: new kakao.maps.LatLng(mouseEvent.latLng.Ma,mouseEvent.latLng.La),
               xAnchor: 0,
               yAnchor: 0
@@ -112,7 +112,7 @@ export default {
             beforeMaker = new kakao.maps.CustomOverlay({
               map: map,
               clickable: true, //커스텀 오버레이 클릭시 지도에 이벤트 전파 방지
-              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><div id="maker-button-list"><button id="marker-button">여기에 마커 만들기</button></div></div>',
+              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><div id="maker-button-list"><button class="marker-button">여기에 마커 만들기</button></div></div>',
               position: new kakao.maps.LatLng(mouseEvent.latLng.Ma,mouseEvent.latLng.La),
               xAnchor: 0,
               yAnchor: 0
@@ -131,7 +131,7 @@ export default {
     },
     initMarkerButtonListener: function() {
       setTimeout(() => {
-        const button = document.querySelector('#marker-button')
+        const button = document.querySelector('.marker-button')
         button.addEventListener("click",() => {
           const maker = document.querySelector('#marker-maker')
           maker.remove()
@@ -157,16 +157,17 @@ export default {
 
 #map {
   width: 100%;
-  height: 95%;
+  height: 100%;
   z-index: 2;
 }
 
 #marker-maker {
   padding: 5px;
   width: 100px;
-  height: fit-content;
-  background-color: rgb(44, 44, 44);
-  border-radius: 5px;
+  height: 20px;
+  background-color: white;
+  border-radius: 0 20px 20px 20px;
+  border: 2px solid rgb(150,150,150);
   z-index: 3;
   -webkit-animation: make-in 0.2 ease-out alternate both;
   animation: make-in 0.2s ease-out alternate both;
@@ -177,12 +178,21 @@ export default {
   height: fit-content;
 }
 
-#marker-button {
+.marker-button {
   width: 100%;
-  height: 20px;
-  border-radius: 5px;
-  background-color: white;
+  height: 25px;
+  border-radius: 20px;
+  color: white;
+  background-color: rgb(237, 40, 40);
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  border: 2px solid rgb(237, 40, 40);
   overflow: hidden;
+}
+
+.marker-button:hover {
+  background-color: rgb(255,255,255);
+  color: black;
 }
 
 .make-marker-enter-active {
