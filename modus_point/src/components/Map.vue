@@ -1,11 +1,8 @@
 <template>
   <div id="map" @contextmenu="initMarkerButtonListener">
-    <transition name="fade">
-      <div id="sm-background" v-if="SHOW_SAVE_MAKER" @click="SHOW_SAVE_MAKER = !SHOW_SAVE_MAKER">
-      </div>
-    </transition>
-    <transition name="fade">
-      <div id="sm-foreground" v-if="SHOW_SAVE_MAKER">
+    <div id="dot-menu-background" v-if="SHOW_SAVE_MAKER" @click="SHOW_SAVE_MAKER = !SHOW_SAVE_MAKER"/>
+    <transition name="menu">
+      <div id="dot-menu-foreground" class="dot-menu" v-if="SHOW_SAVE_MAKER">
         <save-maker v-on:saveEvent="closeMakeWindow"></save-maker>
       </div>
     </transition>
@@ -101,7 +98,7 @@ export default {
             const markermaker = new kakao.maps.CustomOverlay({
               map: map,
               clickable: true, //커스텀 오버레이 클릭시 지도에 이벤트 전파 방지
-              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><div id="maker-button-list"><button class="marker-button">여기에 마커 만들기</button></div></div>',
+              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><button class="marker-button">여기에 마커 만들기</button></div>',
               position: new kakao.maps.LatLng(mouseEvent.latLng.Ma,mouseEvent.latLng.La),
               xAnchor: 0,
               yAnchor: 0
@@ -112,7 +109,7 @@ export default {
             beforeMaker = new kakao.maps.CustomOverlay({
               map: map,
               clickable: true, //커스텀 오버레이 클릭시 지도에 이벤트 전파 방지
-              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><div id="maker-button-list"><button class="marker-button">여기에 마커 만들기</button></div></div>',
+              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><button class="marker-button">여기에 마커 만들기</button>/div>',
               position: new kakao.maps.LatLng(mouseEvent.latLng.Ma,mouseEvent.latLng.La),
               xAnchor: 0,
               yAnchor: 0
@@ -162,20 +159,53 @@ export default {
 }
 
 #marker-maker {
-  padding: 5px;
+  padding: 2px 5px 5px 5px;
   width: 100px;
   height: 20px;
   background-color: white;
   border-radius: 0 20px 20px 20px;
   border: 2px solid rgb(150,150,150);
   z-index: 3;
-  -webkit-animation: make-in 0.2 ease-out alternate both;
-  animation: make-in 0.2s ease-out alternate both;
+  -webkit-animation: make-in 0.2s ease-out;
+  animation: make-in 0.2s ease-out;
 }
 
 #maker-button-list {
   width: 100%;
   height: fit-content;
+}
+
+#dot-menu-background {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 4;
+}
+
+#menu-blankmaker {
+  width: 7%;
+  min-width: 80px;
+}
+#menu-container {
+  width: 100%;
+}
+
+.dot-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 320px;
+  width: 28%;
+  height: 100%;
+  border-radius: 0 20px 20px 0;
+  background-color: white;
+  box-shadow: 2rem 0 2rem 5px rgba(100, 100, 100, 0.8);
+  text-align: center;
+  z-index: 4;
+  -webkit-transition-duration: 0.4s;
+  transition-duration: 0.4s;
 }
 
 .marker-button {
@@ -200,4 +230,45 @@ export default {
   animation: make-in 0.2s ease-out;
 }
 
+.menu-enter-active {
+  -webkit-animation: menu-in 0.4s ease-out;
+  animation: make-in 0.4s ease-out;
+}
+.menu-leave-active {
+  -webkit-animation: menu-out 0.4s ease-out;
+  animation: make-out 0.4s ease-out;
+}
+
+@-webkit-keyframes menu-in {
+  0% {
+    left: -30%;
+  }
+  100% {
+    left: 0;
+  }
+}
+@keyframes menu-in {
+  0% {
+    left: -30%;
+  }
+  100% {
+    left: 0;
+  }
+}
+@-webkit-keyframes menu-out {
+  0% {
+    left: 0;
+  }
+  100% {
+    left: 30%;
+  }
+}
+@keyframes menu-out {
+  0% {
+    left: 0;
+  }
+  100% {
+    left: 30%;
+  }
+}
 </style>

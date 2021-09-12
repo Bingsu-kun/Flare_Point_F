@@ -1,20 +1,16 @@
 <template>
   <div oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
     <transition name="fade-in">
-      <div v-if="isLogin">
+      <div id="login_input" v-if="isLogin">
         <h1>로그인</h1>
-        <div id="login_input">
-          <input placeholder="이메일" type="email" v-model="principal">
-          <p>{{ login_email_error }}</p>
-        </div>
-        <div id="login_input">
-          <input placeholder="비밀번호" type="password" v-model="credentials">
-          <p>{{ login_password_error }}</p>
-        </div>
-        <div>
-          <button class="login_button" @click="login">로그인</button>
-          <button class="login_button" @click="isLogin = false">회원가입</button>
-        </div>
+        <p>이메일</p>
+        <input type="email" v-model="principal">
+        <p style="color: rgb(237,40,40)">{{ login_email_error }}</p>
+        <p>패스워드</p>
+        <input type="password" v-model="credentials">
+        <p>{{ login_password_error }}</p>
+        <button class="login_button" @click="login">로그인</button>
+        <button class="login_button" @click="isLogin = false">회원가입</button>
       </div>
     </transition>
     <transition name="fade-in">
@@ -273,17 +269,19 @@ export default {
 <style>
 
 p {
-  margin: 0 0 10px 30px;
   text-align: left;
-  color: rgb(237, 40, 40);
   font-size: 14px;
 }
 
-#login_input input {
-  width: 80%;
-  height: 40px;
+#login_input {
+  padding: 30px;
   font-size: 20px;
 }
+
+#login_input input {
+  width: 100%;
+}
+
 
 #signup_input {
   margin: 10px 0;

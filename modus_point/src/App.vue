@@ -28,6 +28,11 @@
     <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
       <img :src=SidebarButtonSrc alt="dot">
     </div>
+    <transition name="dot-search">
+      <div id="dot-search" class="dots" v-if="DOTMENU">
+        <img :src=SearchButtonSrc alt="dotsearch">
+      </div>
+    </transition>
     <transition name="dot-filter">
       <div id="dot-filter" class="dots" v-if="DOTMENU">
         <img :src=FilterButtonOnSrc alt="dotfilter">
@@ -59,7 +64,8 @@ export default {
       ProfileButtonSrc: require("./assets/user.png"),
       FilterButtonOnSrc: require("./assets/filter_on.png"),
       LikeButtonOnSrc: require("./assets/flare_on.png"),
-      SidebarButtonSrc: require("./assets/sidebar.png")
+      SidebarButtonSrc: require("./assets/sidebar.png"),
+      SearchButtonSrc: require("./assets/search.png")
     }
   },
   components: {
@@ -99,8 +105,20 @@ body {
   padding: 0px;
 }
 
+button {
+  font-family: Pretendard-Regular;
+}
+
+input {
+  font-family: Pretendard-Regular;
+}
+
+input:focus {
+  outline: none;
+}
+
 #app {
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: Pretendard-Regular, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -124,7 +142,7 @@ body {
 
 #menu_bar img {
   min-width: 50px;
-  width: 50%;
+  width: 65%;
 }
 
 #menu_logo {
@@ -203,6 +221,9 @@ body {
   text-align: center;
   z-index: 8;
 }
+#login-foreground input {
+  border: 0 0 2px 0 soled rgba(100, 50, 216, 0.7);
+}
 
 #dot-menu {
   position: fixed;
@@ -211,6 +232,14 @@ body {
   background: rgb(233,114,114);
   background: linear-gradient(135deg, rgba(233,114,114,1) 0%, rgba(79,13,144,1) 99%);
   z-index: 3;
+}
+
+#dot-search {
+  position: fixed;
+  top: 49%;
+  left: 90%;
+  background: white;
+  z-index: 2;
 }
 
 #dot-filter {
@@ -231,8 +260,8 @@ body {
 
 .dots {
   border-radius: 100%;
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   box-shadow: 0 0 1rem 5px rgba(100, 100, 100, 0.8);
   -webkit-transition-duration: 0.3s;
   transition-duration: 0.3s;
@@ -268,6 +297,14 @@ body {
   animation: fade-out 0.4s ease-out;
 }
 
+.dot-search-enter-active {
+  -webkit-animation: dot-filter-in 0.4s ease-out;
+  animation: dot-filter-in 0.4s ease-out;
+}
+.dot-search-leave-active {
+  -webkit-animation: dot-filter-out 0.4s ease-out;
+  animation: dot-filter-out 0.4s ease-out;
+}
 .dot-filter-enter-active {
   -webkit-animation: dot-filter-in 0.4s ease-out;
   animation: dot-filter-in 0.4s ease-out;
@@ -337,6 +374,22 @@ body {
     height: 25px;
   }
 }
+@-webkit-keyframes dot-search-in {
+  0% {
+    top: 85%;
+  }
+  100% {
+    top: 49%;
+  }
+}
+@keyframes dot-search-in {
+  0% {
+    top: 85%;
+  }
+  100% {
+    top: 49%;
+  }
+}
 @-webkit-keyframes dot-filter-in {
   0% {
     top: 85%;
@@ -367,6 +420,22 @@ body {
   }
   100% {
     top: 73%;
+  }
+}
+@-webkit-keyframes dot-search-out {
+  0% {
+    top: 49%;
+  }
+  100% {
+    top: 85%;
+  }
+}
+@keyframes dot-search-out {
+  0% {
+    top: 49%;
+  }
+  100% {
+    top: 85%;
   }
 }
 @-webkit-keyframes dot-filter-out {
@@ -401,4 +470,12 @@ body {
     top: 85%;
   }
 }
+
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
 </style>
