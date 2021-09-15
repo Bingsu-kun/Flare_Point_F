@@ -1,8 +1,6 @@
 <template>
-  <div oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
-    <span id="menu-blankmaker"/>
-    <span id="menu-container">
-    </span>
+  <div id="menu-contents">
+
   </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <div oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
+  <div>
     <transition name="fade-in">
       <div id="login_input" v-if="isLogin">
         <h1>로그인</h1>
@@ -402,8 +402,8 @@ p {
             transform: translateX(0);
   }
   100% {
-    -webkit-transform: translateX(-2rem);
-            transform: translateX(-2rem);
+    -webkit-transform: translateX(-1rem);
+            transform: translateX(-1rem);
   }
 }
 @keyframes slide-left {
@@ -412,8 +412,8 @@ p {
             transform: translateX(0);
   }
   100% {
-    -webkit-transform: translateX(-2rem);
-            transform: translateX(-2rem);
+    -webkit-transform: translateX(-1rem);
+            transform: translateX(-1rem);
   }
 }
 

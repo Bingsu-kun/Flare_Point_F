@@ -2,15 +2,25 @@
   <div id="map" @contextmenu="initMarkerButtonListener">
     <div id="dot-menu-background" v-if="SHOW_SAVE_MAKER" @click="SHOW_SAVE_MAKER = !SHOW_SAVE_MAKER"/>
     <transition name="menu">
-      <div id="dot-menu-foreground" class="dot-menu" v-if="SHOW_SAVE_MAKER">
+      <div class="dot-menu-foreground" v-if="SHOW_SAVE_MAKER">
         <save-maker v-on:saveEvent="closeMakeWindow"></save-maker>
       </div>
+    </transition>
+    <transition>
+      
+    </transition>
+    <transition>
+    </transition>
+    <transition>
     </transition>
   </div>
 </template>
 
 <script>
 import SaveMaker from './SaveMaker.vue'
+import DotFilter from './Filter.vue'
+import DotSearch from './Search.vue'
+import DotLiked from './LikedMarker.vue'
 
 export default {
 
@@ -31,7 +41,7 @@ export default {
       SHOW_SAVE_MAKER: false
     }
   },
-  props: ['LOGIN'],
+  props: ['LOGIN','DOT_FILTER','DOT_SEARCH','DOT_LIKED'],
   components: {
     SaveMaker
   },
@@ -111,7 +121,7 @@ export default {
             beforeMaker = new kakao.maps.CustomOverlay({
               map: map,
               clickable: true, //커스텀 오버레이 클릭시 지도에 이벤트 전파 방지
-              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><button class="marker-button">여기에 마커 만들기</button>/div>',
+              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><button class="marker-button">여기에 마커 만들기</button></div>',
               position: new kakao.maps.LatLng(mouseEvent.latLng.Ma,mouseEvent.latLng.La),
               xAnchor: 0,
               yAnchor: 0
@@ -120,9 +130,6 @@ export default {
         })
         
         // 센터 기준으로 어디까지 마커 검색해서 불러올지 로직 작성
-
-
-        // 온 보딩 튜토리얼 간단하게.
       }
     },
     initMarkerButtonListener: function() {
@@ -131,7 +138,6 @@ export default {
         button.addEventListener("click",() => {
           const maker = document.querySelector('#marker-maker')
           maker.remove()
-          console.log(this.LOGIN)
           if (this.LOGIN === false) {
             alert('로그인이 필요한 서비스입니다.')
             this.$emit("showLoginForm")
@@ -144,6 +150,15 @@ export default {
     },
     closeMakeWindow: function() {
       this.SHOW_SAVE_MAKER = false
+    },
+    filterCloseEvent: function() {
+      this.$emit("filterCloseEvent")
+    },
+    searchCloseEvent: function() {
+      this.$emit("searchCloseEvent")
+    },
+    likedCloseEvent: function() {
+      this.$emit("likedCloseEvent")
     }
   }
 }
@@ -159,8 +174,8 @@ export default {
 
 #marker-maker {
   padding: 2px 5px 5px 5px;
-  width: 100px;
-  height: 20px;
+  width: 150px;
+  height: 25px;
   background-color: white;
   border-radius: 0 20px 20px 20px;
   border: 2px solid rgb(150,150,150);
@@ -180,31 +195,28 @@ export default {
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 4;
+  z-index: 3;
 }
 
-#menu-blankmaker {
-  width: 7%;
-  min-width: 80px;
-}
-#menu-container {
-  width: 100%;
+#menu-contents {
+  padding: 20px;
 }
 
-.dot-menu {
-  position: fixed;
+.dot-menu-foreground {
+  position: absolute;
   top: 0;
   left: 0;
+  bottom: 0;
   min-width: 320px;
-  width: 28%;
+  width: 28%; 
   height: 100%;
   border-radius: 0 20px 20px 0;
   background-color: white;
   box-shadow: 2rem 0 2rem 5px rgba(100, 100, 100, 0.8);
   text-align: center;
+  justify-content: center;
   z-index: 4;
-  -webkit-transition-duration: 0.4s;
-  transition-duration: 0.4s;
+  overflow: hidden;
 }
 
 .marker-button {
@@ -213,8 +225,6 @@ export default {
   border-radius: 20px;
   color: white;
   background-color: rgb(237, 40, 40);
-  -webkit-transition-duration: 0.4s; /* Safari */
-  transition-duration: 0.4s;
   border: 2px solid rgb(237, 40, 40);
   overflow: hidden;
 }
@@ -231,43 +241,67 @@ export default {
 
 .menu-enter-active {
   -webkit-animation: menu-in 0.4s ease-out;
-  animation: make-in 0.4s ease-out;
+  animation: menu-in 0.4s ease-out;
 }
 .menu-leave-active {
-  -webkit-animation: menu-out 0.4s ease-out;
-  animation: make-out 0.4s ease-out;
+  -webkit-animation: menu-out 0.4s ease-in;
+  animation: menu-out 0.4s ease-in;
 }
 
 @-webkit-keyframes menu-in {
   0% {
-    left: -30%;
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%);
+  }
+  95% {
+    -webkit-transform: translateX(3%);
+            transform: translateX(3%);
   }
   100% {
-    left: 0;
+    -webkit-transform: translateX(0%);
+            transform: translateX(0%);
   }
 }
 @keyframes menu-in {
   0% {
-    left: -30%;
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%);
+  }
+  95% {
+    -webkit-transform: translateX(3%);
+            transform: translateX(3%);
   }
   100% {
-    left: 0;
+    -webkit-transform: translateX(0%);
+            transform: translateX(0%);
   }
 }
 @-webkit-keyframes menu-out {
   0% {
-    left: 0;
+    -webkit-transform: translateX(0%);
+            transform: translateX(0%);
+  }
+  5% {
+    -webkit-transform: translateX(3%);
+            transform: translateX(3%);
   }
   100% {
-    left: 30%;
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%);
   }
 }
 @keyframes menu-out {
   0% {
-    left: 0;
+    -webkit-transform: translateX(0%);
+            transform: translateX(0%);
+  }
+  5% {
+    -webkit-transform: translateX(3%);
+            transform: translateX(3%);
   }
   100% {
-    left: 30%;
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%);
   }
 }
 </style>

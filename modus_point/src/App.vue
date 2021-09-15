@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div id="menu_bar" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
+  <div class="container" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
+    <div id="menu_bar" >
       <a id="menu_logo" href="/">
         <img style="margin-top: 30px;" alt="main_logo" title="플레어포인트" src="./assets/logo.png">
       </a>
@@ -12,7 +12,7 @@
       </div>
     </div>
     <div id="map_marker_wrapper">
-      <kakao-map :LOGIN="LOGIN" v-on:showLoginForm="showLogin"></kakao-map>
+      <kakao-map :LOGIN="LOGIN" :DOT_FILTER="DOT_FILTER" :DOT_LIKED="DOT_LIKED" :DOT_SEARCH="DOT_SEARCH" v-on:showLoginForm="showLogin"></kakao-map>
     </div>
     <div id="login-box">
       <transition name="fade">
@@ -57,9 +57,12 @@ export default {
   },
   data() {
     return {
-      LOGIN: false,
+      LOGIN: true,
       SHOW_LOGIN_FORM: false,
       DOTMENU: false,
+      DOT_FILTER: false,
+      DOT_SEARCH: false,
+      DOT_LIKED: false,
 
       ProfileButtonSrc: require("./assets/user.png"),
       FilterButtonOnSrc: require("./assets/filter_on.png"),
@@ -150,8 +153,8 @@ input:focus {
 }
 
 #profile {
-  position: relative;
-  top: 85%;
+  position: absolute;
+  bottom: 5%;
   display: flex;
   justify-content: center;
   -webkit-box-pack: center;
@@ -227,8 +230,8 @@ input:focus {
 
 #dot-menu {
   position: fixed;
-  top: 85%;
-  left: 90%;
+  right: 5%;
+  bottom: 5%;
   background: rgb(233,114,114);
   background: linear-gradient(135deg, rgba(233,114,114,1) 0%, rgba(79,13,144,1) 99%);
   z-index: 3;
@@ -236,24 +239,24 @@ input:focus {
 
 #dot-search {
   position: fixed;
-  top: 49%;
-  left: 90%;
+  right: 5%;
+  bottom: 41%;
   background: white;
   z-index: 2;
 }
 
 #dot-filter {
   position: fixed;
-  top: 61%;
-  left: 90%;
+  right: 5%;
+  bottom: 29%;
   background: white;
   z-index: 2;
 }
 
 #dot-like {
   position: fixed;
-  top: 73%;
-  left: 90%;
+  right: 5%;
+  bottom: 17%;
   background: white;
   z-index: 2;
 }
@@ -273,7 +276,7 @@ input:focus {
 }
 
 .dots:hover {
-  margin-top: -20px;
+  margin-bottom: 20px;
 }
 
 .container {
@@ -298,12 +301,12 @@ input:focus {
 }
 
 .dot-search-enter-active {
-  -webkit-animation: dot-filter-in 0.4s ease-out;
-  animation: dot-filter-in 0.4s ease-out;
+  -webkit-animation: dot-search-in 0.4s ease-out;
+  animation: dot-search-in 0.4s ease-out;
 }
 .dot-search-leave-active {
-  -webkit-animation: dot-filter-out 0.4s ease-out;
-  animation: dot-filter-out 0.4s ease-out;
+  -webkit-animation: dot-search-out 0.4s ease-out;
+  animation: dot-search-out 0.4s ease-out;
 }
 .dot-filter-enter-active {
   -webkit-animation: dot-filter-in 0.4s ease-out;
@@ -376,98 +379,98 @@ input:focus {
 }
 @-webkit-keyframes dot-search-in {
   0% {
-    top: 85%;
+    bottom: 5%;
   }
   100% {
-    top: 49%;
+    bottom: 41%;
   }
 }
 @keyframes dot-search-in {
   0% {
-    top: 85%;
+    bottom: 5%;
   }
   100% {
-    top: 49%;
+    bottom: 41%;
   }
 }
 @-webkit-keyframes dot-filter-in {
   0% {
-    top: 85%;
+    bottom: 5%;
   }
   100% {
-    top: 61%;
+    bottom: 29%;
   }
 }
 @keyframes dot-filter-in {
   0% {
-    top: 85%;
+    bottom: 5%;
   }
   100% {
-    top: 61%;
+    bottom: 29%;
   }
 }
 @-webkit-keyframes dot-like-in {
   0% {
-    top: 85%;
+    bottom: 5%;
   }
   100% {
-    top: 73%;
+    bottom: 17%;
   }
 }
 @keyframes dot-like-in {
   0% {
-    top: 85%;
+    bottom: 5%;
   }
   100% {
-    top: 73%;
+    bottom: 17%;
   }
 }
 @-webkit-keyframes dot-search-out {
   0% {
-    top: 49%;
+    bottom: 41%;
   }
   100% {
-    top: 85%;
+    bottom: 5%;
   }
 }
 @keyframes dot-search-out {
   0% {
-    top: 49%;
+    bottom: 41%;
   }
   100% {
-    top: 85%;
+    bottom: 5%;
   }
 }
 @-webkit-keyframes dot-filter-out {
   0% {
-    top: 61%;
+    bottom: 29%;
   }
   100% {
-    top: 85%;
+    bottom: 5%;
   }
 }
 @keyframes dot-filter-out {
   0% {
-    top: 61%;
+    bottom: 29%;
   }
   100% {
-    top: 85%;
+    bottom: 5%;
   }
 }
 @-webkit-keyframes dot-like-out {
   0% {
-    top: 73%;
+    bottom: 17%;
   }
   100% {
-    top: 85%;
+    bottom: 5%;
   }
 }
 @keyframes dot-like-out {
   0% {
-    top: 73%;
+    bottom: 17%;
   }
   100% {
-    top: 85%;
+    bottom: 5%;
   }
 }
 
