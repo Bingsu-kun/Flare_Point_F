@@ -14,22 +14,16 @@
       </div>
     </transition>
     <transition name="fade-in">
-      <div v-if="!isLogin">
+      <div id="signup_input" v-if="!isLogin">
         <img class="back" :src="BackButtonSrc" @click="isLogin = true" alt="뒤로가기">
         <h2>회원가입</h2>
-        <div id="signup_input">
-          <input placeholder="이메일" type="email" v-model="principal" @change="emailChecked = false">
-          <button id="e-check" class="signup_button" @click="emailCheck">중복확인</button>
-        </div>
-        <div id="signup_input">
-          <input style="margin-right: 65px; font-size: 12px;" placeholder="비밀번호(영문,숫자,특수문자 포함 6 ~ 20자)" type="password" v-model="credentials">
-        </div>
-        <div id="signup_input">
-          <input style="margin-right: 65px; font-size: 12px;" placeholder="비밀번호 확인" type="password" v-model="checkCredentials">
-        </div>
-        <div id="signup_input">
-          <input placeholder="닉네임(2~10자)" type="text" v-model="name" @change="nameChecked = false">
-          <button id="n-check" class="signup_button" @click="nameCheck">중복확인</button>
+        <div>
+          <input id="signup_email_input" placeholder="이메일" type="email" v-model="principal" @keyup="autoEmailCheck">
+          <p v-if="email_error_message != null">{{ email_error_message }}</p>
+          <input placeholder="비밀번호(영문,숫자,특수문자 포함 6 ~ 20자)" type="password" v-model="credentials">
+          <input placeholder="비밀번호 확인" type="password" v-model="checkCredentials">
+          <input id="signup_name_input" placeholder="닉네임(2~10자)" type="text" v-model="name" @keyup="autoNameCheck">
+          <p v-if="name_error_message != null">{{ name_error_message }}</p>
         </div>
         <p>{{ signup_error_message }}</p>
         <button style="margin: 15px 30px 0 30px" class="login_button" @click="signup">회원가입</button>
@@ -42,18 +36,9 @@
 import axios from 'axios';
 
 export default {
-  name: 'Login',
+  name: 'LoginAndSignup',
 
   mounted() {
-    // auto login 
-    // 첫 화면 띄울 때 요청 받아와서 Header에 apiToken있는지 체크, 없으면 Cookie에 refreshToken있는지 체크.
-    // 둘 중 하나라도 있으면 백에 /login 요청.
-    // 로그인 성공시 data의 login 플래그 true로.
-
-    if (this.getCookie('refreshToken') !== null) {
-      // loginWithRefreshToken API 작성
-      // 쿠키 만들 때 samesite = NONE, secure 속성 추가.
-    }
 
   },
 
@@ -65,6 +50,8 @@ export default {
 
       login_email_error: null,
       login_password_error: null,
+      email_error_message: null,
+      name_error_message: null, 
       signup_error_message: null,
 
       principal: null,
@@ -75,13 +62,44 @@ export default {
       emailChecked: false,
       nameChecked: false,
 
-      COOKIE_NAME: 'refreshToken'
+      COOKIE_NAME: 'refreshToken',
+
+      timer: null
     }
   },
 
   methods: {
 
     //--------------------------- login -----------------------------------
+
+    autoLogin: async function() {
+      try {
+        const refreshCookie = this.getCookie(this.COOKIE_NAME)
+        await axios({
+          method: 'GET',
+          url: 'http://localhost:8080/fisher/me',
+          headers: { Cookie: refreshCookie, Authorization: 'Bearer ' + sessionStorage.getItem('apiToken') },
+          withCredentials: true
+        }).then((res) => {
+          console.log(res.data)
+
+          if (res.data.success === false) {
+            console.log('refreshToken is expired.')
+          }
+          else {
+            sessionStorage.setItem("apiToken", res.data.response.apiToken)
+            sessionStorage.setItem("name", res.data.response.fisher.fishername)
+            sessionStorage.setItem("role", res.data.response.fisher.role)
+            sessionStorage.setItem("email", res.data.response.fisher.email)
+            sessionStorage.setItem("id", res.data.response.fisher.id)
+
+            this.loginEvent()
+          }
+        })
+      } catch (error) {
+        console.log('bad connection.')
+      }
+    },
 
     login: async function() {
       const principal = this.principal
@@ -105,34 +123,36 @@ export default {
             data: { principal: principal, credentials: credentials },
             headers: { Cookie: refreshCookie, Authorization: 'Bearer ' + sessionStorage.getItem('apiToken') },
             withCredentials: true
-            })
-          .then((res) => { 
+            }).then((res) => { 
             //apiToken, refreshToken, FisherDTO
             console.log(res.data)
 
-            sessionStorage.setItem("apiToken", res.data.response.apiToken)
-            sessionStorage.setItem("name", res.data.response.fisher.fishername)
-            sessionStorage.setItem("role", res.data.response.fisher.role)
-            sessionStorage.setItem("email", res.data.response.fisher.email)
-            sessionStorage.setItem("id", res.data.response.fisher.id)
+            if (res.data.success === false) {
+              const statusCode = res.data.error.status
+        
+              if (statusCode === 401)
+                //unauthorized -> 비밀번호 불일치
+                this.login_password_error = "비밀번호가 일치하지 않습니다."
+              else if (statusCode === 406)
+                //not_acceptable -> 이메일 형식 불일치
+                this.login_email_error = "이메일 형식에 맞지 않습니다."
+              else if (statusCode === 500)
+                this.login_email_error = "존재하지 않는 아이디입니다."
 
-            alert(`어서오세요, ${ this.name }님! :)`)
+            }
+            else{
+              sessionStorage.setItem("apiToken", res.data.response.apiToken)
+              sessionStorage.setItem("name", res.data.response.fisher.fishername)
+              sessionStorage.setItem("role", res.data.response.fisher.role)
+              sessionStorage.setItem("email", res.data.response.fisher.email)
+              sessionStorage.setItem("id", res.data.response.fisher.id)
 
-            this.loginEvent()
+              this.loginEvent()
+            }
           })
         } catch (error) {
           const statusCode = error.response.status
-
-          if (statusCode === 401)
-            //unauthorized -> 비밀번호 불일치
-            this.login_password_error = "비밀번호가 일치하지 않습니다."
-          else if (statusCode === 406)
-            //not_acceptable -> 이메일 형식 불일치
-            this.login_email_error = "이메일 형식에 맞지 않습니다."
-          else if (statusCode === 500)
-            this.login_email_error = "존재하지 않는 아이디입니다."
-          else
-            console.warn("unexpected error occured" + error)
+          console.warn("unexpected error occured" + error)
         }
       }
       
@@ -191,6 +211,28 @@ export default {
 
     },
 
+    //------------------------------------ exist check ---------------------------------------
+
+    autoEmailCheck: function() {
+      this.emailChecked = false
+      if(this.timer) {
+        clearTimeout(this.timer)
+      }
+      this.timer = setTimeout(() => {
+        this.emailCheck()
+      }, 300)
+    },
+
+    autoNameCheck: function() {
+      this.nameChecked = false
+      if(this.timer) {
+        clearTimeout(this.timer)
+      }
+      this.timer = setTimeout(() => {
+        this.nameCheck()
+      }, 300)
+    },
+
     emailCheck: async function() {
       //email 중복체크
       const principal = this.principal
@@ -208,17 +250,18 @@ export default {
             const statusCode = res.data.error.status
 
             if (statusCode === 400)
-              this.signup_error_message = "이메일 형식에 맞지 않습니다."
+              this.email_error_message = "이메일 형식에 맞지 않습니다."
             else if (statusCode === 409) 
-              this.signup_error_message = "이미 같은 이메일이 존재합니다.."
+              this.email_error_message = "이미 같은 이메일이 존재합니다.."
           }
           else {
             this.emailChecked = true
-            this.signup_error_message = "사용 가능한 이메일입니다!"
+            this.email_error_message = "사용 가능한 이메일입니다!"
           }
         })
       } catch (error) {
         console.warn("unexpected error occured" + error)
+        this.email_error_message = "서버와의 연결이 좋지 않습니다.."
       } 
     },
 
@@ -239,19 +282,22 @@ export default {
             const statusCode = res.data.error.status
         
             if (statusCode === 400)
-              this.signup_error_message = "닉네임은 2자 이상 10자 이하여야 입니다."
+              this.name_error_message = "닉네임은 2자 이상 10자 이하여야 입니다."
             else if (statusCode === 409) 
-              this.signup_error_message = "이미 같은 닉네임이 존재합니다.."
+              this.name_error_message = "이미 같은 닉네임이 존재합니다.."
           }
           else{
             this.nameChecked = true
-            this.signup_error_message = "사용 가능한 닉네임입니다!"
+            this.name_error_message = "사용 가능한 닉네임입니다!"
           }
         })
       } catch (error) {
         console.warn("unexpected error occured" + error)
+        this.name_error_message = "서버와의 연결이 좋지 않습니다.."
       } 
     },
+
+    // --------------------------------- util --------------------------------------
 
     loginEvent: function() {
       this.$emit("loginEvent")
@@ -259,6 +305,7 @@ export default {
 
     getCookie: function(name) {
       const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+      console.log(document.cookie)
       return value? value[2] : null;
     }
   },
@@ -280,15 +327,19 @@ p {
 
 #login_input input {
   width: 100%;
+  height: 30px;
+  font-size: 14px;
 }
 
 
 #signup_input {
-  margin: 10px 0;
+  padding: 30px;
+  font-size: 20px;
 }
 
 #signup_input input {
-  width: 60%;
+  margin: 10px 0;
+  width: 100%;
   height: 30px;
   font-size: 14px;
 }

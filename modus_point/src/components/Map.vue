@@ -79,7 +79,7 @@ export default {
         const markerImage = new kakao.maps.MarkerImage(markerImageUrl, markerImageSize, markerImageOptions);
 
         // 지도 클릭 이벤트를 등록한다 (좌클릭 : click, 우클릭 : rightclick, 더블클릭 : dblclick)
-        // 맵 위 어디든지 좌클릭이 눌릴 시 이미 있는 마커메이커를 없앤다.
+        // 맵 위 어디든지 좌클릭 시 이미 있는 마커메이커를 없앤다.
         kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
           const maker = document.querySelector('#marker-maker')
           maker.remove()
@@ -92,6 +92,8 @@ export default {
         //     map: map // 마커를 표시할 지도 객체
         //   });
 
+        // 지도 우클릭 이벤트를 등록한다
+        // 맵 위 어디든지 우클릭 시 마커메이커 오버레이 창을 띄운다. 이미 마커메이커가 띄워져있는 경우, 기존 메이커를 지우고 만든다.
         kakao.maps.event.addListener(map, 'rightclick', function(mouseEvent) {
           let beforeMaker = document.querySelector('#marker-maker')
           if (beforeMaker === null) {
@@ -116,9 +118,6 @@ export default {
             })
           }
         })
-        // 우클릭시 새로운 마커 생성 표시 후에 리스트로 하여 다른 기능 추가 할 수 있게 
-        // 새로운 마커 생성 버튼 누르면 마커 생성 모달 창 띄움
-        // 모달창에서 마커 정보 입력후 저장 누르면 서버랑 통신하고 저장 완료.
         
         // 센터 기준으로 어디까지 마커 검색해서 불러올지 로직 작성
 

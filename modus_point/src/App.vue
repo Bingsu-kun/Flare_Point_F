@@ -5,7 +5,7 @@
         <img style="margin-top: 30px;" alt="main_logo" title="플레어포인트" src="./assets/logo.png">
       </a>
       <div id="profile" v-if="!LOGIN" @click="showLogin">
-        <button class="main-login"  v-if="!PBON">로그인</button>
+        <button class="main-login">로그인</button>
       </div>
       <div id="profile" v-if="LOGIN">
         <img :src="ProfileButtonSrc">
@@ -53,7 +53,7 @@ import KakaoMap from './components/Map.vue'
 export default {
   name: 'App',
   mounted() {
-    
+    LoginAndSignup.methods.autoLogin()
   },
   data() {
     return {
