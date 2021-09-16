@@ -6,12 +6,38 @@
         <save-maker v-on:saveEvent="closeMakeWindow"></save-maker>
       </div>
     </transition>
-    <transition>
-      
+    <transition name="menu">
+      <div class="dot-menu-foreground" v-if="DOT_FILTER">
+        <dot-filter v-on:filterCloseEvent="filterCloseEvent"></dot-filter>
+      </div>
     </transition>
-    <transition>
+    <transition name="menu">
+      <div class="dot-menu-foreground" v-if="DOT_SEARCH">
+        <dot-search v-on:searchCloseEvent="searchCloseEvent"></dot-search>
+      </div>
     </transition>
-    <transition>
+    <transition name="menu">
+      <div class="dot-menu-foreground" v-if="DOT_LIKED">
+        <dot-liked v-on:likedCloseEvent="likedCloseEvent"></dot-liked>
+      </div>
+    </transition>
+    <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
+      <img :src=SidebarButtonSrc alt="dot">
+    </div>
+    <transition name="dot-search">
+      <div id="dot-search" class="dots" v-if="DOTMENU" @click="DOT_SEARCH = !DOT_SEARCH">
+        <img :src=SearchButtonSrc alt="dotsearch">
+      </div>
+    </transition>
+    <transition name="dot-filter">
+      <div id="dot-filter" class="dots" v-if="DOTMENU" @click="DOT_FILTER = !DOT_FILTER">
+        <img :src=FilterButtonOnSrc alt="dotfilter">
+      </div>
+    </transition>
+    <transition name="dot-like">
+      <div id="dot-like" class="dots" v-if="DOTMENU" @click="DOT_LIKED = !DOT_LIKED">
+        <img :src=LikeButtonOnSrc alt="dotmarker">
+      </div>
     </transition>
   </div>
 </template>
@@ -38,12 +64,25 @@ export default {
   },
   data() {
     return {
-      SHOW_SAVE_MAKER: false
+      SHOW_SAVE_MAKER: false,
+
+      DOTMENU: false,
+      DOT_FILTER: false,
+      DOT_SEARCH: false,
+      DOT_LIKED: false,
+
+      FilterButtonOnSrc: require("../assets/filter_on.png"),
+      LikeButtonOnSrc: require("../assets/flare_on.png"),
+      SidebarButtonSrc: require("../assets/sidebar.png"),
+      SearchButtonSrc: require("../assets/search.png")
     }
   },
-  props: ['LOGIN','DOT_FILTER','DOT_SEARCH','DOT_LIKED'],
+  props: ['LOGIN'],
   components: {
-    SaveMaker
+    SaveMaker,
+    DotFilter,
+    DotSearch,
+    DotLiked
   },
   methods: {
     // 카카오 맵 초기화 메서드

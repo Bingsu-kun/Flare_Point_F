@@ -25,24 +25,6 @@
         </div>
       </transition>
     </div>
-    <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
-      <img :src=SidebarButtonSrc alt="dot">
-    </div>
-    <transition name="dot-search">
-      <div id="dot-search" class="dots" v-if="DOTMENU">
-        <img :src=SearchButtonSrc alt="dotsearch">
-      </div>
-    </transition>
-    <transition name="dot-filter">
-      <div id="dot-filter" class="dots" v-if="DOTMENU">
-        <img :src=FilterButtonOnSrc alt="dotfilter">
-      </div>
-    </transition>
-    <transition name="dot-like">
-      <div id="dot-like" class="dots" v-if="DOTMENU">
-        <img :src=LikeButtonOnSrc alt="dotmarker">
-      </div>
-    </transition>
   </div>
 </template>
 
@@ -59,16 +41,8 @@ export default {
     return {
       LOGIN: true,
       SHOW_LOGIN_FORM: false,
-      DOTMENU: false,
-      DOT_FILTER: false,
-      DOT_SEARCH: false,
-      DOT_LIKED: false,
 
-      ProfileButtonSrc: require("./assets/user.png"),
-      FilterButtonOnSrc: require("./assets/filter_on.png"),
-      LikeButtonOnSrc: require("./assets/flare_on.png"),
-      SidebarButtonSrc: require("./assets/sidebar.png"),
-      SearchButtonSrc: require("./assets/search.png")
+      ProfileButtonSrc: require("./assets/user.png")
     }
   },
   components: {
