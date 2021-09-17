@@ -1,5 +1,6 @@
 <template>
   <div id="map" @contextmenu="initMarkerButtonListener">
+    <loading :active="isLoading" :can-cancel="true" :color="loading_color" :is-full-page="fullscreen"/>
     <div id="dot-menu-background" v-if="SHOW_SAVE_MAKER" @click="SHOW_SAVE_MAKER = !SHOW_SAVE_MAKER"/>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="SHOW_SAVE_MAKER">
@@ -43,6 +44,9 @@
 </template>
 
 <script>
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
+
 import SaveMaker from './SaveMaker.vue'
 import DotFilter from './Filter.vue'
 import DotSearch from './Search.vue'
@@ -53,18 +57,29 @@ export default {
   name: 'Map',
   mounted() {
     if (window.kakao && window.kakao.maps) {
-      this.initKakaoMap();
+      try {
+        this.initKakaoMap();
+      } catch(e) {
+        console.log("Fail to load Kakao map. Check traffic limit." + e)
+      }
     }
     else {
-      const script = document.createElement('script');
-      script.onload = () => kakao.maps.load(this.initKakaoMap);
-      script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=407b973edfee2735f163d9c7a5c03218'
-      document.body.appendChild(script);
+      try {
+        const script = document.createElement('script');
+        script.onload = () => kakao.maps.load(this.initKakaoMap);
+        script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=407b973edfee2735f163d9c7a5c03218'
+        document.body.appendChild(script);
+      } catch(e) {
+        console.log("Fail to load Kakao map. Check traffic limit." + e)
+      }
     }
   },
   data() {
     return {
       SHOW_SAVE_MAKER: false,
+      isLoading: false,
+      fullscreen: false,
+      loading_color: "#E2004B",
 
       DOTMENU: false,
       DOT_FILTER: false,
@@ -79,6 +94,7 @@ export default {
   },
   props: ['LOGIN'],
   components: {
+    Loading,
     SaveMaker,
     DotFilter,
     DotSearch,
@@ -87,18 +103,20 @@ export default {
   methods: {
     // 카카오 맵 초기화 메서드
     initKakaoMap: function() {
-
+      this.isLoading = true
       const mapContainer = document.querySelector("#map");
       navigator.geolocation.getCurrentPosition((position) => {
         this.lat = position.coords.latitude
         this.lng = position.coords.longitude
         init(this.lat,this.lng,mapContainer)
+        this.isLoading = false
       },() => {
         console.log("현재 위치를 파악할 수 없습니다.")
         //강남역
         this.lat = 37.49780947181307
         this.lng = 127.02766764268932
         init(this.lat,this.lng,mapContainer)
+        this.isLoading = false
       })
   
       function init(lat,lng,mapContainer) {
@@ -107,7 +125,6 @@ export default {
           level: 3
         };
         const map = new kakao.maps.Map(mapContainer, options);
-
         // 지도 생성
         map.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
 
@@ -167,7 +184,6 @@ export default {
             })
           }
         })
-        
         // 센터 기준으로 어디까지 마커 검색해서 불러올지 로직 작성
       }
     },
