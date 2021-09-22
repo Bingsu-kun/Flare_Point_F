@@ -159,8 +159,9 @@ input:focus {
 
 #map_marker_wrapper {
   position: fixed;
-  left: 7%;
+  right: 0;
   top: 0;
+  bottom: 0;
   width: 93%;
   height: 100%;
   z-index: 1;

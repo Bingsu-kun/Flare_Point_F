@@ -81,7 +81,7 @@ export default {
           headers: { Cookie: refreshCookie, Authorization: 'Bearer ' + sessionStorage.getItem('apiToken') },
           withCredentials: true
         }).then((res) => {
-          console.log(res.data)
+          console.log(res.data.response)
 
           if (res.data.success === false) {
             console.log('refreshToken is expired.')
@@ -187,7 +187,7 @@ export default {
           .then((res) => {
             //apiToken, refreshToken, fisher
             
-            console.log(res.data)
+            console.log(res.data.response)
 
             if (res.data.success === false) {
               console.log(`unexpected error occured`)              

@@ -4,39 +4,39 @@
     <div id="dot-menu-background" v-if="SHOW_SAVE_MAKER" @click="SHOW_SAVE_MAKER = !SHOW_SAVE_MAKER"/>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="SHOW_SAVE_MAKER">
-        <save-maker v-on:saveEvent="closeMakeWindow"></save-maker>
+        <save-maker :latitude="rightClickLat" :longitude="rightClickLng" @saveEvent="saveEvent"></save-maker>
       </div>
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_FILTER">
-        <dot-filter v-on:filterCloseEvent="filterCloseEvent"></dot-filter>
+        <dot-filter @filterCloseEvent="filterCloseEvent"></dot-filter>
       </div>
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_SEARCH">
-        <dot-search v-on:searchCloseEvent="searchCloseEvent"></dot-search>
+        <dot-search @searchSelectedEvent="searchSelectedEvent" @searchCloseEvent="searchCloseEvent"></dot-search>
       </div>
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_LIKED">
-        <dot-liked v-on:likedCloseEvent="likedCloseEvent"></dot-liked>
+        <dot-liked @likedCloseEvent="likedCloseEvent"></dot-liked>
       </div>
     </transition>
     <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
       <img :src=SidebarButtonSrc alt="dot">
     </div>
     <transition name="dot-search">
-      <div id="dot-search" class="dots" v-if="DOTMENU" @click="DOT_SEARCH = !DOT_SEARCH">
+      <div id="dot-search" class="dots" v-if="DOTMENU" @click="DOT_SEARCH = !DOT_SEARCH; DOT_FILTER = false; DOT_LIKED = false;">
         <img :src=SearchButtonSrc alt="dotsearch">
       </div>
     </transition>
     <transition name="dot-filter">
-      <div id="dot-filter" class="dots" v-if="DOTMENU" @click="DOT_FILTER = !DOT_FILTER">
+      <div id="dot-filter" class="dots" v-if="DOTMENU" @click="DOT_FILTER = !DOT_FILTER; DOT_SEARCH = false; DOT_LIKED = false;">
         <img :src=FilterButtonOnSrc alt="dotfilter">
       </div>
     </transition>
     <transition name="dot-like">
-      <div id="dot-like" class="dots" v-if="DOTMENU" @click="DOT_LIKED = !DOT_LIKED">
+      <div id="dot-like" class="dots" v-if="DOTMENU" @click="DOT_LIKED = !DOT_LIKED; DOT_SEARCH = false; DOT_FILTER = false;">
         <img :src=LikeButtonOnSrc alt="dotmarker">
       </div>
     </transition>
@@ -67,7 +67,7 @@ export default {
       try {
         const script = document.createElement('script');
         script.onload = () => kakao.maps.load(this.initKakaoMap);
-        script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=407b973edfee2735f163d9c7a5c03218'
+        script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=407b973edfee2735f163d9c7a5c03218&libraries=services'
         document.body.appendChild(script);
       } catch(e) {
         console.log("Fail to load Kakao map. Check traffic limit." + e)
@@ -76,10 +76,13 @@ export default {
   },
   data() {
     return {
+      map: null,
       SHOW_SAVE_MAKER: false,
       isLoading: false,
       fullscreen: false,
       loading_color: "#E2004B",
+      rightClickLat: '',
+      rightClickLng: '',
 
       DOTMENU: false,
       DOT_FILTER: false,
@@ -108,14 +111,14 @@ export default {
       navigator.geolocation.getCurrentPosition((position) => {
         this.lat = position.coords.latitude
         this.lng = position.coords.longitude
-        init(this.lat,this.lng,mapContainer)
+        this.map = init(this.lat,this.lng,mapContainer)
         this.isLoading = false
       },() => {
         console.log("현재 위치를 파악할 수 없습니다.")
         //강남역
         this.lat = 37.49780947181307
         this.lng = 127.02766764268932
-        init(this.lat,this.lng,mapContainer)
+        this.map = init(this.lat,this.lng,mapContainer)
         this.isLoading = false
       })
   
@@ -134,29 +137,15 @@ export default {
         // 지도의 상단 우측에 지도 타입 변경 컨트롤을 추가한다
         map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
 
-        // 마커 이미지의 주소
-        const markerImageUrl = 'https://t1.daumcdn.net/localimg/localimages/07/2012/img/marker_p.png', 
-          markerImageSize = new kakao.maps.Size(30, 35), // 마커 이미지의 크기
-          markerImageOptions = { 
-              offset : new kakao.maps.Point(13, 40)// 마커 좌표에 일치시킬 이미지 안의 좌표
-        };
-
-        // 마커 이미지를 생성한다
-        const markerImage = new kakao.maps.MarkerImage(markerImageUrl, markerImageSize, markerImageOptions);
-
         // 지도 클릭 이벤트를 등록한다 (좌클릭 : click, 우클릭 : rightclick, 더블클릭 : dblclick)
         // 맵 위 어디든지 좌클릭 시 이미 있는 마커메이커를 없앤다.
         kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
           const maker = document.querySelector('#marker-maker')
-          maker.remove()
+          if (maker !== null)
+            maker.remove()
         });
 
-        // // 지도에 마커를 생성하고 표시한다
-        //   const marker = new kakao.maps.Marker({
-        //     position: mouseEvent.latLng, // 마커의 좌표
-        //     image : markerImage, // 마커의 이미지
-        //     map: map // 마커를 표시할 지도 객체
-        //   });
+        
 
         // 지도 우클릭 이벤트를 등록한다
         // 맵 위 어디든지 우클릭 시 마커메이커 오버레이 창을 띄운다. 이미 마커메이커가 띄워져있는 경우, 기존 메이커를 지우고 만든다.
@@ -166,32 +155,40 @@ export default {
             const markermaker = new kakao.maps.CustomOverlay({
               map: map,
               clickable: true, //커스텀 오버레이 클릭시 지도에 이벤트 전파 방지
-              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><button class="marker-button">여기에 마커 만들기</button></div>',
+              content: '<div id="marker-maker"><button class="marker-button">여기에 마커 만들기</button></div>',
               position: new kakao.maps.LatLng(mouseEvent.latLng.Ma,mouseEvent.latLng.La),
               xAnchor: 0,
               yAnchor: 0
             })
+            this.rightClickLat = mouseEvent.latLng.Ma
+            this.rightClickLng = mouseEvent.latLng.La
           }
           else {
             beforeMaker.remove()
             beforeMaker = new kakao.maps.CustomOverlay({
               map: map,
               clickable: true, //커스텀 오버레이 클릭시 지도에 이벤트 전파 방지
-              content: '<div id="marker-maker" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;"><button class="marker-button">여기에 마커 만들기</button></div>',
+              content: '<div id="marker-maker"><button class="marker-button">여기에 마커 만들기</button></div>',
               position: new kakao.maps.LatLng(mouseEvent.latLng.Ma,mouseEvent.latLng.La),
               xAnchor: 0,
               yAnchor: 0
             })
+            this.rightClickLat = mouseEvent.latLng.Ma
+            this.rightClickLng = mouseEvent.latLng.La
           }
         })
         // 센터 기준으로 어디까지 마커 검색해서 불러올지 로직 작성
+        return map;
       }
     },
     initMarkerButtonListener: function() {
+      //TODO - markerImageUrl은 추후 SaveMaker 컴포넌트에서 변경하자.
+      // const markerImageUrl = 'https://t1.daumcdn.net/localimg/localimages/07/2012/img/marker_p.png'
+      // const markerImage = new kakao.maps.MarkerImage(markerImageUrl, new kakao.maps.Size(30, 35), { offset : new kakao.maps.Point(13, 40) });
+      const button = document.querySelector('.marker-button')
+      const maker = document.querySelector('#marker-maker')
       setTimeout(() => {
-        const button = document.querySelector('.marker-button')
         button.addEventListener("click",() => {
-          const maker = document.querySelector('#marker-maker')
           maker.remove()
           if (this.LOGIN === false) {
             alert('로그인이 필요한 서비스입니다.')
@@ -199,21 +196,27 @@ export default {
           }
           else {
             this.SHOW_SAVE_MAKER = true
+            // // 지도에 마커를 생성하고 표시한다
+            // console.log(map)
+            // const marker = new kakao.maps.Marker({
+            //   position: map.getCenter(), // 마커의 좌표
+            //   image : markerImage, // 마커의 이미지
+            //   map: map // 마커를 표시할 지도 객체
+            // });
+            this.map.setLevel(1,{ animate: true })
           }
         })
       },100)
     },
-    closeMakeWindow: function() {
+    saveEvent: function(pickedCategory) {
       this.SHOW_SAVE_MAKER = false
+      // 마커 생성 
+      // TODO -pickedCategory 값에 따라 이미지 마커 변경.
+
+      this.map.setLevel(3,{ animate: true })
     },
-    filterCloseEvent: function() {
-      this.$emit("filterCloseEvent")
-    },
-    searchCloseEvent: function() {
-      this.$emit("searchCloseEvent")
-    },
-    likedCloseEvent: function() {
-      this.$emit("likedCloseEvent")
+    searchSelectedEvent: function(Lat,Lng) {
+      this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
     }
   }
 }
@@ -254,7 +257,10 @@ export default {
 }
 
 #menu-contents {
-  padding: 20px;
+  padding: 50px;
+}
+#menu-contents div {
+  margin: 40px 0;
 }
 
 .dot-menu-foreground {
