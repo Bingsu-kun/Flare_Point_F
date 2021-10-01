@@ -46,6 +46,7 @@
 <script>
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
+import axios from 'axios';
 
 import SaveMaker from './SaveMaker.vue'
 import DotFilter from './Filter.vue'
@@ -77,12 +78,17 @@ export default {
   data() {
     return {
       map: null,
+      markers: [],
       SHOW_SAVE_MAKER: false,
       isLoading: false,
       fullscreen: false,
       loading_color: "#E2004B",
+
       rightClickLat: '',
       rightClickLng: '',
+      thisMarkerLat: '',
+      thisMarkerLng: '',
+      SHOW_THIS_MARKER: false,
 
       DOTMENU: false,
       DOT_FILTER: false,
@@ -92,7 +98,13 @@ export default {
       FilterButtonOnSrc: require("../assets/filter_on.png"),
       LikeButtonOnSrc: require("../assets/flare_on.png"),
       SidebarButtonSrc: require("../assets/sidebar.png"),
-      SearchButtonSrc: require("../assets/search.png")
+      SearchButtonSrc: require("../assets/search.png"),
+
+      FishingMarkerSrc: require("../assets/fishing_marker.png"),
+      CampingMarkerSrc: require("../assets/camping_marker.png"),
+      GatheringMarkerSrc: require("../assets/gathering_marker.png"),
+      StoreMarkerSrc: require("../assets/store_marker.png"),
+      SecretPlaceMarkerSrc: require("../assets/secret_place_marker.png")
     }
   },
   props: ['LOGIN'],
@@ -145,12 +157,11 @@ export default {
             maker.remove()
         });
 
-        
-
         // 지도 우클릭 이벤트를 등록한다
         // 맵 위 어디든지 우클릭 시 마커메이커 오버레이 창을 띄운다. 이미 마커메이커가 띄워져있는 경우, 기존 메이커를 지우고 만든다.
         kakao.maps.event.addListener(map, 'rightclick', function(mouseEvent) {
           let beforeMaker = document.querySelector('#marker-maker')
+          map.setCenter(new kakao.maps.LatLng(mouseEvent.latLng.Ma, mouseEvent.latLng.La))
           if (beforeMaker === null) {
             const markermaker = new kakao.maps.CustomOverlay({
               map: map,
@@ -160,8 +171,6 @@ export default {
               xAnchor: 0,
               yAnchor: 0
             })
-            this.rightClickLat = mouseEvent.latLng.Ma
-            this.rightClickLng = mouseEvent.latLng.La
           }
           else {
             beforeMaker.remove()
@@ -173,8 +182,6 @@ export default {
               xAnchor: 0,
               yAnchor: 0
             })
-            this.rightClickLat = mouseEvent.latLng.Ma
-            this.rightClickLng = mouseEvent.latLng.La
           }
         })
         // 센터 기준으로 어디까지 마커 검색해서 불러올지 로직 작성
@@ -182,11 +189,12 @@ export default {
       }
     },
     initMarkerButtonListener: function() {
-      //TODO - markerImageUrl은 추후 SaveMaker 컴포넌트에서 변경하자.
-      // const markerImageUrl = 'https://t1.daumcdn.net/localimg/localimages/07/2012/img/marker_p.png'
-      // const markerImage = new kakao.maps.MarkerImage(markerImageUrl, new kakao.maps.Size(30, 35), { offset : new kakao.maps.Point(13, 40) });
       const button = document.querySelector('.marker-button')
       const maker = document.querySelector('#marker-maker')
+      const center = this.map.getCenter()
+      this.rightClickLat = center.Ma
+      this.rightClickLng = center.La
+      console.log(this.rightClickLat, this.rightClickLng)
       setTimeout(() => {
         button.addEventListener("click",() => {
           maker.remove()
@@ -196,23 +204,118 @@ export default {
           }
           else {
             this.SHOW_SAVE_MAKER = true
-            // // 지도에 마커를 생성하고 표시한다
-            // console.log(map)
-            // const marker = new kakao.maps.Marker({
-            //   position: map.getCenter(), // 마커의 좌표
-            //   image : markerImage, // 마커의 이미지
-            //   map: map // 마커를 표시할 지도 객체
-            // });
+            
             this.map.setLevel(1,{ animate: true })
           }
         })
       },100)
     },
-    saveEvent: function(pickedCategory) {
-      this.SHOW_SAVE_MAKER = false
-      // 마커 생성 
-      // TODO -pickedCategory 값에 따라 이미지 마커 변경.
+    //모든 마커들을 서버또는 localStorage에서 가져온다. 
+    getAllMarkers: async function() {
+      const stored = localStorage.getItem("markers")
+      
+      if (stored) {
+        const markers = JSON.parse(stored)
+        this.markers = markers
+      }
+      else {
+        const markers = []
 
+        try {
+          //axios로 모든 마커 가져오기
+          await axios({
+            method: 'GET',
+            url: 'http://localhost:8080/marker/all',
+            withCredentials: true
+          }).then((res) => {
+            console.log(res.data.response)
+
+            if (res.data.success === false) {
+              console.log('marker loading failed by server issue.')
+            }
+            else {
+              //TODO - markers에 저장 및 localStorage 저장. List를 받아왔을 때 데이터 형식 확인.
+            }
+
+          })
+          console.log('all marker loaded.')
+        } catch (error) {
+          console.log('marker loading failed.' + error)
+        }
+      }
+    },
+    //마커 찍기
+    renderMarkers: function() {
+      this.markers.forEach((mk) => {
+        const Lat = mk.latitude
+        const Lng = mk.longitude
+        const string = ''
+        const category = mk.category.toLowerCase()
+
+        const markerImageUrl = (pickedCategory) => {
+          if (pickedCategory === "fishing")
+            return this.FishingMarkerSrc
+          else if (pickedCategory === "camping")
+            return this.CampingMarkerSrc
+          else if (pickedCategory === "gathering")
+            return this.GatheringMarkerSrc
+          else if (pickedCategory === "store")
+            return this.StoreMarkerSrc
+          else if (pickedCategory === "secret_place")
+            return this.SecretPlaceMarkerSrc
+          else
+            console.log('category error.')
+        }
+        const markerImage = new kakao.maps.MarkerImage(markerImageUrl(category), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) });
+        // 지도에 마커를 생성하고 표시한다
+        const marker = new kakao.maps.Marker({
+          position: new kakao.maps.LatLng(Lat,Lng), // 마커의 좌표
+          image : markerImage, // 마커의 이미지
+          map: this.map // 마커를 표시할 지도 객체
+        });
+
+        kakao.maps.event.addListener(marker,'click',() => {
+          this.thisMarkerLat = marker.position.Ma
+          this.thisMarkerLng = marker.position.La
+          this.SHOW_THIS_MARKER = true
+        })
+      })
+    },
+    saveEvent: function(pickedCategory,savedMarker) {
+      this.SHOW_SAVE_MAKER = false
+      const Lat = this.rightClickLat
+      const Lng = this.rightClickLng
+      const markerImageUrl = (pickedCategory) => {
+        if (pickedCategory === "fishing")
+          return this.FishingMarkerSrc
+        else if (pickedCategory === "camping")
+          return this.CampingMarkerSrc
+        else if (pickedCategory === "gathering")
+          return this.GatheringMarkerSrc
+        else if (pickedCategory === "store")
+          return this.StoreMarkerSrc
+        else if (pickedCategory === "secret_place")
+          return this.SecretPlaceMarkerSrc
+        else
+          console.log('category error.')
+      }
+      const markerImage = new kakao.maps.MarkerImage(markerImageUrl(pickedCategory), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) });
+      // 지도에 마커를 생성하고 표시한다
+      const marker = new kakao.maps.Marker({
+        position: new kakao.maps.LatLng(Lat,Lng), // 마커의 좌표
+        image : markerImage, // 마커의 이미지
+        map: this.map // 마커를 표시할 지도 객체
+      });
+      console.log(marker)
+
+      kakao.maps.event.addListener(marker,'click',() => {
+        this.thisMarkerLat = marker.position.Ma
+        this.thisMarkerLng = marker.position.La
+        this.SHOW_THIS_MARKER = true
+      })
+
+      this.markers.push(savedMarker)
+      localStorage.setItem("markers", JSON.stringify(this.markers) )
       this.map.setLevel(3,{ animate: true })
     },
     searchSelectedEvent: function(Lat,Lng) {
@@ -257,10 +360,10 @@ export default {
 }
 
 #menu-contents {
-  padding: 50px;
+  padding: 30px 20px;
 }
 #menu-contents div {
-  margin: 40px 0;
+  margin: 20px 0;
 }
 
 .dot-menu-foreground {

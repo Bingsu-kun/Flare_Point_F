@@ -104,6 +104,7 @@ export default {
 }
 
 #search-form {
+  margin: 20px 0;
   display: flex;
   justify-content: space-around;
   align-items: center;

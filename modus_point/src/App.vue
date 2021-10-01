@@ -14,17 +14,13 @@
     <div id="map_marker_wrapper">
       <kakao-map :LOGIN="LOGIN" :DOT_FILTER="DOT_FILTER" :DOT_LIKED="DOT_LIKED" :DOT_SEARCH="DOT_SEARCH" v-on:showLoginForm="showLogin"></kakao-map>
     </div>
-    <div id="login-box">
-      <transition name="fade">
-        <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="closeLogin">
-        </div>
-      </transition>
-      <transition name="fade">
-        <div id="login-foreground" v-if="SHOW_LOGIN_FORM">
+    <transition name="fade">
+      <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="closeLogin">
+        <div id="login-foreground" v-if="SHOW_LOGIN_FORM" @click.stop>
           <login-and-signup v-on:loginEvent="setLogin"></login-and-signup>
         </div>
-      </transition>
-    </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -35,11 +31,16 @@ import KakaoMap from './components/Map.vue'
 export default {
   name: 'App',
   mounted() {
-    LoginAndSignup.methods.autoLogin()
+    if ( sessionStorage.getItem('apiToken') ) {
+      this.LOGIN = true
+    }
+    else {
+      LoginAndSignup.methods.autoLogin()
+    }
   },
   data() {
     return {
-      LOGIN: true,
+      LOGIN: false,
       SHOW_LOGIN_FORM: false,
 
       ProfileButtonSrc: require("./assets/user.png")
@@ -57,15 +58,11 @@ export default {
     },
 
     showLogin: function() {
-      const loginBox = document.querySelector('#login-box')
-      loginBox.style.zIndex = 6
       this.SHOW_LOGIN_FORM = true
     },
 
     closeLogin: function() {
-      const loginBox = document.querySelector('#login-box')
       this.SHOW_LOGIN_FORM = false
-      setTimeout(function() {loginBox.style.zIndex = 0},600)
     }
   }
 }
@@ -106,8 +103,7 @@ input:focus {
   padding: 25px 0px;
   min-width: 80px;
   width: 7%;
-  background: rgb(233,114,114);
-  background: linear-gradient(180deg, rgba(233,114,114,1) 25%, rgba(79,13,144,1) 99%);
+  background: rgb(25,75,130);
   box-shadow: 2rem 0 2rem 5px rgba(100, 100, 100, 0.8);
   position: fixed;
   top: 0;
@@ -115,6 +111,8 @@ input:focus {
   bottom: 0;
   z-index: 5;
   text-align: center;
+  display: flex;
+  justify-content: center;
 }
 
 #menu_bar img {
@@ -152,7 +150,7 @@ input:focus {
 }
 
 .main-login:hover {
-  background-color: blueviolet;
+  background-color: rgb(237,40,40);
   color: white;
   box-shadow: 0 5px 5px 3px (0,0,0,0.5);
 }
@@ -168,29 +166,22 @@ input:focus {
 }
 
 #login-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
   width: 100%;
   height: 100%;
-  position: fixed;
-  left: 0;
-  top: 0;
-  background-color: rgba(0,0,0,0.5);
-  z-index: 7;
-}
-
-#login-box {
-  position: fixed;
   display: flex;
   justify-content: center;
   -webkit-box-pack: center;
   align-items: center;
   -webkit-box-align: center;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 7;
 }
 
 #login-foreground {
-  position: fixed;
   width: 450px;
   height: 550px;
   border-radius: 20px;
@@ -207,8 +198,7 @@ input:focus {
   position: fixed;
   right: 5%;
   bottom: 5%;
-  background: rgb(233,114,114);
-  background: linear-gradient(135deg, rgba(233,114,114,1) 0%, rgba(79,13,144,1) 99%);
+  background: rgb(25,75,130);
   z-index: 3;
 }
 
@@ -243,10 +233,12 @@ input:focus {
   box-shadow: 0 0 1rem 5px rgba(100, 100, 100, 0.8);
   -webkit-transition-duration: 0.3s;
   transition-duration: 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .dots img {
-  margin-top: 30%;
   width: 50%;
 }
 
