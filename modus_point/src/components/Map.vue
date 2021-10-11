@@ -9,7 +9,7 @@
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_FILTER">
-        <dot-filter @filterCloseEvent="filterCloseEvent"></dot-filter>
+        <dot-filter :markers="markers" @filterCloseEvent="filterCloseEvent"></dot-filter>
       </div>
     </transition>
     <transition name="menu">
@@ -19,7 +19,7 @@
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_LIKED">
-        <dot-liked @likedCloseEvent="likedCloseEvent"></dot-liked>
+        <dot-liked :likedMarkers="likedMarkers" @likedCloseEvent="likedCloseEvent"></dot-liked>
       </div>
     </transition>
     <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
@@ -61,7 +61,7 @@ export default {
       try {
         this.initKakaoMap();
       } catch(e) {
-        console.log("Fail to load Kakao map. Check traffic limit." + e)
+        console.log("Fail to load Kakao map." + e)
       }
     }
     else {
@@ -71,7 +71,7 @@ export default {
         script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=407b973edfee2735f163d9c7a5c03218&libraries=services'
         document.body.appendChild(script);
       } catch(e) {
-        console.log("Fail to load Kakao map. Check traffic limit." + e)
+        console.log("Fail to load Kakao map." + e)
       }
     }
   },
@@ -79,6 +79,7 @@ export default {
     return {
       map: null,
       markers: [],
+      likedMarkers: [],
       SHOW_SAVE_MAKER: false,
       isLoading: false,
       fullscreen: false,
@@ -194,12 +195,11 @@ export default {
       const center = this.map.getCenter()
       this.rightClickLat = center.Ma
       this.rightClickLng = center.La
-      console.log(this.rightClickLat, this.rightClickLng)
       setTimeout(() => {
         button.addEventListener("click",() => {
           maker.remove()
           if (this.LOGIN === false) {
-            alert('로그인이 필요한 서비스입니다.')
+            alert('로그인이 필요합니다!')
             this.$emit("showLoginForm")
           }
           else {
@@ -212,36 +212,55 @@ export default {
     },
     //모든 마커들을 서버또는 localStorage에서 가져온다. 
     getAllMarkers: async function() {
-      const stored = localStorage.getItem("markers")
-      
-      if (stored) {
-        const markers = JSON.parse(stored)
-        this.markers = markers
+
+      try {
+        //axios로 모든 마커 가져오기
+        await axios({
+          method: 'GET',
+          url: 'http://localhost:8080/marker/all',
+          withCredentials: true
+        }).then((res) => {
+          console.log(res.data.response)
+
+          if (res.data.success === false) {
+            console.log('marker loading failed by server issue.')
+          }
+          else {
+            //TODO - markers에 저장 List를 받아왔을 때 데이터 형식 확인.
+            //this.markers = res.data.response
+          }
+
+        })
+        console.log('all marker loaded.')
+      } catch (error) {
+        console.log('marker loading failed.' + error)
       }
-      else {
-        const markers = []
 
-        try {
-          //axios로 모든 마커 가져오기
-          await axios({
-            method: 'GET',
-            url: 'http://localhost:8080/marker/all',
-            withCredentials: true
-          }).then((res) => {
-            console.log(res.data.response)
+      this.renderMarkers()
+      
+    },
+    getLikedMarkers: async function() {
+      try {
+        await axios({
+          method: 'GET',
+          url: 'http://localhost:8080/marker/mylikedlist',
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
+          withCredentials: true
+        }). then((res) => {
+          console.log(res.data.response)
 
-            if (res.data.success === false) {
-              console.log('marker loading failed by server issue.')
-            }
-            else {
-              //TODO - markers에 저장 및 localStorage 저장. List를 받아왔을 때 데이터 형식 확인.
-            }
+          if (res.data.success === false) {
+            const statusCode = res.data.error.status 
 
-          })
-          console.log('all marker loaded.')
-        } catch (error) {
-          console.log('marker loading failed.' + error)
-        }
+            console.log('get liked markers failed.')
+          }
+          else {
+            //TODO - likedmarkers에 저장 List를 받아왔을 때 데이터 형식 확인.
+            //this.likedmarkers = res.data.response
+          }
+        })
+      } catch (error) {
+        console.warn("unexpected error occured" + error)
       }
     },
     //마커 찍기
@@ -297,7 +316,7 @@ export default {
         else if (pickedCategory === "secret_place")
           return this.SecretPlaceMarkerSrc
         else
-          console.log('category error.')
+          console.warn('category error.')
       }
       const markerImage = new kakao.maps.MarkerImage(markerImageUrl(pickedCategory), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) });
       // 지도에 마커를 생성하고 표시한다
@@ -314,8 +333,8 @@ export default {
         this.SHOW_THIS_MARKER = true
       })
 
+      //새로 생성된 마커를 배열에 추가
       this.markers.push(savedMarker)
-      localStorage.setItem("markers", JSON.stringify(this.markers) )
       this.map.setLevel(3,{ animate: true })
     },
     searchSelectedEvent: function(Lat,Lng) {

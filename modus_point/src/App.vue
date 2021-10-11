@@ -12,7 +12,7 @@
       </div>
     </div>
     <div id="map_marker_wrapper">
-      <kakao-map :LOGIN="LOGIN" :DOT_FILTER="DOT_FILTER" :DOT_LIKED="DOT_LIKED" :DOT_SEARCH="DOT_SEARCH" v-on:showLoginForm="showLogin"></kakao-map>
+      <kakao-map :LOGIN="LOGIN" @showLoginForm="showLogin"></kakao-map>
     </div>
     <transition name="fade">
       <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="closeLogin">
@@ -37,6 +37,9 @@ export default {
     else {
       LoginAndSignup.methods.autoLogin()
     }
+
+    KakaoMap.methods.getAllMarkers()
+    KakaoMap.methods.getLikedMarkers()
   },
   data() {
     return {
@@ -64,6 +67,7 @@ export default {
     closeLogin: function() {
       this.SHOW_LOGIN_FORM = false
     }
+
   }
 }
 </script>

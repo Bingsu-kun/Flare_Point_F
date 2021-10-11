@@ -1,7 +1,7 @@
 <template>
   <div id="search-container">
     <div id="search-form">
-      <input class="search-input" v-model="keyword" placeholder="검색어를 입력해 주세요." @keydown.enter="search">
+      <input class="search-input" :value="keyword" @input="keyword = $event.target.value" placeholder="검색어를 입력해 주세요." @keydown.enter="search">
       <button class="search-button" @click="search"></button>
     </div>
     <div id="search-result">

@@ -121,7 +121,7 @@ export default {
             withCredentials: true
             }).then((res) => { 
             //apiToken, refreshToken, FisherDTO
-            console.log(res.data)
+            console.log(res.data.response)
 
             if (res.data.success === false) {
               const statusCode = res.data.error.status
