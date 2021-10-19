@@ -217,7 +217,7 @@ export default {
         //axios로 모든 마커 가져오기
         await axios({
           method: 'GET',
-          url: 'http://localhost:8080/marker/all',
+          url: 'http://3.34.123.190:8080/marker/all',
           withCredentials: true
         }).then((res) => {
           console.log(res.data.response)
@@ -243,7 +243,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'http://localhost:8080/marker/mylikedlist',
+          url: 'http://3.34.123.190:8080/marker/mylikelist',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }). then((res) => {

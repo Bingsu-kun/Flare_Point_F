@@ -83,7 +83,7 @@ export default {
           const refreshCookie = getCookie('refreshToken')
           await axios({
             method: 'POST',
-            url: 'http://localhost:8080/marker/create',
+            url: 'http://3.34.123.190:8080/marker/create',
             headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
             data: { name: name, latitude: latitude, longitude: longitude, isPrivate: isPrivate, category: category, tagString: tagString, description: description },
             withCredentials: true

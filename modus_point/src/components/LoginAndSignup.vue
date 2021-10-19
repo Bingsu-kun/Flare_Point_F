@@ -77,7 +77,7 @@ export default {
         const refreshCookie = getCookie(this.COOKIE_NAME)
         await axios({
           method: 'GET',
-          url: 'http://localhost:8080/fisher/me',
+          url: 'http://3.34.123.190:8080/fisher/me',
           withCredentials: true
         }).then((res) => {
 
@@ -115,13 +115,12 @@ export default {
         try {
           await axios({
             method: 'POST',
-            url: 'http://localhost:8080/fisher/login',
+            url: 'http://3.34.123.190:8080/fisher/login',
             data: { principal: this.principal.trim(), credentials: this.credentials },
             headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
             withCredentials: true
             }).then((res) => { 
             //apiToken, refreshToken, FisherDTO
-            console.log(res.data.response)
 
             if (res.data.success === false) {
               const statusCode = res.data.error.status
@@ -174,14 +173,12 @@ export default {
         try {
           await axios({
             method: 'POST',
-            url: 'http://localhost:8080/fisher/join',
+            url: 'http://3.34.123.190:8080/fisher/join',
             data: { principal: this.principal.trim(), credentials: this.credentials, name: this.name.trim() },
             withCredentials: true
           })
           .then((res) => {
             //apiToken, refreshToken, fisher
-            
-            console.log(res.data.response)
 
             if (res.data.success === false) {
               console.log(`unexpected error occured`)              
@@ -233,7 +230,7 @@ export default {
       try {
         await axios({
           method: 'POST',
-          url: 'http://localhost:8080/fisher/join/email/exists',
+          url: 'http://3.34.123.190:8080/fisher/join/email/exists',
           data: { req: this.principal.trim() }
         })
         .then((res) => {
@@ -253,7 +250,7 @@ export default {
         })
       } catch (error) {
         console.warn("unexpected error occured" + error)
-        this.email_error_message = "이메일 형식에 맞지 않습니다."
+        this.email_error_message = "서버와의 연결이 좋지 않습니다.."
       } 
     },
 
@@ -266,7 +263,7 @@ export default {
         try {
         await axios({
           method: 'POST',
-          url: 'http://localhost:8080/fisher/join/name/exists',
+          url: 'http://3.34.123.190:8080/fisher/join/name/exists',
           data: { req: this.name.trim() }
         })
         .then((res) => {
