@@ -9,34 +9,44 @@
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_FILTER">
-        <dot-filter :markers="markers" @filterCloseEvent="filterCloseEvent"></dot-filter>
+        <dot-filter :markers="markers" @menuCloseEvent="menuCloseEvent"></dot-filter>
       </div>
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_SEARCH">
-        <dot-search @searchSelectedEvent="searchSelectedEvent" @searchCloseEvent="searchCloseEvent"></dot-search>
+        <dot-search @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-search>
       </div>
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_LIKED">
-        <dot-liked :likedMarkers="likedMarkers" @likedCloseEvent="likedCloseEvent"></dot-liked>
+        <dot-liked :likedMarkers="likedMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-liked>
+      </div>
+    </transition>
+    <transition name="menu">
+      <div class="dot-menu-foreground" v-if="DOT_MY">
+        <dot-my :myMarkers="myMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-my>
       </div>
     </transition>
     <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
       <img :src=SidebarButtonSrc alt="dot">
     </div>
     <transition name="dot-search">
-      <div id="dot-search" class="dots" v-if="DOTMENU" @click="DOT_SEARCH = !DOT_SEARCH; DOT_FILTER = false; DOT_LIKED = false;">
+      <div id="dot-search" class="dots" v-if="DOTMENU" @click="DOT_SEARCH = !DOT_SEARCH; DOT_FILTER = false; DOT_LIKED = false; DOT_MY = false; DOTMENU = !DOTMENU;">
         <img :src=SearchButtonSrc alt="dotsearch">
       </div>
     </transition>
     <transition name="dot-filter">
-      <div id="dot-filter" class="dots" v-if="DOTMENU" @click="DOT_FILTER = !DOT_FILTER; DOT_SEARCH = false; DOT_LIKED = false;">
+      <div id="dot-filter" class="dots" v-if="DOTMENU" @click="DOT_FILTER = !DOT_FILTER; DOT_SEARCH = false; DOT_LIKED = false; DOT_MY = false; DOTMENU = !DOTMENU;">
         <img :src=FilterButtonOnSrc alt="dotfilter">
       </div>
     </transition>
     <transition name="dot-like">
-      <div id="dot-like" class="dots" v-if="DOTMENU" @click="DOT_LIKED = !DOT_LIKED; DOT_SEARCH = false; DOT_FILTER = false;">
+      <div id="dot-like" class="dots" v-if="DOTMENU" @click="DOT_LIKED = !DOT_LIKED; DOT_SEARCH = false; DOT_FILTER = false; DOT_MY = false; DOTMENU = !DOTMENU;">
+        <img :src=LikeButtonOnSrc alt="dotmarker">
+      </div>
+    </transition>
+    <transition name="dot-my">
+      <div id="dot-my" class="dots" v-if="DOTMENU" @click="DOT_MY = !DOT_MY; DOT_SEARCH = false; DOT_FILTER = false; DOT_LIKED = false; DOTMENU = !DOTMENU;">
         <img :src=LikeButtonOnSrc alt="dotmarker">
       </div>
     </transition>
@@ -52,6 +62,7 @@ import SaveMaker from './SaveMaker.vue'
 import DotFilter from './Filter.vue'
 import DotSearch from './Search.vue'
 import DotLiked from './LikedMarker.vue'
+import DotMy from './MyMarker.vue'
 
 export default {
 
@@ -80,6 +91,7 @@ export default {
       map: null,
       markers: [],
       likedMarkers: [],
+      myMarkers: [],
       SHOW_SAVE_MAKER: false,
       isLoading: false,
       fullscreen: false,
@@ -95,6 +107,7 @@ export default {
       DOT_FILTER: false,
       DOT_SEARCH: false,
       DOT_LIKED: false,
+      DOT_MY: false,
 
       FilterButtonOnSrc: require("../assets/filter_on.png"),
       LikeButtonOnSrc: require("../assets/flare_on.png"),
@@ -114,7 +127,8 @@ export default {
     SaveMaker,
     DotFilter,
     DotSearch,
-    DotLiked
+    DotLiked,
+    DotMy
   },
   methods: {
     // 카카오 맵 초기화 메서드
@@ -185,7 +199,6 @@ export default {
             })
           }
         })
-        // 센터 기준으로 어디까지 마커 검색해서 불러올지 로직 작성
         return map;
       }
     },
@@ -228,10 +241,10 @@ export default {
           else {
             //TODO - markers에 저장 List를 받아왔을 때 데이터 형식 확인.
             //this.markers = res.data.response
+            console.log('all marker loaded.')
           }
 
         })
-        console.log('all marker loaded.')
       } catch (error) {
         console.log('marker loading failed.' + error)
       }
@@ -246,7 +259,7 @@ export default {
           url: 'http://3.34.123.190:8080/marker/mylikelist',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
-        }). then((res) => {
+        }).then((res) => {
           console.log(res.data.response)
 
           if (res.data.success === false) {
@@ -260,6 +273,30 @@ export default {
           }
         })
       } catch (error) {
+        console.warn("unexpected error occured" + error)
+      }
+    },
+    getMyMarkers: async function() {
+      try {
+        await axios({
+          method: 'GET',
+          url: 'http://3.34.123.190:8080/marker/my',
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
+          withCredentials: true
+        }).then((res) => {
+          console.log(res.data.response)
+
+          if (res.data.success === false) {
+            const statusCode = res.data.error.status 
+
+            console.log('get my markers failed.')
+          }
+          else {
+            //TODO - mymarkers에 저장 List를 받아왔을 때 데이터 형식 확인.
+            //this.likedmarkers = res.data.response
+          }
+        })
+      } catch(error) {
         console.warn("unexpected error occured" + error)
       }
     },
@@ -337,8 +374,15 @@ export default {
       this.markers.push(savedMarker)
       this.map.setLevel(3,{ animate: true })
     },
-    searchSelectedEvent: function(Lat,Lng) {
+    selectedEvent: function(Lat,Lng) {
       this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
+    },
+    menuCloseEvent: function() {
+      const dots = [this.DotFilter,this.DotSearch,this.DotLiked,this.DotMy]
+      dots.forEach((element) => {
+        if (element === true)
+          element = false
+      })
     }
   }
 }

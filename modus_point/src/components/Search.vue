@@ -5,7 +5,7 @@
       <button class="search-button" @click="search"></button>
     </div>
     <div id="search-result">
-      <div @click="searchSelectedEvent(result.y,result.x)" id="frag" class="search-result-fragment" v-for="result in searchResults" :key="result.id">
+      <div @click="selectedEvent(result.y,result.x)" id="frag" class="search-result-fragment" v-for="result in searchResults" :key="result.id">
         <div id="place-name">{{ result.place_name }}</div>
         <div id="place-address">
           <span style="margin-bottom: 5px;">{{ result.road_address_name }}</span>
@@ -88,8 +88,8 @@ export default {
         })
       }
     },
-    searchSelectedEvent: function(Lat,Lng) {
-      this.$emit("searchSelectedEvent",Lat,Lng)
+    selectedEvent: function(Lat,Lng) {
+      this.$emit("selectedEvent",Lat,Lng)
     }
   }
 

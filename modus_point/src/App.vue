@@ -39,7 +39,9 @@ export default {
     }
 
     KakaoMap.methods.getAllMarkers()
-    KakaoMap.methods.getLikedMarkers()
+    if ( this.LOGIN === true )
+      KakaoMap.methods.getLikedMarkers()
+      KakaoMap.methods.getMyMarkers()
   },
   data() {
     return {
@@ -353,7 +355,7 @@ input:focus {
     bottom: 5%;
   }
   100% {
-    bottom: 41%;
+    bottom: 53%;
   }
 }
 @keyframes dot-search-in {
@@ -361,7 +363,7 @@ input:focus {
     bottom: 5%;
   }
   100% {
-    bottom: 41%;
+    bottom: 53%;
   }
 }
 @-webkit-keyframes dot-filter-in {
@@ -369,7 +371,7 @@ input:focus {
     bottom: 5%;
   }
   100% {
-    bottom: 29%;
+    bottom: 41%;
   }
 }
 @keyframes dot-filter-in {
@@ -377,7 +379,7 @@ input:focus {
     bottom: 5%;
   }
   100% {
-    bottom: 29%;
+    bottom: 41%;
   }
 }
 @-webkit-keyframes dot-like-in {
@@ -385,10 +387,26 @@ input:focus {
     bottom: 5%;
   }
   100% {
-    bottom: 17%;
+    bottom: 29%;
   }
 }
 @keyframes dot-like-in {
+  0% {
+    bottom: 5%;
+  }
+  100% {
+    bottom: 29%;
+  }
+}
+@-webkit-keyframes dot-my-in {
+  0% {
+    bottom: 5%;
+  }
+  100% {
+    bottom: 17%;
+  }
+}
+@keyframes dot-my-in {
   0% {
     bottom: 5%;
   }
@@ -398,7 +416,7 @@ input:focus {
 }
 @-webkit-keyframes dot-search-out {
   0% {
-    bottom: 41%;
+    bottom: 53%;
   }
   100% {
     bottom: 5%;
@@ -406,7 +424,7 @@ input:focus {
 }
 @keyframes dot-search-out {
   0% {
-    bottom: 41%;
+    bottom: 53%;
   }
   100% {
     bottom: 5%;
@@ -414,7 +432,7 @@ input:focus {
 }
 @-webkit-keyframes dot-filter-out {
   0% {
-    bottom: 29%;
+    bottom: 41%;
   }
   100% {
     bottom: 5%;
@@ -422,7 +440,7 @@ input:focus {
 }
 @keyframes dot-filter-out {
   0% {
-    bottom: 29%;
+    bottom: 41%;
   }
   100% {
     bottom: 5%;
@@ -430,13 +448,29 @@ input:focus {
 }
 @-webkit-keyframes dot-like-out {
   0% {
-    bottom: 17%;
+    bottom: 29%;
   }
   100% {
     bottom: 5%;
   }
 }
 @keyframes dot-like-out {
+  0% {
+    bottom: 29%;
+  }
+  100% {
+    bottom: 5%;
+  }
+}
+@-webkit-keyframes dot-my-out {
+  0% {
+    bottom: 17%;
+  }
+  100% {
+    bottom: 5%;
+  }
+}
+@keyframes dot-my-out {
   0% {
     bottom: 17%;
   }
