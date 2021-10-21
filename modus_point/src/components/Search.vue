@@ -1,5 +1,6 @@
 <template>
   <div id="search-container">
+    <h3> 지역 검색 </h3>
     <div id="search-form">
       <input class="search-input" :value="keyword" @input="keyword = $event.target.value" placeholder="검색어를 입력해 주세요." @keydown.enter="search">
       <button class="search-button" @click="search"></button>

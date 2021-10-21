@@ -34,6 +34,7 @@
 <script>
 import axios from 'axios';
 import getCookie from '../getCookie.js'
+import refresh from '../getRefreshedToken.js'
 
 export default {
 
@@ -74,10 +75,10 @@ export default {
 
     autoLogin: async function() {
       try {
-        const refreshCookie = getCookie(this.COOKIE_NAME)
         await axios({
           method: 'GET',
           url: 'http://3.34.123.190:8080/fisher/me',
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
 
@@ -85,17 +86,13 @@ export default {
             console.log('refreshToken is expired.')
           }
           else {
-            sessionStorage.setItem("apiToken", res.data.response.apiToken)
-            sessionStorage.setItem("name", res.data.response.fisher.fishername)
-            sessionStorage.setItem("role", res.data.response.fisher.role)
-            sessionStorage.setItem("email", res.data.response.fisher.email)
-            sessionStorage.setItem("id", res.data.response.fisher.id)
+            sessionStorage.setItem('apiToken', refresh(res.headers))
 
             this.loginEvent()
           }
         })
       } catch (error) {
-        console.log('bad connection.')
+        console.log(error)
       }
     },
 
@@ -136,13 +133,15 @@ export default {
 
             }
             else{
-
               if (!sessionStorage.getItem("apiToken")){
                 sessionStorage.setItem("apiToken", res.data.response.apiToken)
                 sessionStorage.setItem("name", res.data.response.fisher.fishername)
                 sessionStorage.setItem("role", res.data.response.fisher.role)
                 sessionStorage.setItem("email", res.data.response.fisher.email)
                 sessionStorage.setItem("id", res.data.response.fisher.id)
+              }
+              else {
+                sessionStorage.setItem("apiToken",res.data.response.apiToken)
               }
 
               this.loginEvent()

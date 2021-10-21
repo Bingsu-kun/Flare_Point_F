@@ -17,7 +17,7 @@
     <transition name="fade">
       <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="closeLogin">
         <div id="login-foreground" v-if="SHOW_LOGIN_FORM" @click.stop>
-          <login-and-signup v-on:loginEvent="setLogin"></login-and-signup>
+          <login-and-signup @loginEvent="setLogin"></login-and-signup>
         </div>
       </div>
     </transition>
@@ -31,17 +31,9 @@ import KakaoMap from './components/Map.vue'
 export default {
   name: 'App',
   mounted() {
-    if ( sessionStorage.getItem('apiToken') ) {
-      this.LOGIN = true
-    }
-    else {
+    setTimeout(() => {
       LoginAndSignup.methods.autoLogin()
-    }
-
-    KakaoMap.methods.getAllMarkers()
-    if ( this.LOGIN === true )
-      KakaoMap.methods.getLikedMarkers()
-      KakaoMap.methods.getMyMarkers()
+    },500)
   },
   data() {
     return {
@@ -107,8 +99,7 @@ input:focus {
 
 #menu_bar {
   padding: 25px 0px;
-  min-width: 80px;
-  width: 7%;
+  width: 80px;
   background: rgb(25,75,130);
   box-shadow: 2rem 0 2rem 5px rgba(100, 100, 100, 0.8);
   position: fixed;
@@ -166,7 +157,7 @@ input:focus {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 93%;
+  width: calc(100% - 80px);
   height: 100%;
   z-index: 1;
 }
@@ -211,7 +202,7 @@ input:focus {
 #dot-search {
   position: fixed;
   right: 5%;
-  bottom: 41%;
+  bottom: 53%;
   background: white;
   z-index: 2;
 }
@@ -219,12 +210,20 @@ input:focus {
 #dot-filter {
   position: fixed;
   right: 5%;
-  bottom: 29%;
+  bottom: 41%;
   background: white;
   z-index: 2;
 }
 
 #dot-like {
+  position: fixed;
+  right: 5%;
+  bottom: 29%;
+  background: white;
+  z-index: 2;
+}
+
+#dot-my {
   position: fixed;
   right: 5%;
   bottom: 17%;
@@ -296,6 +295,14 @@ input:focus {
 .dot-like-leave-active {
   -webkit-animation: dot-like-out 0.4s ease-out;
   animation: dot-like-out 0.4s ease-out;
+}
+.dot-my-enter-active {
+  -webkit-animation: dot-my-in 0.4s ease-out;
+  animation: dot-my-in 0.4s ease-out;
+}
+.dot-my-leave-active {
+  -webkit-animation: dot-my-out 0.4s ease-out;
+  animation: dot-my-out 0.4s ease-out;
 }
 
 @-webkit-keyframes fade-in {

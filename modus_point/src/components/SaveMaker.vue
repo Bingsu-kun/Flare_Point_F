@@ -24,6 +24,7 @@
 <script>
 import axios from 'axios'
 import getCookie from '../getCookie.js'
+import refresh from '../getRefreshedToken.js'
 
 export default {
   data() {
@@ -42,7 +43,7 @@ export default {
   props: ['latitude', 'longitude'],
   methods: {
     saveEvent: function() {
-      this.$emit('saveEvent', this.pickedCategory, this.savedMarker)
+      this.$emit('saveEvent', this.savedMarker)
     },
     // description 100자 제한. (not byte)
     checklength: function() {
@@ -80,7 +81,6 @@ export default {
       }
       else {
         try {
-          const refreshCookie = getCookie('refreshToken')
           await axios({
             method: 'POST',
             url: 'http://3.34.123.190:8080/marker/create',
@@ -90,10 +90,11 @@ export default {
           }).then((res) => {
 
             if (res.data.success === false) {
-              console.log('marker create failed.' + res.date.response)
+              console.log('marker create failed.' + res.data.response)
             }
             else {
               this.savedMarker = res.data.response
+              sessionStorage.setItem("apiToken", refresh(res.headers))
               this.saveEvent()
             }
           })

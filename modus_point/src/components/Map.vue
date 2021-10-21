@@ -4,12 +4,12 @@
     <div id="dot-menu-background" v-if="SHOW_SAVE_MAKER" @click="SHOW_SAVE_MAKER = !SHOW_SAVE_MAKER"/>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="SHOW_SAVE_MAKER">
-        <save-maker :latitude="rightClickLat" :longitude="rightClickLng" @saveEvent="saveEvent"></save-maker>
+        <save-maker :latitude="centerLat" :longitude="centerLng" @saveEvent="saveEvent"></save-maker>
       </div>
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_FILTER">
-        <dot-filter :markers="markers" @menuCloseEvent="menuCloseEvent"></dot-filter>
+        <dot-filter @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-filter>
       </div>
     </transition>
     <transition name="menu">
@@ -31,23 +31,23 @@
       <img :src=SidebarButtonSrc alt="dot">
     </div>
     <transition name="dot-search">
-      <div id="dot-search" class="dots" v-if="DOTMENU" @click="DOT_SEARCH = !DOT_SEARCH; DOT_FILTER = false; DOT_LIKED = false; DOT_MY = false; DOTMENU = !DOTMENU;">
+      <div id="dot-search" class="dots" v-if="DOTMENU" @click="DOT_SEARCH = !DOT_SEARCH; DOT_FILTER = false; DOT_LIKED = false; DOT_MY = false; DOTMENU = false">
         <img :src=SearchButtonSrc alt="dotsearch">
       </div>
     </transition>
     <transition name="dot-filter">
-      <div id="dot-filter" class="dots" v-if="DOTMENU" @click="DOT_FILTER = !DOT_FILTER; DOT_SEARCH = false; DOT_LIKED = false; DOT_MY = false; DOTMENU = !DOTMENU;">
+      <div id="dot-filter" class="dots" v-if="DOTMENU" @click="DOT_FILTER = !DOT_FILTER; DOT_SEARCH = false; DOT_LIKED = false; DOT_MY = false; DOTMENU = false">
         <img :src=FilterButtonOnSrc alt="dotfilter">
       </div>
     </transition>
     <transition name="dot-like">
-      <div id="dot-like" class="dots" v-if="DOTMENU" @click="DOT_LIKED = !DOT_LIKED; DOT_SEARCH = false; DOT_FILTER = false; DOT_MY = false; DOTMENU = !DOTMENU;">
-        <img :src=LikeButtonOnSrc alt="dotmarker">
+      <div id="dot-like" class="dots" v-if="DOTMENU" @click="DOT_LIKED = !DOT_LIKED; DOT_SEARCH = false; DOT_FILTER = false; DOT_MY = false; DOTMENU = false">
+        <img :src=LikeButtonOnSrc alt="dotlike">
       </div>
     </transition>
     <transition name="dot-my">
-      <div id="dot-my" class="dots" v-if="DOTMENU" @click="DOT_MY = !DOT_MY; DOT_SEARCH = false; DOT_FILTER = false; DOT_LIKED = false; DOTMENU = !DOTMENU;">
-        <img :src=LikeButtonOnSrc alt="dotmarker">
+      <div id="dot-my" class="dots" v-if="DOTMENU" @click="DOT_MY = !DOT_MY; DOT_SEARCH = false; DOT_FILTER = false; DOT_LIKED = false; DOTMENU = false">
+        <img :src=MyMkButtonSrc alt="dotmarker">
       </div>
     </transition>
   </div>
@@ -73,18 +73,39 @@ export default {
         this.initKakaoMap();
       } catch(e) {
         console.log("Fail to load Kakao map." + e)
+      } finally {
+        setTimeout(() => {
+          this.getAllMarkers(() => {
+            this.isLoading = false
+          })
+          if ( this.LOGIN === true ){
+            this.getLikedMarkers()
+            this.getMyMarkers()
+          }
+        }, 8000)
       }
     }
     else {
       try {
         const script = document.createElement('script');
-        script.onload = () => kakao.maps.load(this.initKakaoMap);
-        script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=407b973edfee2735f163d9c7a5c03218&libraries=services'
+        script.onload = () => kakao.maps.load(this.initKakaoMap());
+        script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=12658ca88c9c540ede74d413df66f251&libraries=services'
         document.body.appendChild(script);
       } catch(e) {
         console.log("Fail to load Kakao map." + e)
+      } finally {
+        setTimeout(() => {
+          this.getAllMarkers(() => {
+            this.isLoading = false
+          })
+          if ( this.LOGIN === true ){
+            this.getLikedMarkers()
+            this.getMyMarkers()
+          }
+        }, 8000)
       }
     }
+    
   },
   data() {
     return {
@@ -97,10 +118,8 @@ export default {
       fullscreen: false,
       loading_color: "#E2004B",
 
-      rightClickLat: '',
-      rightClickLng: '',
-      thisMarkerLat: '',
-      thisMarkerLng: '',
+      centerLat: '',
+      centerLng: '',
       SHOW_THIS_MARKER: false,
 
       DOTMENU: false,
@@ -113,12 +132,7 @@ export default {
       LikeButtonOnSrc: require("../assets/flare_on.png"),
       SidebarButtonSrc: require("../assets/sidebar.png"),
       SearchButtonSrc: require("../assets/search.png"),
-
-      FishingMarkerSrc: require("../assets/fishing_marker.png"),
-      CampingMarkerSrc: require("../assets/camping_marker.png"),
-      GatheringMarkerSrc: require("../assets/gathering_marker.png"),
-      StoreMarkerSrc: require("../assets/store_marker.png"),
-      SecretPlaceMarkerSrc: require("../assets/secret_place_marker.png")
+      MyMkButtonSrc: require("../assets/user_on.png")
     }
   },
   props: ['LOGIN'],
@@ -139,14 +153,12 @@ export default {
         this.lat = position.coords.latitude
         this.lng = position.coords.longitude
         this.map = init(this.lat,this.lng,mapContainer)
-        this.isLoading = false
       },() => {
         console.log("현재 위치를 파악할 수 없습니다.")
         //강남역
         this.lat = 37.49780947181307
         this.lng = 127.02766764268932
         this.map = init(this.lat,this.lng,mapContainer)
-        this.isLoading = false
       })
   
       function init(lat,lng,mapContainer) {
@@ -199,6 +211,7 @@ export default {
             })
           }
         })
+        // 센터 기준으로 어디까지 마커 검색해서 불러올지 로직 작성
         return map;
       }
     },
@@ -206,8 +219,8 @@ export default {
       const button = document.querySelector('.marker-button')
       const maker = document.querySelector('#marker-maker')
       const center = this.map.getCenter()
-      this.rightClickLat = center.Ma
-      this.rightClickLng = center.La
+      this.centerLat = center.Ma
+      this.centerLng = center.La
       setTimeout(() => {
         button.addEventListener("click",() => {
           maker.remove()
@@ -223,8 +236,8 @@ export default {
         })
       },100)
     },
-    //모든 마커들을 서버또는 localStorage에서 가져온다. 
-    getAllMarkers: async function() {
+    //모든 마커들을 서버또는 localStorage에서 가져온다.
+    getAllMarkers: async function(callback) {
 
       try {
         //axios로 모든 마커 가져오기
@@ -239,18 +252,20 @@ export default {
             console.log('marker loading failed by server issue.')
           }
           else {
-            //TODO - markers에 저장 List를 받아왔을 때 데이터 형식 확인.
-            //this.markers = res.data.response
-            console.log('all marker loaded.')
+            this.markers = res.data.response
           }
 
         })
       } catch (error) {
         console.log('marker loading failed.' + error)
+      } finally {
+        if (this.markers !== []) {
+          for (let mk of this.markers){
+                this.renderMarker(mk)
+          }
+        }
+        callback()
       }
-
-      this.renderMarkers()
-      
     },
     getLikedMarkers: async function() {
       try {
@@ -263,7 +278,6 @@ export default {
           console.log(res.data.response)
 
           if (res.data.success === false) {
-            const statusCode = res.data.error.status 
 
             console.log('get liked markers failed.')
           }
@@ -277,98 +291,61 @@ export default {
       }
     },
     getMyMarkers: async function() {
-      try {
-        await axios({
-          method: 'GET',
-          url: 'http://3.34.123.190:8080/marker/my',
-          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-          withCredentials: true
-        }).then((res) => {
-          console.log(res.data.response)
-
-          if (res.data.success === false) {
-            const statusCode = res.data.error.status 
-
-            console.log('get my markers failed.')
-          }
-          else {
-            //TODO - mymarkers에 저장 List를 받아왔을 때 데이터 형식 확인.
-            //this.likedmarkers = res.data.response
-          }
-        })
-      } catch(error) {
-        console.warn("unexpected error occured" + error)
+      for(let mk of this.markers) {
+        if (mk.fisherId === sessionStorage.getItem("id"))
+          this.myMarkers.push(mk)
       }
     },
-    //마커 찍기
-    renderMarkers: function() {
-      this.markers.forEach((mk) => {
-        const Lat = mk.latitude
-        const Lng = mk.longitude
-        const string = ''
-        const category = mk.category.toLowerCase()
-
-        const markerImageUrl = (pickedCategory) => {
-          if (pickedCategory === "fishing")
-            return this.FishingMarkerSrc
-          else if (pickedCategory === "camping")
-            return this.CampingMarkerSrc
-          else if (pickedCategory === "gathering")
-            return this.GatheringMarkerSrc
-          else if (pickedCategory === "store")
-            return this.StoreMarkerSrc
-          else if (pickedCategory === "secret_place")
-            return this.SecretPlaceMarkerSrc
-          else
-            console.log('category error.')
-        }
-        const markerImage = new kakao.maps.MarkerImage(markerImageUrl(category), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) });
+    renderMarker: function(mk) {
+      const Lat = mk.latitude
+      const Lng = mk.longitude
+      const markerImageUrl = (category) => {
+        if (category === "fishing")
+          return require("../assets/fishing_marker.png")
+        else if (category === "camping")
+          return require("../assets/camping_marker.png")
+        else if (category === "gathering")
+          return require("../assets/gathering_marker.png")
+        else if (category === "store")
+          return require("../assets/store_marker.png")
+        else if (category === "secret_place")
+          return require("../assets/secret_place_marker.png")
+        else
+          console.log('category error.')
+      } 
+      if (mk.isPrivate === false) {
         // 지도에 마커를 생성하고 표시한다
         const marker = new kakao.maps.Marker({
           position: new kakao.maps.LatLng(Lat,Lng), // 마커의 좌표
-          image : markerImage, // 마커의 이미지
+          image : new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) }), // 마커의 이미지
           map: this.map // 마커를 표시할 지도 객체
         });
 
         kakao.maps.event.addListener(marker,'click',() => {
-          this.thisMarkerLat = marker.position.Ma
-          this.thisMarkerLng = marker.position.La
+          this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
           this.SHOW_THIS_MARKER = true
         })
-      })
-    },
-    saveEvent: function(pickedCategory,savedMarker) {
-      this.SHOW_SAVE_MAKER = false
-      const Lat = this.rightClickLat
-      const Lng = this.rightClickLng
-      const markerImageUrl = (pickedCategory) => {
-        if (pickedCategory === "fishing")
-          return this.FishingMarkerSrc
-        else if (pickedCategory === "camping")
-          return this.CampingMarkerSrc
-        else if (pickedCategory === "gathering")
-          return this.GatheringMarkerSrc
-        else if (pickedCategory === "store")
-          return this.StoreMarkerSrc
-        else if (pickedCategory === "secret_place")
-          return this.SecretPlaceMarkerSrc
-        else
-          console.warn('category error.')
       }
-      const markerImage = new kakao.maps.MarkerImage(markerImageUrl(pickedCategory), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) });
-      // 지도에 마커를 생성하고 표시한다
-      const marker = new kakao.maps.Marker({
-        position: new kakao.maps.LatLng(Lat,Lng), // 마커의 좌표
-        image : markerImage, // 마커의 이미지
-        map: this.map // 마커를 표시할 지도 객체
-      });
-      console.log(marker)
+      else {
+        //isPrivate가 true일 경우 제작자가 지금 로그인한 사람과 같은지 확인 후 렌더한다.
+        const id = sessionStorage.getItem('id')
+        if (id === mk.fisherId ){
+          const marker = new kakao.maps.Marker({
+            position: new kakao.maps.LatLng(Lat,Lng), // 마커의 좌표
+            image : new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) }), // 마커의 이미지
+            map: this.map // 마커를 표시할 지도 객체
+          });
 
-      kakao.maps.event.addListener(marker,'click',() => {
-        this.thisMarkerLat = marker.position.Ma
-        this.thisMarkerLng = marker.position.La
-        this.SHOW_THIS_MARKER = true
-      })
+          kakao.maps.event.addListener(marker,'click',() => {
+            this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
+            this.SHOW_THIS_MARKER = true
+          })
+        }
+      }
+    },
+    saveEvent: function(savedMarker) {
+      this.SHOW_SAVE_MAKER = false
+      this.renderMarker(savedMarker)
 
       //새로 생성된 마커를 배열에 추가
       this.markers.push(savedMarker)
@@ -376,13 +353,6 @@ export default {
     },
     selectedEvent: function(Lat,Lng) {
       this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
-    },
-    menuCloseEvent: function() {
-      const dots = [this.DotFilter,this.DotSearch,this.DotLiked,this.DotMy]
-      dots.forEach((element) => {
-        if (element === true)
-          element = false
-      })
     }
   }
 }
