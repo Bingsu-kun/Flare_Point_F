@@ -7,7 +7,7 @@
         <input type="email" v-model="principal">
         <p style="color: rgb(237,40,40)">{{ login_email_error }}</p>
         <p>패스워드</p>
-        <input type="password" v-model="credentials">
+        <input type="password" v-model="credentials" @keydown.enter="login">
         <p>{{ login_password_error }}</p>
         <button class="login_button" @click="login">로그인</button>
         <button class="login_button" @click="isLogin = false">회원가입</button>
@@ -77,7 +77,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'http://3.34.123.190:8080/fisher/me',
+          url: 'http://3.34.252.182:8080/fisher/me',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
@@ -112,7 +112,7 @@ export default {
         try {
           await axios({
             method: 'POST',
-            url: 'http://3.34.123.190:8080/fisher/login',
+            url: 'http://3.34.252.182:8080/fisher/login',
             data: { principal: this.principal.trim(), credentials: this.credentials },
             headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
             withCredentials: true
@@ -172,7 +172,7 @@ export default {
         try {
           await axios({
             method: 'POST',
-            url: 'http://3.34.123.190:8080/fisher/join',
+            url: 'http://3.34.252.182:8080/fisher/join',
             data: { principal: this.principal.trim(), credentials: this.credentials, name: this.name.trim() },
             withCredentials: true
           })
@@ -229,7 +229,7 @@ export default {
       try {
         await axios({
           method: 'POST',
-          url: 'http://3.34.123.190:8080/fisher/join/email/exists',
+          url: 'http://3.34.252.182:8080/fisher/join/email/exists',
           data: { req: this.principal.trim() }
         })
         .then((res) => {
@@ -262,7 +262,7 @@ export default {
         try {
         await axios({
           method: 'POST',
-          url: 'http://3.34.123.190:8080/fisher/join/name/exists',
+          url: 'http://3.34.252.182:8080/fisher/join/name/exists',
           data: { req: this.name.trim() }
         })
         .then((res) => {

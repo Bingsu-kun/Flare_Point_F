@@ -1,5 +1,6 @@
 <template>
   <div id="liked-markers-container">
+    <button class="close" @click="menuCloseEvent"></button>
     <!--
       무한 스크롤 내부 수정 필요.
       <div @click="searchSelectedEvent(result.y,result.x)" id="frag" class="search-result-fragment" v-for="result in searchResults" :key="result.id">
@@ -24,6 +25,10 @@ export default {
   },
   props: ['likedMarkers'],
   methods: {
+
+    menuCloseEvent: function() {
+      this.$emit("menuCloseEvent")
+    }
 
   }
   

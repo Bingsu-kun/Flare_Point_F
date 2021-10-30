@@ -1,22 +1,19 @@
 <template>
   <div id="menu-contents">
-    <div id="categoty-name-form">
-      <select id="category-selector" name="category" v-model="pickedCategory">
-        <option value="">카테고리</option>
-        <option value="fishing">낚시</option>
-        <option value="camping">캠핑</option>
-        <option value="gathering">채집</option>
-        <option value="store">특별한가게</option>
-        <option value="secret_place">나만의장소</option>
-      </select>
-      <span id="private-selector">나만보기<input type="checkbox" name="isPrivate" v-model="isPrivate"></span>
+    <div id="category-name-form">
+      <button id="cb-1" class="category-button" @click="categorySelect('fishing',0)"></button>
+      <button id="cb-2" class="category-button" @click="categorySelect('camping',1)"></button>
+      <button id="cb-3" class="category-button" @click="categorySelect('gathering',2)"></button>
+      <button id="cb-4" class="category-button" @click="categorySelect('store',3)"></button>
+      <button id="cb-5" class="category-button" @click="categorySelect('secret_place',4)"></button>
     </div>
     <div id="maker-body">
       <input class="marker-input" placeholder="마커의 이름을 적어주세요" :value="markerName" @input="markerName = $event.target.value">
       <textarea id="description" :value="description" @input="description = $event.target.value" @keyup="checklength" class="marker-input" placeholder="마커를 설명해 주세요 (최대 100자)" style="height: 200px; resize: none; word-break: break-all; text-overflow: clip;"></textarea>
       <p v-if="DescOver" style="color: rgb(237,40,40)" >최대 100자 까지만 가능합니다!</p>
-      <input class="marker-input" placeholder="마커를 대표할 태그를 적어주세요 (최대 10개)" style="font-size: 12px;" :value="tagString" @input="tagString = $event.target.value">
+      <input class="marker-input" placeholder="최대 10개까지 태그를 적어주세요 ex) #차박#낚시#바베큐" style="font-size: 12px;" :value="tagString" @input="tagString = $event.target.value">
     </div>
+    <span id="private-selector">나만보기<input type="checkbox" name="isPrivate" v-model="isPrivate"></span>
     <button @click="saveMarker" class="marker-make-button">저장</button>
   </div>
 </template>
@@ -71,19 +68,16 @@ export default {
         const userInfo = sessionStorage.getItem("name")
         name = `${userInfo}님의 마커`
       }
-      if (description === '') {
-        description = '내용이 없습니다.'
-      }
       if (category === '') {
-        alert('카테고리를 선택해 주세요!')
-        const category = document.getElementById("#category-selector")
-        category.style.borderColor('#ED2828')
+        alert('마커를 선택해 주세요!')
+        const categoryBox = document.querySelector('#category-name-form')
+        categoryBox.style.borderColor = '#ED2828'
       }
       else {
         try {
           await axios({
             method: 'POST',
-            url: 'http://3.34.123.190:8080/marker/create',
+            url: 'http://3.34.252.182:8080/marker/create',
             headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
             data: { name: name, latitude: latitude, longitude: longitude, isPrivate: isPrivate, category: category, tagString: tagString, description: description },
             withCredentials: true
@@ -102,6 +96,20 @@ export default {
           console.log('bad connection.' + error)
         }
       }
+    },
+    categorySelect: function(category,index) {
+      this.pickedCategory = category
+      const buttons = document.querySelectorAll('.category-button')
+      let cnt = 0
+      for (let btn of buttons) {
+        if (cnt === index) {
+          btn.style.backgroundColor = 'white'
+        }
+        else {
+          btn.style.backgroundColor = 'darkgrey'
+        }
+        cnt += 1
+      }
     }
   }
 }
@@ -109,23 +117,36 @@ export default {
 
 <style>
 
-#categoty-name-form {
+#category-name-form {
   width: 100%;
   height: 20%;
   display: flex;
   justify-content: space-between ;
+  border: 2px solid white;
+  border-radius: 5px;
 }
 
-#category-selector {
-  padding: 1px 2px;
-  width: 120px;
-  height: 34px;
-  border: 2px solid grey;
+.category-button {
+  width: 50px;
+  height: 50px;
   border-radius: 5px;
-  display: inline-flex;
-  justify-content: center;
-  text-align: center;
+  border: 2px solid grey;
+  background-color: darkgray;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  transition-duration: 0.3s;
 }
+
+.category-button:hover {
+  background-color: white;
+}
+
+#cb-1 { background-image: url("../assets/fishing_marker.png");}
+#cb-2 { background-image: url("../assets/camping_marker.png");}
+#cb-3 { background-image: url("../assets/gathering_marker.png");}
+#cb-4 { background-image: url("../assets/store_marker.png");}
+#cb-5 { background-image: url("../assets/secret_place_marker.png");}
 
 #private-selector {
   font-size: 14px;

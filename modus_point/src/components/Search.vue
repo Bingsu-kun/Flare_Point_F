@@ -1,12 +1,13 @@
 <template>
   <div id="search-container">
     <h3> 지역 검색 </h3>
+    <button class="close" @click="menuCloseEvent"></button>
     <div id="search-form">
       <input class="search-input" :value="keyword" @input="keyword = $event.target.value" placeholder="검색어를 입력해 주세요." @keydown.enter="search">
       <button class="search-button" @click="search"></button>
     </div>
-    <div id="search-result">
-      <div @click="selectedEvent(result.y,result.x)" id="frag" class="search-result-fragment" v-for="result in searchResults" :key="result.id">
+    <div id="search-result" v-if="!noResult">
+      <div @click="selectedEvent(result.y,result.x)" id="frag" class="search-result-fragment" v-for="result in searchResults" :key="result.id" >
         <div id="place-name">{{ result.place_name }}</div>
         <div id="place-address">
           <span style="margin-bottom: 5px;">{{ result.road_address_name }}</span>
@@ -14,8 +15,8 @@
         </div>
         <div id="place-phone">{{ result.phone }}</div>
       </div>
-      <img v-if="noResult" id="NO-RESULT" alt="no-result">
     </div>
+    <div id="no-search-result" v-if="noResult"/>
   </div>
 </template>
 <script>
@@ -32,12 +33,13 @@ export default {
       const searchResult = new kakao.maps.services.Places()
       const keyword = this.keyword
       this.searchResults = []
+      let noResult = this.noResult
       let result = this.searchResults
-      let no = this.noResult
       if (keyword !== '' && keyword.length > 1)
         searchResult.keywordSearch( keyword, placeSearched )
       
       function placeSearched(data, status, pagination) {
+        console.log(data)
         if (status === kakao.maps.services.Status.OK) {
 
           for ( let i = 0; i < data.length; i++ ) {
@@ -48,17 +50,16 @@ export default {
           },1000)
           
           const observerOption = {
-            root: null,
-            rootMargin: "0px 0px 0px 0px",
-            threshold: 0.5
+            rootMargin: "100px",
+            threshold: 1
           }
 
           const io = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
               if (entry.isIntersecting) {
+                observer.unobserve(entry.target)
                 if (pagination.hasNextPage){
                   pagination.nextPage()
-                  observer.unobserve(entry.target)
                   observeChild(observer)
                 }
               }
@@ -67,12 +68,12 @@ export default {
         
         } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
 
-            //검색 결과 없을 때
-            no = true
+          //검색 결과 없을 때
+          noResult = true
 
         } else if (status === kakao.maps.services.Status.ERROR) {
 
-            alert('검색 중 오류가 발생했습니다.');
+          alert('검색 중 오류가 발생했습니다.');
 
         }
       }
@@ -80,7 +81,7 @@ export default {
       //관측 요소 갱신 함수
       function observeChild(intersectionObserver,pagination) {
         const resultChilds = document.querySelectorAll("#frag")
-        resultChilds.forEach(el => {
+        resultChilds.forEach((el) => {
           if (!el.nextElementSibling) {
             intersectionObserver.observe(el)
           } else {
@@ -91,6 +92,9 @@ export default {
     },
     selectedEvent: function(Lat,Lng) {
       this.$emit("selectedEvent",Lat,Lng)
+    },
+    menuCloseEvent: function() {
+      this.$emit("menuCloseEvent")
     }
   }
 
@@ -99,8 +103,28 @@ export default {
 
 <style>
 
+.close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background-color: transparent;
+  background-image: url("../assets/close.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition-duration: 0.3s;
+}
+
+.close:hover {
+  width: 25px;
+  height: 25px;
+}
+
 #search-container {
-  padding: 30px 20px;
+  padding: 0 20px;
   height: 100%;
 }
 
@@ -112,11 +136,19 @@ export default {
 }
 
 #search-result {
-  margin: 17px 0;
   height: 80%;
   text-align: left;
   overflow: overlay;
   overflow-x: hidden;
+}
+
+#no-search-result {
+  width: inherit;
+  height: 400px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-image: url('../assets/not_found.png');
 }
 
 #place-name {
@@ -132,7 +164,7 @@ export default {
 }
 
 #place-phone {
-  color: royalblue;
+  color: rgb(25,75,130);
   font-size: 12px;
 }
 
@@ -146,22 +178,26 @@ export default {
   transition-duration: 0.2s;
 }
 .search-input:focus {
-  border: 2px solid blueviolet
+  border: 2px solid rgb(25,75,130);
 }
 
 .search-button {
-  padding: 0;
+  padding: 0px;
   width: 30px;
   height: 30px;
-  border: 2px solid blueviolet;
+  border: 2px solid rgb(25,75,130);
   border-radius: 100%;
   background-color: white;
+  background-image: url("../assets/search.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
 }
 .search-button:hover {
   border: 0;
-  background-color: blueviolet;
+  background-color: rgb(25,75,130);
 }
 
 .search-result-fragment {

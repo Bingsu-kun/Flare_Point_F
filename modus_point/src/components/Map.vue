@@ -9,7 +9,7 @@
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_FILTER">
-        <dot-filter @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-filter>
+        <dot-filter :markers="markers" @disableMarkers="disableMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="enableMarkers(menuCloseEvent)"></dot-filter>
       </div>
     </transition>
     <transition name="menu">
@@ -25,6 +25,11 @@
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_MY">
         <dot-my :myMarkers="myMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-my>
+      </div>
+    </transition>
+    <transition name="menu">
+      <div class="dot-menu-foreground" v-if="SHOW_THIS_MARKER">
+        <marker-overlay :selected="selected" @menuCloseEvent="menuCloseEvent"></marker-overlay>
       </div>
     </transition>
     <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
@@ -63,6 +68,7 @@ import DotFilter from './Filter.vue'
 import DotSearch from './Search.vue'
 import DotLiked from './LikedMarker.vue'
 import DotMy from './MyMarker.vue'
+import MarkerOverlay from './MarkerOverlay.vue'
 
 export default {
 
@@ -111,8 +117,10 @@ export default {
     return {
       map: null,
       markers: [],
+      renderedMarkers: [],
       likedMarkers: [],
       myMarkers: [],
+      selected: null,
       SHOW_SAVE_MAKER: false,
       isLoading: false,
       fullscreen: false,
@@ -142,7 +150,8 @@ export default {
     DotFilter,
     DotSearch,
     DotLiked,
-    DotMy
+    DotMy,
+    MarkerOverlay
   },
   methods: {
     // 카카오 맵 초기화 메서드
@@ -229,6 +238,10 @@ export default {
             this.$emit("showLoginForm")
           }
           else {
+            this.DOT_FILTER = false
+            this.DOT_SEARCH = false
+            this.DOT_LIKED = false
+            this.DOT_MY = false
             this.SHOW_SAVE_MAKER = true
             
             this.map.setLevel(1,{ animate: true })
@@ -243,7 +256,7 @@ export default {
         //axios로 모든 마커 가져오기
         await axios({
           method: 'GET',
-          url: 'http://3.34.123.190:8080/marker/all',
+          url: 'http://3.34.252.182:8080/marker/all',
           withCredentials: true
         }).then((res) => {
           console.log(res.data.response)
@@ -271,7 +284,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'http://3.34.123.190:8080/marker/mylikelist',
+          url: 'http://3.34.252.182:8080/marker/mylikelist',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
@@ -318,13 +331,17 @@ export default {
         const marker = new kakao.maps.Marker({
           position: new kakao.maps.LatLng(Lat,Lng), // 마커의 좌표
           image : new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) }), // 마커의 이미지
-          map: this.map // 마커를 표시할 지도 객체
+          map: this.map, // 마커를 표시할 지도 객체
+          title: mk.markerId
         });
 
         kakao.maps.event.addListener(marker,'click',() => {
           this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
+          this.selected = findSelected(this.markers,Lat,Lng)
           this.SHOW_THIS_MARKER = true
         })
+    
+        this.renderedMarkers.push(marker)
       }
       else {
         //isPrivate가 true일 경우 제작자가 지금 로그인한 사람과 같은지 확인 후 렌더한다.
@@ -333,15 +350,26 @@ export default {
           const marker = new kakao.maps.Marker({
             position: new kakao.maps.LatLng(Lat,Lng), // 마커의 좌표
             image : new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) }), // 마커의 이미지
-            map: this.map // 마커를 표시할 지도 객체
+            map: this.map, // 마커를 표시할 지도 객체
+            title: mk.markerId
           });
 
           kakao.maps.event.addListener(marker,'click',() => {
             this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
+            this.selected = findSelected(this.markers,Lat,Lng)
             this.SHOW_THIS_MARKER = true
           })
+
+          this.renderedMarkers.push(marker)
         }
       }
+      function findSelected (markers,Lat,Lng) {
+        for (let mk of markers) {
+          if (mk.latitude === Lat && mk.longitude === Lng)
+            return mk
+        }
+      }
+      console.log(this.renderedMarkers)
     },
     saveEvent: function(savedMarker) {
       this.SHOW_SAVE_MAKER = false
@@ -353,6 +381,28 @@ export default {
     },
     selectedEvent: function(Lat,Lng) {
       this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
+    },
+    menuCloseEvent: function() {
+      this.DOT_FILTER = false
+      this.DOT_SEARCH = false
+      this.DOT_LIKED = false
+      this.DOT_MY = false
+      this.SHOW_THIS_MARKER = false
+    },
+    disableMarkers: function(markers) {
+      this.renderedMarkers.forEach((element) => {
+        if (markers.indexOf(parseInt(element.getTitle())) !== -1)
+          element.setVisible(false)
+        else 
+          element.setVisible(true)
+      })
+    },
+    enableMarkers: function(callback) {
+      this.renderedMarkers.forEach((element) => {
+        if (element.getVisible() === false)
+          element.setVisible(true)
+      })
+      callback()
     }
   }
 }
@@ -393,10 +443,10 @@ export default {
 }
 
 #menu-contents {
-  padding: 30px 20px;
+  padding: 0 20px;
 }
 #menu-contents div {
-  margin: 20px 0;
+  margin: 10px 0;
 }
 
 .dot-menu-foreground {

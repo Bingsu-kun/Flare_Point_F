@@ -1,4 +1,4 @@
 export default function (headers) {
-  const refreshedApiToken = headers.get("Authorization")
+  const refreshedApiToken = headers.authorization
   return refreshedApiToken
 }
