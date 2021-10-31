@@ -50,8 +50,7 @@ export default {
           },1000)
           
           const observerOption = {
-            rootMargin: "100px",
-            threshold: 1
+            threshold: 0.5
           }
 
           const io = new IntersectionObserver((entries, observer) => {
@@ -60,7 +59,6 @@ export default {
                 observer.unobserve(entry.target)
                 if (pagination.hasNextPage){
                   pagination.nextPage()
-                  observeChild(observer)
                 }
               }
             })
