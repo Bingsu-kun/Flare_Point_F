@@ -298,6 +298,29 @@ export default {
         console.warn("unexpected error occured" + error)
       }
     },
+    getReceivedLikes: async function() {
+      try {
+        await axios({
+          method: 'GET',
+          // url: 'http://3.34.252.182:8080/marker/mylikelist',
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
+          withCredentials: true
+        }).then((res) => {
+          console.log(res.data.response)
+
+          if (res.data.success === false) {
+
+            console.log('get received likes failed.')
+          }
+          else {
+            //TODO - likedmarkers에 저장 List를 받아왔을 때 데이터 형식 확인.
+            //sessionStorage.setItem("likes", res.data.response)
+          }
+        })
+      } catch (error) {
+        console.warn("unexpected error occured" + error)
+      }
+    },
     getMyMarkers: async function() {
       for(let mk of this.markers) {
         if (mk.fisherId === sessionStorage.getItem("id"))

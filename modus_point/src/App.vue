@@ -21,12 +21,18 @@
         </div>
       </div>
     </transition>
+    <transition name="menu">
+      <div class="user-profile" v-if="SHOW_USER_PROFILE">
+        <user></user>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
 import LoginAndSignup from './components/LoginAndSignup.vue'
 import KakaoMap from './components/Map.vue'
+import User from './components/User.vue'
 
 export default {
   name: 'App',
@@ -45,7 +51,8 @@ export default {
   },
   components: {
     LoginAndSignup,
-    KakaoMap
+    KakaoMap,
+    User
   },
   methods: {
 
@@ -254,6 +261,22 @@ input:focus {
 
 .dots:hover {
   margin-bottom: 20px;
+}
+
+.user-profile{
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 320px;
+  height: 200px;
+  padding: 20px;
+  border-radius: 0 20px 20px 0;
+  background-color: white;
+  box-shadow: 2rem 0 2rem 5px rgba(100, 100, 100, 0.8);
+  text-align: center;
+  justify-content: center;
+  z-index: 4;
+  overflow: hidden;
 }
 
 .container {
