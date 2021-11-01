@@ -20,7 +20,6 @@
 
 <script>
 import axios from 'axios'
-import getCookie from '../getCookie.js'
 import refresh from '../getRefreshedToken.js'
 
 export default {

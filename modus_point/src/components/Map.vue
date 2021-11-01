@@ -29,7 +29,7 @@
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="SHOW_THIS_MARKER">
-        <marker-overlay :selected="selected" @menuCloseEvent="menuCloseEvent"></marker-overlay>
+        <marker-overlay :selected="selected" :likedMarkers="likedMarkers" :myMarkers="myMarkers" @menuCloseEvent="menuCloseEvent"></marker-overlay>
       </div>
     </transition>
     <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
@@ -197,7 +197,7 @@ export default {
         // 맵 위 어디든지 우클릭 시 마커메이커 오버레이 창을 띄운다. 이미 마커메이커가 띄워져있는 경우, 기존 메이커를 지우고 만든다.
         kakao.maps.event.addListener(map, 'rightclick', function(mouseEvent) {
           let beforeMaker = document.querySelector('#marker-maker')
-          map.setCenter(new kakao.maps.LatLng(mouseEvent.latLng.Ma, mouseEvent.latLng.La))
+          map.panTo(new kakao.maps.LatLng(mouseEvent.latLng.Ma, mouseEvent.latLng.La))
           if (beforeMaker === null) {
             const markermaker = new kakao.maps.CustomOverlay({
               map: map,
@@ -330,13 +330,13 @@ export default {
         // 지도에 마커를 생성하고 표시한다
         const marker = new kakao.maps.Marker({
           position: new kakao.maps.LatLng(Lat,Lng), // 마커의 좌표
-          image : new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) }), // 마커의 이미지
+          image : new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(36, 36), { offset : new kakao.maps.Point(18, 36) }), // 마커의 이미지
           map: this.map, // 마커를 표시할 지도 객체
           title: mk.markerId
         });
 
         kakao.maps.event.addListener(marker,'click',() => {
-          this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
+          this.map.panTo(new kakao.maps.LatLng(Lat,Lng))
           this.selected = findSelected(this.markers,Lat,Lng)
           this.SHOW_THIS_MARKER = true
         })
@@ -349,15 +349,23 @@ export default {
         if (id === mk.fisherId ){
           const marker = new kakao.maps.Marker({
             position: new kakao.maps.LatLng(Lat,Lng), // 마커의 좌표
-            image : new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(35, 35), { offset : new kakao.maps.Point(13, 40) }), // 마커의 이미지
+            image : new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(36, 36), { offset : new kakao.maps.Point(18, 36) }), // 마커의 이미지
             map: this.map, // 마커를 표시할 지도 객체
             title: mk.markerId
           });
 
           kakao.maps.event.addListener(marker,'click',() => {
-            this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
+            this.map.panTo(new kakao.maps.LatLng(Lat,Lng))
             this.selected = findSelected(this.markers,Lat,Lng)
             this.SHOW_THIS_MARKER = true
+          })
+
+          kakao.maps.event.addListener(marker,'mouseover',() => {
+            marker.image = new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(50, 50), { offset : new kakao.maps.Point(25, 50) })
+          })
+
+          kakao.maps.event.addListener(marker,'mouseout',() => {
+            marker.image = new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(36, 36), { offset : new kakao.maps.Point(18, 36) })
           })
 
           this.renderedMarkers.push(marker)
@@ -380,7 +388,7 @@ export default {
       this.map.setLevel(3,{ animate: true })
     },
     selectedEvent: function(Lat,Lng) {
-      this.map.setCenter(new kakao.maps.LatLng(Lat,Lng))
+      this.map.panTo(new kakao.maps.LatLng(Lat,Lng))
     },
     menuCloseEvent: function() {
       this.DOT_FILTER = false
