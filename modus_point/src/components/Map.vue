@@ -29,7 +29,7 @@
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="SHOW_THIS_MARKER">
-        <marker-overlay :selected="selected" :likedMarkers="likedMarkers" :myMarkers="myMarkers" @menuCloseEvent="menuCloseEvent"></marker-overlay>
+        <marker-overlay :selected="selected" :likedMarkers="likedMarkers" :myMarkers="myMarkers" @showLoginForm="showLoginForm" @menuCloseEvent="menuCloseEvent"></marker-overlay>
       </div>
     </transition>
     <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
@@ -104,10 +104,6 @@ export default {
           this.getAllMarkers(() => {
             this.isLoading = false
           })
-          if ( this.LOGIN === true ){
-            this.getLikedMarkers()
-            this.getMyMarkers()
-          }
         }, 8000)
       }
     }
@@ -234,8 +230,7 @@ export default {
         button.addEventListener("click",() => {
           maker.remove()
           if (this.LOGIN === false) {
-            alert('로그인이 필요합니다!')
-            this.$emit("showLoginForm")
+            this.showLoginForm()
           }
           else {
             this.DOT_FILTER = false
@@ -309,7 +304,7 @@ export default {
           this.myMarkers.push(mk)
       }
     },
-    renderMarker: function(mk) {
+    renderMarker: function(mk,callback) {
       const Lat = mk.latitude
       const Lng = mk.longitude
       const markerImageUrl = (category) => {
@@ -339,6 +334,14 @@ export default {
           this.map.panTo(new kakao.maps.LatLng(Lat,Lng))
           this.selected = findSelected(this.markers,Lat,Lng)
           this.SHOW_THIS_MARKER = true
+        })
+
+        kakao.maps.event.addListener(marker,'mouseover',() => {
+          marker.image = new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(50, 50), { offset : new kakao.maps.Point(25, 50) })
+        })
+
+        kakao.maps.event.addListener(marker,'mouseout',() => {
+          marker.image = new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(36, 36), { offset : new kakao.maps.Point(18, 36) })
         })
     
         this.renderedMarkers.push(marker)
@@ -377,7 +380,7 @@ export default {
             return mk
         }
       }
-      console.log(this.renderedMarkers)
+      callback()
     },
     saveEvent: function(savedMarker) {
       this.SHOW_SAVE_MAKER = false
@@ -411,6 +414,18 @@ export default {
           element.setVisible(true)
       })
       callback()
+    },
+    showLoginForm: function() {
+      this.$emit("showLoginForm")
+    },
+    reRender: function() {
+      this.isLoading = true
+      this.renderedMarkers.forEach((element) => {
+        element.remove()
+      })
+      this.renderMarker(this.markers,() => {
+        this.isLoading = false
+      })
     }
   }
 }

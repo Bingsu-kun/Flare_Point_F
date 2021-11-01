@@ -49,9 +49,14 @@ export default {
   },
   methods: {
 
-    setLogin: function() {
+    setLogin: function(isAuto) {
       this.LOGIN = true
       this.SHOW_LOGIN_FORM = false
+      this.KakaoMap.getLikedMarkers()
+      this.KakaoMap.getMyMarkers()
+      if (!isAuto) {
+        this.KakaoMap.reRender()
+      }
     },
 
     showLogin: function() {

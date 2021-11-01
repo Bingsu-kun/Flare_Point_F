@@ -100,7 +100,9 @@ export default {
   props:['selected','likedMarkers','myMarkers'],
   methods: {
     like: async function() {
-      if (!this.iLiked) {
+      if (!sessionStorage.getItem('id'))
+        this.showLoginForm()
+      else if (!this.iLiked) {
         try {
           await axios({
             method: 'GET',
@@ -148,6 +150,9 @@ export default {
     },
     menuCloseEvent: function() {
       this.$emit("menuCloseEvent")
+    },
+    showLoginForm: function() {
+      this.$emit("showLoginForm")
     }
 
   },

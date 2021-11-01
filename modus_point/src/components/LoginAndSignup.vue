@@ -287,8 +287,8 @@ export default {
 
     // --------------------------------- util --------------------------------------
 
-    loginEvent: function() {
-      this.$emit("loginEvent")
+    loginEvent: function(isAuto) {
+      this.$emit("loginEvent",isAuto)
     }
   }
 
