@@ -1,19 +1,21 @@
 <template>
   <div id="my-markers-container">
     <button class="close" @click="menuCloseEvent"></button>
-        <!--
-        무한 스크롤 내부 수정 필요.
-        <div @click="selectedEvent(result.latitude,result.longitude)" id="frag" class="search-result-fragment" v-for="result in myMarkers" :key="result.markerId">
-            <div id="place-name">{{ result.place_name }}</div>
-            <div id="place-address">
-            <span style="margin-bottom: 5px;">{{ result.road_address_name }}</span>
-            <span>(지번) {{ result.address_name }}</span>
-            </div>
-            <div id="place-phone">{{ result.phone }}</div>
+    <div v-if="LOGIN">
+      <h3>좋아요한 마커 목록</h3>
+      <div id="search-result" v-if="!noResult">
+        <div @click="selectedEvent(result.latitude,result.longitude)" id="frag" class="filter-result-fragment" v-for="result in myMarkers" :key="result.MarkerId">
+          
+          <div id="marker-name">{{ result.name }}</div>
+          <span id="marker-tags" v-for="tag in result.tags.split('#')" :key="tag">{{ tag }}</span>
+          
         </div>
-        <img v-if="noResult" id="NO-RESULT" alt="no-result">
-
-        -->
+      </div>
+      <div id="no-search-result" v-if="noResult"/>
+    </div>
+    <div v-if="!LOGIN">
+      로그인 후 이용하실 수 있습니다
+    </div>
   </div>
 </template>
 
@@ -27,7 +29,7 @@ export default {
           noResult: false,
       }
   },
-  props: ['myMarkers'],
+  props: ['LOGIN','myMarkers'],
   methods: {
     isNoResult: function(myMarkers) {
         if (myMarkers === []) {

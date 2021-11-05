@@ -1,12 +1,12 @@
 <template>
 	<div id="user-profile-container">
 		<span id="role-image">
+			<img class="profile-img" :src="require('../assets/user.png')">
 		</span>
 		<span id="user-properties">
-			<h4>{{ Name }}</h4>
-			<div>Email: {{ Email }}</div>
-			<div>직업: {{ Role }}  받은 좋아요: {{ Likes }}</div>
-			<div style="color: grey">직업은 좋아요 수에 따라 변동됩니다</div>
+			<h3>{{ Name }}</h3>
+			<h6>{{ Email }}</h6>
+			<div>{{ Role }} - 받은 좋아요: {{ Likes }}</div>
 		</span>
 	</div>
 </template>
@@ -30,11 +30,17 @@ export default {
 #role-image {
 	width: 100px;
 	height: 100px;
+	display: flex;
+	justify-content: center;
+	align-content: center;
 }
 
 #user-properties {
 	width: fit-content;
 	height: 100px;
+	display: flex;
+	justify-content: center;
+	align-content: center;
 }
 
 </style>

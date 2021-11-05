@@ -1,19 +1,21 @@
 <template>
   <div id="liked-markers-container">
     <button class="close" @click="menuCloseEvent"></button>
-    <!--
-      무한 스크롤 내부 수정 필요.
-      <div @click="searchSelectedEvent(result.y,result.x)" id="frag" class="search-result-fragment" v-for="result in searchResults" :key="result.id">
-        <div id="place-name">{{ result.place_name }}</div>
-        <div id="place-address">
-          <span style="margin-bottom: 5px;">{{ result.road_address_name }}</span>
-          <span>(지번) {{ result.address_name }}</span>
+    <div v-if="LOGIN">
+      <h3>좋아요한 마커 목록</h3>
+      <div id="search-result" v-if="!noResult">
+        <div @click="selectedEvent(result.latitude,result.longitude)" id="frag" class="filter-result-fragment" v-for="result in likedMarkers" :key="result.MarkerId">
+          
+          <div id="marker-name">{{ result.name }}</div>
+          <span id="marker-tags" v-for="tag in result.tags.split('#')" :key="tag">{{ tag }}</span>
+          
         </div>
-        <div id="place-phone">{{ result.phone }}</div>
       </div>
-      <img v-if="noResult" id="NO-RESULT" alt="no-result">
-
-      -->
+      <div id="no-search-result" v-if="noResult"/>
+    </div>
+    <div v-if="!LOGIN">
+      로그인 후 이용하실 수 있습니다
+    </div>
   </div>
 </template>
 <script>
@@ -23,15 +25,25 @@ export default {
 
     }
   },
-  props: ['likedMarkers'],
+  props: ['LOGIN','likedMarkers'],
+  computed: {
+    noResult: function() {
+      if (this.likedMarkers === []) {
+        return true
+      }
+      else {
+        return false
+      }
+    }
+  },
   methods: {
-
+    selectedEvent(Lat, Lng) {
+        this.$emit('selectedEvent',Lat,Lng)
+    },
     menuCloseEvent: function() {
       this.$emit("menuCloseEvent")
     }
-
-  }
-  
+  } 
 }
 </script>
 <style>

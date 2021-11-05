@@ -1,6 +1,7 @@
 <template>
   <div id="menu-contents">
     <button class="close" @click="menuCloseEvent"></button>
+    <h3> 마커 필터링 </h3>
     <div id="category-name-form" style="margin-top: 40px;">
       <button id="cb-1" class="category-button" @click="categorySelect('fishing',0)"></button>
       <button id="cb-2" class="category-button" @click="categorySelect('camping',1)"></button>
@@ -15,15 +16,15 @@
       <input class="search-input" :value="keyword" placeholder="다음 내용을 포함" @input="keyword = $event.target.value" @keydown.enter="filtering">
       <button class="search-button" @click="filtering"></button>
     </div>
-      <div id="search-result" v-if="!noResult">
-        <div @click="selectedEvent(result.latitude,result.longitude)" id="frag" class="filter-result-fragment" v-for="result in filteredMarkers" :key="result.MarkerId">
-          
-          <div id="marker-name">{{ result.name }}</div>
-          <span id="marker-tags" v-for="tag in result.tags.split('#')" :key="tag">{{ tag }}</span>
-         
-        </div>
+    <div id="search-result" v-if="!noResult">
+      <div @click="selectedEvent(result.latitude,result.longitude)" id="frag" class="filter-result-fragment" v-for="result in filteredMarkers" :key="result.MarkerId">
+        
+        <div id="marker-name">{{ result.name }}</div>
+        <span id="marker-tags" v-for="tag in result.tags.split('#')" :key="tag">{{ tag }}</span>
+        
       </div>
-      <div id="no-search-result" v-if="noResult"/>
+    </div>
+    <div id="no-search-result" v-if="noResult"/>
   </div>
 </template>
 <script>
@@ -118,7 +119,7 @@ export default {
 }
 
 #marker-tags {
-  margin: 0 1px;
+  margin: 0 3px;
   padding: 2px 4px;
   font-size: 10px;
   border: 1px solid rgb(25,75,130);

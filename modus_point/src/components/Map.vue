@@ -19,12 +19,12 @@
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_LIKED">
-        <dot-liked :likedMarkers="likedMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-liked>
+        <dot-liked :LOGIN="LOGIN" :likedMarkers="likedMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-liked>
       </div>
     </transition>
     <transition name="menu">
       <div class="dot-menu-foreground" v-if="DOT_MY">
-        <dot-my :myMarkers="myMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-my>
+        <dot-my :LOGIN="LOGIN" :myMarkers="myMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-my>
       </div>
     </transition>
     <transition name="menu">
@@ -290,8 +290,7 @@ export default {
             console.log('get liked markers failed.')
           }
           else {
-            //TODO - likedmarkers에 저장 List를 받아왔을 때 데이터 형식 확인.
-            //this.likedmarkers = res.data.response
+            this.likedmarkers = res.data.response
           }
         })
       } catch (error) {
@@ -302,7 +301,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          // url: 'http://3.34.252.182:8080/marker/mylikelist',
+          url: 'http://3.34.252.182:8080/marker/mylikecount',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
@@ -313,8 +312,7 @@ export default {
             console.log('get received likes failed.')
           }
           else {
-            //TODO - likedmarkers에 저장 List를 받아왔을 때 데이터 형식 확인.
-            //sessionStorage.setItem("likes", res.data.response)
+            sessionStorage.setItem("likes", res.data.response)
           }
         })
       } catch (error) {
@@ -327,7 +325,7 @@ export default {
           this.myMarkers.push(mk)
       }
     },
-    renderMarker: function(mk,callback) {
+    renderMarker: function(mk) {
       const Lat = mk.latitude
       const Lng = mk.longitude
       const markerImageUrl = (category) => {
@@ -358,14 +356,6 @@ export default {
           this.selected = findSelected(this.markers,Lat,Lng)
           this.SHOW_THIS_MARKER = true
         })
-
-        kakao.maps.event.addListener(marker,'mouseover',() => {
-          marker.image = new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(50, 50), { offset : new kakao.maps.Point(25, 50) })
-        })
-
-        kakao.maps.event.addListener(marker,'mouseout',() => {
-          marker.image = new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(36, 36), { offset : new kakao.maps.Point(18, 36) })
-        })
     
         this.renderedMarkers.push(marker)
       }
@@ -386,14 +376,6 @@ export default {
             this.SHOW_THIS_MARKER = true
           })
 
-          kakao.maps.event.addListener(marker,'mouseover',() => {
-            marker.image = new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(50, 50), { offset : new kakao.maps.Point(25, 50) })
-          })
-
-          kakao.maps.event.addListener(marker,'mouseout',() => {
-            marker.image = new kakao.maps.MarkerImage(markerImageUrl(mk.category.toLowerCase()), new kakao.maps.Size(36, 36), { offset : new kakao.maps.Point(18, 36) })
-          })
-
           this.renderedMarkers.push(marker)
         }
       }
@@ -403,7 +385,6 @@ export default {
             return mk
         }
       }
-      callback()
     },
     saveEvent: function(savedMarker) {
       this.SHOW_SAVE_MAKER = false
@@ -446,9 +427,10 @@ export default {
       this.renderedMarkers.forEach((element) => {
         element.remove()
       })
-      this.renderMarker(this.markers,() => {
-        this.isLoading = false
-      })
+      for (let mk of this.markers) {
+        this.renderMarker(mk)
+      }
+      this.isLoading = false
     }
   }
 }

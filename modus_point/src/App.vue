@@ -8,7 +8,7 @@
         <button class="main-login">로그인</button>
       </div>
       <div id="profile" v-if="LOGIN">
-        <img :src="ProfileButtonSrc">
+        <img class="profile-img" :src="ProfileButtonSrc" @click="SHOW_USER_PROFILE = !SHOW_USER_PROFILE">
       </div>
     </div>
     <div id="map_marker_wrapper">
@@ -141,6 +141,15 @@ input:focus {
   -webkit-box-pack: center;
   align-items: center;
   -webkit-box-align: center;
+}
+
+.profile-img {
+  border-radius: 100%;
+  transition-duration: 0.3s;
+}
+
+.profile-img:hover {
+  background-color: rgb(170, 170, 170);
 }
 
 .main-login {
