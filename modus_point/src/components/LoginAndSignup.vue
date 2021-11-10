@@ -88,7 +88,7 @@ export default {
           else {
             sessionStorage.setItem('apiToken', refresh(res.headers))
 
-            this.loginEvent()
+            this.loginEvent(true)
           }
         })
       } catch (error) {
@@ -108,7 +108,6 @@ export default {
       else {
         this.login_email_error = null
         this.login_password_error = null
-        const refreshCookie = getCookie(this.COOKIE_NAME)
         try {
           await axios({
             method: 'POST',
@@ -117,7 +116,6 @@ export default {
             headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
             withCredentials: true
             }).then((res) => { 
-            //apiToken, refreshToken, FisherDTO
 
             if (res.data.success === false) {
               const statusCode = res.data.error.status
@@ -144,11 +142,10 @@ export default {
                 sessionStorage.setItem("apiToken",res.data.response.apiToken)
               }
 
-              this.loginEvent()
+              this.loginEvent(false)
             }
           })
         } catch (error) {
-          const statusCode = error.response.status
           console.warn("unexpected error occured" + error)
         }
       }

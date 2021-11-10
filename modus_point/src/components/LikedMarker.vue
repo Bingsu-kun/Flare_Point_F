@@ -19,33 +19,57 @@
   </div>
 </template>
 <script>
+import axios from 'axios';
+
 export default {
+  mount() {
+    this.getLikedMarkers()
+  },
   data() {
     return {
-
+      noResult: true,
+      likedMarkers: []
     }
   },
-  props: ['LOGIN','likedMarkers'],
-  computed: {
-    noResult: function() {
-      if (this.likedMarkers === []) {
-        return true
-      }
-      else {
-        return false
-      }
-    }
-  },
+  props: ['LOGIN'],
   methods: {
+    getLikedMarkers: async function() {
+      try {
+        await axios({
+          method: 'GET',
+          url: 'http://3.34.252.182:8080/marker/mylikelist',
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
+          withCredentials: true
+        }).then((res) => {
+
+          if (res.data.success === false) {
+            console.log('get liked markers failed.')
+          }
+          else {
+            this.likedmarkers = res.data.response
+            if (res.data.response !== []) {
+              this.noResult = false
+            }
+          }
+        })
+      } catch (error) {
+        this.logout()
+      }
+    },
     selectedEvent(Lat, Lng) {
         this.$emit('selectedEvent',Lat,Lng)
     },
     menuCloseEvent: function() {
       this.$emit("menuCloseEvent")
+    },
+    logout: function() {
+      this.$emit("logout")
     }
   } 
 }
 </script>
 <style>
-  
+#liked-markers-container {
+  padding: 20px;
+}
 </style>

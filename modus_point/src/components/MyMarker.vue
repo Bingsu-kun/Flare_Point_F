@@ -2,7 +2,7 @@
   <div id="my-markers-container">
     <button class="close" @click="menuCloseEvent"></button>
     <div v-if="LOGIN">
-      <h3>좋아요한 마커 목록</h3>
+      <h3>내 마커 목록</h3>
       <div id="search-result" v-if="!noResult">
         <div @click="selectedEvent(result.latitude,result.longitude)" id="frag" class="filter-result-fragment" v-for="result in myMarkers" :key="result.MarkerId">
           
@@ -20,24 +20,43 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
+
   mounted() {
-      this.isNoResult(this.myMarkers)
+      this.getMyMarkers()
   },
   data() {
       return {
-          noResult: false,
+          noResult: true,
+          myMarkers: [],
       }
   },
-  props: ['LOGIN','myMarkers'],
+  props: ['LOGIN'],
   methods: {
-    isNoResult: function(myMarkers) {
-        if (myMarkers === []) {
-            this.noResult = true
-        }
-        else {
-            this.noResult = false
-        }
+    getMyMarkers: async function() {
+      try {
+        await axios({
+          method: 'GET',
+          url: 'http://3.34.252.182:8080/marker/mymarkers',
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
+          withCredentials: true
+        }).then((res) => {
+
+          if (res.data.success === false) {
+            console.log('get liked markers failed.')
+          }
+          else {
+            this.myMarkers = res.data.response
+            if (res.data.response !== []) {
+              this.noResult = false
+            }
+          }
+        })
+      } catch (error) {
+        this.logout()
+      }
     },
     selectedEvent(Lat, Lng) {
         this.$emit('selectedEvent',Lat,Lng)
@@ -51,5 +70,7 @@ export default {
 </script>
 
 <style>
-
+#my-markers-container {
+  padding: 20px;
+}
 </style>

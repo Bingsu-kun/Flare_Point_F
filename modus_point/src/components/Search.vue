@@ -39,7 +39,6 @@ export default {
         searchResult.keywordSearch( keyword, placeSearched )
       
       function placeSearched(data, status, pagination) {
-        console.log(data)
         if (status === kakao.maps.services.Status.OK) {
 
           for ( let i = 0; i < data.length; i++ ) {
@@ -183,7 +182,7 @@ export default {
   padding: 0px;
   width: 30px;
   height: 30px;
-  border: 2px solid rgb(25,75,130);
+  border: 0;
   border-radius: 100%;
   background-color: white;
   background-image: url("../assets/search.png");
@@ -194,8 +193,7 @@ export default {
   transition-duration: 0.2s;
 }
 .search-button:hover {
-  border: 0;
-  background-color: rgb(25,75,130);
+  background-color: rgb(170,170,170);
 }
 
 .search-result-fragment {

@@ -2,16 +2,6 @@
   <div id="menu-contents">
     <button class="close" @click="menuCloseEvent"></button>
     <h3> 마커 필터링 </h3>
-    <div id="category-name-form" style="margin-top: 40px;">
-      <button id="cb-1" class="category-button" @click="categorySelect('fishing',0)"></button>
-      <button id="cb-2" class="category-button" @click="categorySelect('camping',1)"></button>
-      <button id="cb-3" class="category-button" @click="categorySelect('gathering',2)"></button>
-      <button id="cb-4" class="category-button" @click="categorySelect('store',3)"></button>
-      <button id="cb-5" class="category-button" @click="categorySelect('secret_place',4)"></button>
-    </div>
-    <div>
-      <button id="cb-6" class="category-button" style="width: 100%; background-color: white" @click="categorySelect('',5)">모든 카테고리</button>
-    </div>
     <div id="search-form" style="margin-top: 20px">
       <input class="search-input" :value="keyword" placeholder="다음 내용을 포함" @input="keyword = $event.target.value" @keydown.enter="filtering">
       <button class="search-button" @click="filtering"></button>
@@ -31,7 +21,6 @@
 export default {
   data() {
     return {
-      pickedCategory: '',
       keyword: '',
       noResult: false,
 
@@ -42,42 +31,23 @@ export default {
   props: ['markers'],
   methods: {
     filtering: function() {
-      const keyword = this.keyword
-      const pickedCategory = this.pickedCategory
+      const keywords = this.keyword.split(' ')
       this.filteredMarkers = []
       this.throwMarkers = []
 
       this.markers.forEach(element => {
-        if (pickedCategory === '') {
-          if (keyword === '') {
-            this.filteredMarkers.push(element)
-          }
-          else {
-            if (element.name.indexOf(keyword) !== -1 || element.tags.indexOf(keyword) !== -1) {
-              this.filteredMarkers.push(element)
-            }
-            else {
-              this.throwMarkers.push(element.markerId)
-            }
-          }
-        }
-        else if (element.category.toLowerCase() === pickedCategory){
-          if (keyword === '') {
-            this.filteredMarkers.push(element)
-          }
-          else {
-            if (element.name.indexOf(keyword) !== -1 || element.tags.indexOf(keyword) !== -1) {
-              this.filteredMarkers.push(element)
-            }
-            else {
-              this.throwMarkers.push(element.markerId)
-            }
-          }
+        if (this.keyword === '') {
+          this.filteredMarkers.push(element)
         }
         else {
-          this.throwMarkers.push(element.markerId)
+          this.filteredMarkers.push(element)
+          for (let key of keywords) {
+            if (element.name.indexOf(key) === -1 && element.tags.indexOf(key) === -1){
+              this.throwMarkers.push(element)
+              this.filteredMarkers.pop()
+            }
+          }
         }
-        
       });
       if (this.filteredMarkers.length === 0)
         this.noResult = true
@@ -87,20 +57,6 @@ export default {
     },
     disabling: function() {
       this.$emit('disableMarkers',this.throwMarkers)
-    },
-    categorySelect: function(category,index) {
-      this.pickedCategory = category
-      const buttons = document.querySelectorAll('.category-button')
-      let cnt = 0
-      for (let btn of buttons) {
-        if (cnt === index) {
-          btn.style.backgroundColor = 'white'
-        }
-        else {
-          btn.style.backgroundColor = 'darkgrey'
-        }
-        cnt += 1
-      }
     },
     selectedEvent: function(Lat,Lng) {
       this.$emit('selectedEvent',Lat,Lng)

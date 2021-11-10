@@ -4,26 +4,28 @@
       <a id="menu_logo" href="/">
         <img style="margin-top: 30px;" alt="main_logo" title="플레어포인트" src="./assets/logo.png">
       </a>
-      <div id="profile" v-if="!LOGIN" @click="showLogin">
+      <div id="profile" v-if="!LOGIN" @click="SHOW_LOGIN_FORM = true">
         <button class="main-login">로그인</button>
       </div>
       <div id="profile" v-if="LOGIN">
-        <img class="profile-img" :src="ProfileButtonSrc" @click="SHOW_USER_PROFILE = !SHOW_USER_PROFILE">
+        <img class="profile-img" :src="ProfileButtonSrc" @click="SHOW_USER_PROFILE = true">
       </div>
     </div>
     <div id="map_marker_wrapper">
-      <kakao-map :LOGIN="LOGIN" @showLoginForm="showLogin"></kakao-map>
+      <kakao-map :LOGIN="LOGIN" @showLoginForm="SHOW_LOGIN_FORM = true" @logout="setLogout"></kakao-map>
     </div>
     <transition name="fade">
-      <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="closeLogin">
+      <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="SHOW_LOGIN_FORM = false">
         <div id="login-foreground" v-if="SHOW_LOGIN_FORM" @click.stop>
           <login-and-signup @loginEvent="setLogin"></login-and-signup>
         </div>
       </div>
     </transition>
-    <transition name="menu">
-      <div class="user-profile" v-if="SHOW_USER_PROFILE">
-        <user></user>
+    <transition name="fade">
+      <div id="login-background" v-if="SHOW_USER_PROFILE" @click="SHOW_USER_PROFILE = false">
+        <div id="login-foreground" v-if="SHOW_USER_PROFILE" @click.stop>
+          <user @logout="setLogout"></user>
+        </div>
       </div>
     </transition>
   </div>
@@ -37,14 +39,14 @@ import User from './components/User.vue'
 export default {
   name: 'App',
   mounted() {
-    setTimeout(() => {
-      LoginAndSignup.methods.autoLogin()
-    },500)
+    if (sessionStorage.getItem('apiToken'))
+      this.LOGIN = true
   },
   data() {
     return {
       LOGIN: false,
       SHOW_LOGIN_FORM: false,
+      SHOW_USER_PROFILE: false,
 
       ProfileButtonSrc: require("./assets/user.png")
     }
@@ -59,19 +61,11 @@ export default {
     setLogin: function(isAuto) {
       this.LOGIN = true
       this.SHOW_LOGIN_FORM = false
-      this.KakaoMap.getLikedMarkers()
-      this.KakaoMap.getMyMarkers()
-      if (!isAuto) {
-        this.KakaoMap.reRender()
-      }
     },
 
-    showLogin: function() {
-      this.SHOW_LOGIN_FORM = true
-    },
-
-    closeLogin: function() {
-      this.SHOW_LOGIN_FORM = false
+    setLogout: function() {
+      alert("인증이 만료되었습니다. 다시 로그인 해주세요")
+      this.LOGIN = false
     }
 
   }
@@ -153,8 +147,7 @@ input:focus {
 }
 
 .main-login {
-  width: 80%;
-  min-width: 75px;
+  width: 70px;
   height: 40px;
   border-radius: 10px;
   color: black;
@@ -270,22 +263,6 @@ input:focus {
 
 .dots:hover {
   margin-bottom: 20px;
-}
-
-.user-profile{
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 320px;
-  height: 200px;
-  padding: 20px;
-  border-radius: 0 20px 20px 0;
-  background-color: white;
-  box-shadow: 2rem 0 2rem 5px rgba(100, 100, 100, 0.8);
-  text-align: center;
-  justify-content: center;
-  z-index: 4;
-  overflow: hidden;
 }
 
 .container {
