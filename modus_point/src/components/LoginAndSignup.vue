@@ -1,19 +1,21 @@
 <template>
   <div>
-    <transition name="fade-in">
+    <transition name="just-fade-in">
       <div id="login_input" v-if="isLogin">
-        <img style="margin: 20px 0; height: 50px;" :src="InlineLogo" alt="inline logo">
+        <img style="margin: 20px 0; height: 40px;" :src="InlineLogo" alt="inline logo">
         <p>이메일</p>
         <input type="email" v-model="principal">
         <p style="color: rgb(237,40,40)">{{ login_email_error }}</p>
         <p>패스워드</p>
         <input type="password" v-model="credentials" @keydown.enter="login">
         <p>{{ login_password_error }}</p>
-        <button class="login_button" @click="login">로그인</button>
-        <button class="login_button" @click="isLogin = false">회원가입</button>
+        <div style="display: flex; justify-content: space-around; align-content: center; margin: 20px 0;">
+          <button class="login_button" @click="login">로그인</button>
+          <button class="login_button" @click="isLogin = false">회원가입</button>
+        </div>
       </div>
     </transition>
-    <transition name="fade-in">
+    <transition name="just-fade-in">
       <div id="signup_input" v-if="!isLogin">
         <img class="back" :src="BackButtonSrc" @click="isLogin = true" alt="뒤로가기">
         <div>
@@ -33,7 +35,6 @@
 
 <script>
 import axios from 'axios';
-import getCookie from '../getCookie.js'
 import refresh from '../getRefreshedToken.js'
 
 export default {
@@ -88,7 +89,7 @@ export default {
           else {
             sessionStorage.setItem('apiToken', refresh(res.headers))
 
-            this.loginEvent(true)
+            this.loginEvent()
           }
         })
       } catch (error) {
@@ -126,9 +127,7 @@ export default {
               else if (statusCode === 406)
                 //not_acceptable -> 이메일 형식 불일치
                 this.login_email_error = "이메일 형식에 맞지 않습니다."
-              else if (statusCode === 500)
-                this.login_email_error = "존재하지 않는 아이디입니다."
-
+                
             }
             else{
               if (!sessionStorage.getItem("apiToken")){
@@ -146,7 +145,7 @@ export default {
             }
           })
         } catch (error) {
-          console.warn("unexpected error occured" + error)
+          this.login_email_error = "존재하지 않는 아이디입니다."
         }
       }
       
@@ -284,8 +283,8 @@ export default {
 
     // --------------------------------- util --------------------------------------
 
-    loginEvent: function(isAuto) {
-      this.$emit("loginEvent",isAuto)
+    loginEvent: function() {
+      this.$emit("loginEvent")
     }
   }
 
@@ -297,6 +296,7 @@ export default {
 p {
   text-align: left;
   font-size: 14px;
+  font-family: Pretendard-Regular;
 }
 
 #login_input {
@@ -305,11 +305,12 @@ p {
 }
 
 #login_input input {
-  width: 100%;
+  width: -webkit-fill-available;
   height: 30px;
   font-size: 14px;
+  border: 1px solid #cacaca;
+  border-radius: 10px;
 }
-
 
 #signup_input {
   padding: 30px;
@@ -318,9 +319,11 @@ p {
 
 #signup_input input {
   margin: 10px 0;
-  width: 100%;
+  width: -webkit-fill-available;
   height: 30px;
   font-size: 14px;
+  border: 1px solid #cacaca;
+  border-radius: 10px;
 }
 
 .back {
@@ -338,15 +341,14 @@ p {
 }
 
 .login_button {
-  margin: 50px 30px 0 30px;
   width: 80px;
   height: 40px;
-  border-radius: 5px;
+  border-radius: 10px;
   color: white;
-  background-color: rgb(237, 40, 40);
+  background-color: #F3776B;
   -webkit-transition-duration: 0.4s; /* Safari */
   transition-duration: 0.4s;
-  border: 2px solid rgb(237, 40, 40);
+  border: 2px solid #F3776B;
   text-align: center;
 }
 
@@ -359,12 +361,12 @@ p {
   margin: 20px 0 0 5px;
   width: 60px;
   height: 25px;
-  border-radius: 3px;
+  border-radius: 10px;
   color: white;
-  background-color: rgb(237, 40, 40);
+  background-color: #F3776B;
   -webkit-transition-duration: 0.4s; /* Safari */
   transition-duration: 0.4s;
-  border: 2px solid rgb(237, 40, 40);
+  border: 2px solid #F3776B;
   font-size: 0.6rem;
 }
 

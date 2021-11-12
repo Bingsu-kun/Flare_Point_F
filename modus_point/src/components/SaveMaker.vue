@@ -1,5 +1,6 @@
 <template>
   <div id="menu-contents">
+    <div id="menu-title">마커생성</div>
     <div id="maker-body">
       <input class="marker-input" placeholder="마커의 이름을 적어주세요" :value="markerName" @input="markerName = $event.target.value">
       <textarea id="description" :value="description" @input="description = $event.target.value" @keyup="checklength" class="marker-input" placeholder="마커를 설명해 주세요 (최대 100자)" style="height: 200px; resize: none; word-break: break-all; text-overflow: clip;"></textarea>
@@ -28,7 +29,7 @@ export default {
       savedMarker: ''
     }
   },
-  props: ['latitude', 'longitude'],
+  props: ['latitude', 'longitude', 'place_addr'],
   methods: {
     saveEvent: function() {
       this.$emit('saveEvent', this.savedMarker)
@@ -50,6 +51,7 @@ export default {
       let name = this.markerName
       const latitude = this.latitude
       const longitude = this.longitude
+      const place_addr = this.place_addr
       const isPrivate = this.isPrivate
       const tagString = this.tagString
       let description = this.description
@@ -63,7 +65,7 @@ export default {
           method: 'POST',
           url: 'http://3.34.252.182:8080/marker/create',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-          data: { name: name, latitude: latitude, longitude: longitude, isPrivate: isPrivate, tagString: tagString, description: description },
+          data: { name: name, latitude: latitude, longitude: longitude, place_addr: place_addr, isPrivate: isPrivate, tagString: tagString, description: description },
           withCredentials: true
         }).then((res) => {
           if (res.data.success === false) {

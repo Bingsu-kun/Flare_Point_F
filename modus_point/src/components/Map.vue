@@ -1,58 +1,30 @@
 <template>
   <div id="map" @contextmenu="initMarkerButtonListener">
     <loading :active="isLoading" :can-cancel="true" :color="loading_color" :is-full-page="fullscreen"/>
-    <div id="dot-menu-background" v-if="SHOW_SAVE_MAKER" @click="SHOW_SAVE_MAKER = !SHOW_SAVE_MAKER"/>
+    <div id="menu-background" v-if="SHOW_SAVE_MAKER" @click="SHOW_SAVE_MAKER = !SHOW_SAVE_MAKER"/>
     <transition name="menu">
-      <div class="dot-menu-foreground" v-if="SHOW_SAVE_MAKER">
-        <save-maker :latitude="centerLat" :longitude="centerLng" @saveEvent="saveEvent"></save-maker>
-      </div>
-    </transition>
-    <transition name="menu">
-      <div class="dot-menu-foreground" v-if="DOT_FILTER">
-        <dot-filter :markers="markers" @disableMarkers="disableMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="enableMarkers(menuCloseEvent)"></dot-filter>
+      <div class="menu-foreground" v-if="SHOW_SAVE_MAKER">
+        <save-maker :latitude="centerLat" :longitude="centerLng" :place_addr="place_addr" @saveEvent="saveEvent"></save-maker>
       </div>
     </transition>
     <transition name="menu">
-      <div class="dot-menu-foreground" v-if="DOT_SEARCH">
-        <dot-search @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-search>
+      <div class="menu-foreground" v-if="SHOW_FILTER">
+        <menu-filter :markers="markers" :allMarkersLikes="allMarkersLikes" @disableMarkers="disableMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="enableMarkers(menuCloseEvent)"></menu-filter>
       </div>
     </transition>
     <transition name="menu">
-      <div class="dot-menu-foreground" v-if="DOT_LIKED">
-        <dot-liked :LOGIN="LOGIN" @logout="logout" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-liked>
+      <div class="menu-foreground" v-if="SHOW_SEARCH">
+        <menu-search @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></menu-search>
       </div>
     </transition>
     <transition name="menu">
-      <div class="dot-menu-foreground" v-if="DOT_MY">
-        <dot-my :LOGIN="LOGIN" :markers="markers" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></dot-my>
+      <div class="menu-foreground" v-if="SHOW_MY">
+        <menu-my :LOGIN="LOGIN" @logout="logout" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></menu-my>
       </div>
     </transition>
     <transition name="menu">
-      <div class="dot-menu-foreground" v-if="SHOW_THIS_MARKER">
-        <marker-overlay :selected="selected" @deleteEvent="deleteEvent" @showLoginForm="showLoginForm" @menuCloseEvent="menuCloseEvent"></marker-overlay>
-      </div>
-    </transition>
-    <div id="dot-menu" class="dots" @click="DOTMENU = !DOTMENU">
-      <img :src=SidebarButtonSrc alt="dot">
-    </div>
-    <transition name="dot-search">
-      <div id="dot-search" class="dots" v-if="DOTMENU" @click="DOT_SEARCH = !DOT_SEARCH; DOT_FILTER = false; DOT_LIKED = false; DOT_MY = false; DOTMENU = false">
-        <img :src=SearchButtonSrc alt="dotsearch">
-      </div>
-    </transition>
-    <transition name="dot-filter">
-      <div id="dot-filter" class="dots" v-if="DOTMENU" @click="DOT_FILTER = !DOT_FILTER; DOT_SEARCH = false; DOT_LIKED = false; DOT_MY = false; DOTMENU = false">
-        <img :src=FilterButtonOnSrc alt="dotfilter">
-      </div>
-    </transition>
-    <transition name="dot-like">
-      <div id="dot-like" class="dots" v-if="DOTMENU" @click="DOT_LIKED = !DOT_LIKED; DOT_SEARCH = false; DOT_FILTER = false; DOT_MY = false; DOTMENU = false">
-        <img :src=LikeButtonOnSrc alt="dotlike">
-      </div>
-    </transition>
-    <transition name="dot-my">
-      <div id="dot-my" class="dots" v-if="DOTMENU" @click="DOT_MY = !DOT_MY; DOT_SEARCH = false; DOT_FILTER = false; DOT_LIKED = false; DOTMENU = false">
-        <img :src=MyMkButtonSrc alt="dotmarker">
+      <div class="menu-foreground" v-if="SHOW_THIS_MARKER">
+        <marker-overlay :selected="selected" @deleteEvent="deleteEvent" @showLoginForm="showLoginForm" @menuCloseEvent="SHOW_THIS_MARKER = false"></marker-overlay>
       </div>
     </transition>
   </div>
@@ -64,10 +36,9 @@ import 'vue-loading-overlay/dist/vue-loading.css';
 import axios from 'axios';
 
 import SaveMaker from './SaveMaker.vue'
-import DotFilter from './Filter.vue'
-import DotSearch from './Search.vue'
-import DotLiked from './LikedMarker.vue'
-import DotMy from './MyMarker.vue'
+import MenuFilter from './Filter.vue'
+import MenuSearch from './Search.vue'
+import MenuMy from './LikedMarker.vue'
 import MarkerOverlay from './MarkerOverlay.vue'
 
 export default {
@@ -114,6 +85,7 @@ export default {
       map: null,
       markers: [],
       renderedMarkers: [],
+      allMarkersLikes: [],
       selected: null,
       
       isLoading: false,
@@ -122,30 +94,21 @@ export default {
 
       centerLat: '',
       centerLng: '',
+      place_addr: '',
       
-      DOTMENU: false,
-      DOT_FILTER: false,
-      DOT_SEARCH: false,
-      DOT_LIKED: false,
-      DOT_MY: false,
       SHOW_SAVE_MAKER: false,
       SHOW_THIS_MARKER: false,
 
-      FilterButtonOnSrc: require("../assets/filter_on.png"),
-      LikeButtonOnSrc: require("../assets/flare_on.png"),
-      SidebarButtonSrc: require("../assets/sidebar.png"),
-      SearchButtonSrc: require("../assets/search.png"),
-      MyMkButtonSrc: require("../assets/user_on.png")
+      SidebarButtonSrc: require("../assets/sidebar.png")
     }
   },
-  props: ['LOGIN'],
+  props: ['LOGIN','SHOW_FILTER','SHOW_SEARCH','SHOW_MY'],
   components: {
     Loading,
     SaveMaker,
-    DotFilter,
-    DotSearch,
-    DotLiked,
-    DotMy,
+    MenuFilter,
+    MenuSearch,
+    MenuMy,
     MarkerOverlay
   },
   methods: {
@@ -225,6 +188,14 @@ export default {
       const center = this.map.getCenter()
       this.centerLat = center.Ma
       this.centerLng = center.La
+      const geocoder = new kakao.maps.services.Geocoder();
+      const coord = new kakao.maps.LatLng(this.centerLat, this.centerLng);
+      const callback = (result, status) => {
+        if (status === kakao.maps.services.Status.OK) {
+          this.place_addr = result[0].address.address_name
+        }
+      }
+      geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
       setTimeout(() => {
         button.addEventListener("click",() => {
           maker.remove()
@@ -232,10 +203,7 @@ export default {
             this.showLoginForm()
           }
           else {
-            this.DOT_FILTER = false
-            this.DOT_SEARCH = false
-            this.DOT_LIKED = false
-            this.DOT_MY = false
+            this.menuCloseEvent()
             this.SHOW_SAVE_MAKER = true
             
             this.map.setLevel(1,{ animate: true })
@@ -268,7 +236,6 @@ export default {
       }
     },
     getAllMarkersLikes: async function() {
-      let allMarkersLikes = []
       let markerIds = []
       for (let i = 0; i < this.markers.length; i++) {
         markerIds.push(this.markers[i])
@@ -287,7 +254,13 @@ export default {
             console.log('marker loading failed by server issue.')
           }
           else {
-            this.allMarkersLikes = res.data.response
+            const like = (markerId, like) => {
+              this.markerId = markerId,
+              this.like = like
+            }
+            for (let i = 0; i < markerIds.length; i++) {
+              this.allMarkersLikes.push(new like(markerIds[i],res.data.response[i]))
+            }
           }
 
         })
@@ -296,7 +269,7 @@ export default {
       } finally {
         if (this.markers !== []) {
           for (let i = 0; i < this.markers.length; i++){
-                this.renderMarker(this.markers[i],allMarkersLikes[i])
+                this.renderMarker(this.markers[i],this.allMarkersLikes[i].like)
           }
         }
       }
@@ -330,11 +303,7 @@ export default {
         kakao.maps.event.addListener(marker,'click',() => {
           this.map.panTo(new kakao.maps.LatLng(Lat,Lng))
           this.selected = findSelected(this.markers,Lat,Lng)
-          this.DOT_FILTER = false
-          this.DOT_SEARCH = false
-          this.DOT_LIKED = false
-          this.DOT_MY = false
-          this.SHOW_THIS_MARKER = true
+          takeALook
         })
     
         this.renderedMarkers.push(marker)
@@ -353,11 +322,7 @@ export default {
           kakao.maps.event.addListener(marker,'click',() => {
             this.map.panTo(new kakao.maps.LatLng(Lat,Lng))
             this.selected = findSelected(this.markers,Lat,Lng)
-            this.DOT_FILTER = false
-            this.DOT_SEARCH = false
-            this.DOT_LIKED = false
-            this.DOT_MY = false
-            this.SHOW_THIS_MARKER = true
+            takeALook
           })
 
           this.renderedMarkers.push(marker)
@@ -368,6 +333,10 @@ export default {
           if (mk.latitude === Lat && mk.longitude === Lng)
             return mk
         }
+      }
+      const takeALook = () => {
+        this.menuCloseEvent()
+        this.SHOW_THIS_MARKER = true
       }
     },
     saveEvent: function(savedMarker) {
@@ -392,11 +361,7 @@ export default {
       this.map.panTo(new kakao.maps.LatLng(Lat,Lng))
     },
     menuCloseEvent: function() {
-      this.DOT_FILTER = false
-      this.DOT_SEARCH = false
-      this.DOT_LIKED = false
-      this.DOT_MY = false
-      this.SHOW_THIS_MARKER = false
+      this.$emit("menuCloseEvent")
     },
     disableMarkers: function(markers) {
       this.renderedMarkers.forEach((element) => {
@@ -426,8 +391,8 @@ export default {
       }
       this.isLoading = false
     },
-    logout: function() {
-      this.$emit('logout')
+    logout: function(cause) {
+      this.$emit('logout',cause)
     }
   }
 }
@@ -458,7 +423,7 @@ export default {
   height: fit-content;
 }
 
-#dot-menu-background {
+#menu-background {
   width: 100%;
   height: 100%;
   position: fixed;
@@ -467,14 +432,11 @@ export default {
   z-index: 3;
 }
 
-#menu-contents {
-  padding: 0 20px;
-}
-#menu-contents div {
-  margin: 10px 0;
+#menu-container {
+  height: -webkit-fill-available;
 }
 
-.dot-menu-foreground {
+.menu-foreground {
   position: absolute;
   top: 0;
   left: 0;
@@ -484,10 +446,10 @@ export default {
   height: 100%;
   border-radius: 0 20px 20px 0;
   background-color: white;
-  box-shadow: 2rem 0 2rem 5px rgba(100, 100, 100, 0.8);
+  box-shadow: 1px 0 20px 5px #F3776B;
   text-align: center;
   justify-content: center;
-  z-index: 4;
+  z-index: 6;
   overflow: hidden;
 }
 
@@ -495,15 +457,15 @@ export default {
   width: 100%;
   height: 25px;
   border-radius: 20px;
-  color: white;
-  background-color: rgb(237, 40, 40);
-  border: 2px solid rgb(237, 40, 40);
+  color: black;
+  background-color: white;
+  border: 2px solid #F3776B;
   overflow: hidden;
 }
 
 .marker-button:hover {
-  background-color: rgb(255,255,255);
-  color: black;
+  background-color: #F3776B;
+  color: white;
 }
 
 .make-marker-enter-active {
@@ -512,22 +474,18 @@ export default {
 }
 
 .menu-enter-active {
-  -webkit-animation: menu-in 0.4s ease-out;
-  animation: menu-in 0.4s ease-out;
+  -webkit-animation: menu-in 0.3s ease-out;
+  animation: menu-in 0.3s ease-out;
 }
 .menu-leave-active {
-  -webkit-animation: menu-out 0.4s ease-in;
-  animation: menu-out 0.4s ease-in;
+  -webkit-animation: menu-out 0.3s ease-in;
+  animation: menu-out 0.3s ease-in;
 }
 
 @-webkit-keyframes menu-in {
   0% {
     -webkit-transform: translateX(-100%);
             transform: translateX(-100%);
-  }
-  95% {
-    -webkit-transform: translateX(3%);
-            transform: translateX(3%);
   }
   100% {
     -webkit-transform: translateX(0%);
@@ -539,10 +497,6 @@ export default {
     -webkit-transform: translateX(-100%);
             transform: translateX(-100%);
   }
-  95% {
-    -webkit-transform: translateX(3%);
-            transform: translateX(3%);
-  }
   100% {
     -webkit-transform: translateX(0%);
             transform: translateX(0%);
@@ -553,10 +507,6 @@ export default {
     -webkit-transform: translateX(0%);
             transform: translateX(0%);
   }
-  5% {
-    -webkit-transform: translateX(3%);
-            transform: translateX(3%);
-  }
   100% {
     -webkit-transform: translateX(-100%);
             transform: translateX(-100%);
@@ -566,10 +516,6 @@ export default {
   0% {
     -webkit-transform: translateX(0%);
             transform: translateX(0%);
-  }
-  5% {
-    -webkit-transform: translateX(3%);
-            transform: translateX(3%);
   }
   100% {
     -webkit-transform: translateX(-100%);

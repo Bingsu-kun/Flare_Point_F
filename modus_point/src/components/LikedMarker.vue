@@ -1,5 +1,6 @@
 <template>
   <div id="liked-markers-container">
+    <div id="menu-title">마이마커</div>
     <button class="close" @click="menuCloseEvent"></button>
     <div v-if="LOGIN">
       <h3>좋아요한 마커 목록</h3>
@@ -53,7 +54,7 @@ export default {
           }
         })
       } catch (error) {
-        this.logout()
+        this.logout("인증이 만료되었습니다. ")
       }
     },
     selectedEvent(Lat, Lng) {
@@ -62,8 +63,8 @@ export default {
     menuCloseEvent: function() {
       this.$emit("menuCloseEvent")
     },
-    logout: function() {
-      this.$emit("logout")
+    logout: function(cause) {
+      this.$emit("logout",cause)
     }
   } 
 }

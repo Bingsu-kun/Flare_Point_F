@@ -1,19 +1,20 @@
 <template>
-  <div id="search-container">
-    <h3> 지역 검색 </h3>
+  <div id="menu-container">
     <button class="close" @click="menuCloseEvent"></button>
+    <div id="menu-title">위치 찾기</div>
     <div id="search-form">
-      <input class="search-input" :value="keyword" @input="keyword = $event.target.value" placeholder="검색어를 입력해 주세요." @keydown.enter="search">
+      <input class="search-input" :value="keyword" @input="keyword = $event.target.value" placeholder="장소, 주소, 지명 검색" @keydown.enter="search">
       <button class="search-button" @click="search"></button>
     </div>
     <div id="search-result" v-if="!noResult">
       <div @click="selectedEvent(result.y,result.x)" id="frag" class="search-result-fragment" v-for="result in searchResults" :key="result.id" >
         <div id="place-name">{{ result.place_name }}</div>
         <div id="place-address">
-          <span style="margin-bottom: 5px;">{{ result.road_address_name }}</span>
-          <span>(지번) {{ result.address_name }}</span>
+          <div>{{ result.road_address_name }}</div>
+          <div>(지번) {{ result.address_name }}</div>
         </div>
         <div id="place-phone">{{ result.phone }}</div>
+        <div id="divider"/>
       </div>
     </div>
     <div id="no-search-result" v-if="noResult"/>
@@ -33,10 +34,14 @@ export default {
       const searchResult = new kakao.maps.services.Places()
       const keyword = this.keyword
       this.searchResults = []
-      let noResult = this.noResult
       let result = this.searchResults
-      if (keyword !== '' && keyword.length > 1)
+      if (keyword !== '' && keyword.length > 1){
         searchResult.keywordSearch( keyword, placeSearched )
+      }
+      setTimeout(() => {
+        if (this.searchResults.length === 0)
+          this.noResult = true
+      },2000)
       
       function placeSearched(data, status, pagination) {
         if (status === kakao.maps.services.Status.OK) {
@@ -62,11 +67,6 @@ export default {
               }
             })
           }, observerOption)
-        
-        } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
-
-          //검색 결과 없을 때
-          noResult = true
 
         } else if (status === kakao.maps.services.Status.ERROR) {
 
@@ -100,6 +100,14 @@ export default {
 
 <style>
 
+#menu-title {
+  font-family: Pretendard-Black;
+  margin-top: 20px;
+  padding: 10px 0;
+  width: inherit;
+  height: fit-content;
+}
+
 .close {
   position: absolute;
   top: 15px;
@@ -120,20 +128,17 @@ export default {
   height: 25px;
 }
 
-#search-container {
-  padding: 0 20px;
-  height: 100%;
-}
-
 #search-form {
-  margin: 20px 0;
+  margin: 20px;
+  padding: 0 10px 0 15px ;
+  border: 1px solid #CACACA;
+  border-radius: 10px;
   display: flex;
-  justify-content: space-around;
   align-items: center;
 }
 
 #search-result {
-  height: 80%;
+  height: -webkit-fill-available;
   text-align: left;
   overflow: overlay;
   overflow-x: hidden;
@@ -149,42 +154,44 @@ export default {
 }
 
 #place-name {
-  font-size: 20px;
+  margin: 3px 0;
+  font-size: 16px;
+  font-family: Pretendard-Bold;
 }
 
 #place-address {
-  color:gray;
-  font-size: 12px;
+  margin: 2px 0;
+  font-size: 13px;
 }
-#place-address span {
-  margin-right: 10px;
-}
-
 #place-phone {
-  color: rgb(25,75,130);
-  font-size: 12px;
+  margin: 2px 0;
+  margin-bottom: 10px;
+  font-size: 11px;
+}
+#divider {
+  position: relative;
+  left: 0;
+  width: -webkit-fill-available;
+  height: 0.2px;
+  background-color: #CACACA;
 }
 
 .search-input {
-  padding: 0 5px;
-  width: 80%;
-  height: 30px;
-  border: 2px solid grey;
-  border-radius: 5px;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
+  width: -webkit-fill-available;
+  height: 40px;
+  border: 0;
 }
 .search-input:focus {
-  border: 2px solid rgb(25,75,130);
+  font-family: Pretendard-Bold;
 }
 
 .search-button {
-  padding: 0px;
-  width: 30px;
-  height: 30px;
+  margin: 5px;
+  width: 15px;
+  height: 15px;
   border: 0;
   border-radius: 100%;
-  background-color: white;
+  background-color: transparent;
   background-image: url("../assets/search.png");
   background-repeat: no-repeat;
   background-size: cover;
@@ -193,18 +200,21 @@ export default {
   transition-duration: 0.2s;
 }
 .search-button:hover {
-  background-color: rgb(170,170,170);
+  background-color: rgb(170, 170, 170);
+  cursor: pointer;
+}
+.search-button:focus {
+  border: 0
 }
 
 .search-result-fragment {
-  margin: 5px 0;
-  padding: 10px;
+  padding: 10px 20px 0 20px;
   width: inherit;
   height: fit-content;
   -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
 }
 .search-result-fragment:hover {
-  background-color: rgba(40,40,40,0.5);
+  background-color: rgba(223, 160, 157, 0.2);
 }
 </style>

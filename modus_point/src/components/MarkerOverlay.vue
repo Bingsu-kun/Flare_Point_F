@@ -52,7 +52,10 @@ export default {
       confirmDel: false,
       likedMarkers: [],
       myMarkers: [],
-      likeCount: 0
+      likeCount: 0,
+
+      starOn: require("../assets/star_on.png"),
+      starOff: require("../assets/star_off.png")
     }
   },
   props:['selected'],
@@ -90,7 +93,7 @@ export default {
         }).then((res) => {
 
           if (res.data.success === false) {
-            console.log('get liked markers failed.')
+            console.log('get my markers failed.')
           }
           else {
             this.myMarkers = res.data.response
@@ -288,7 +291,7 @@ export default {
 .marker-overlay-like {
   width: 150px;
   height: 50px;
-  background-image: url('../assets/flare_on.png');
+  background-image: url('../assets/star_on.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

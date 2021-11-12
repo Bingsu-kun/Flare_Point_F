@@ -1,18 +1,21 @@
 <template>
   <div class="container" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
     <div id="menu_bar" >
-      <a id="menu_logo" href="/">
-        <img style="margin-top: 30px;" alt="main_logo" title="플레어포인트" src="./assets/logo.png">
-      </a>
-      <div id="profile" v-if="!LOGIN" @click="SHOW_LOGIN_FORM = true">
-        <button class="main-login">로그인</button>
+      <div id="menus" style="padding: 0 20px; justify-content: end;">
+        <button class="menu-buttons" @click="SHOW_FILTER = !SHOW_FILTER; SHOW_SEARCH = false; SHOW_MY = false">테마별마커</button>
+        <button class="menu-buttons" @click="SHOW_SEARCH = !SHOW_SEARCH; SHOW_FILTER = false; SHOW_MY = false">위치찾기</button>
       </div>
-      <div id="profile" v-if="LOGIN">
-        <img class="profile-img" :src="ProfileButtonSrc" @click="SHOW_USER_PROFILE = true">
+      <div id="menus">
+        <img class="menu_logo" alt="main_logo" title="플레어포인트" src="./assets/logo.png">
+      </div>
+      <div id="menus" style="padding: 0 20px; justify-content: start;">
+        <button class="menu-buttons" @click="SHOW_MY = !SHOW_MY; SHOW_FILTER = false; SHOW_SEARCH = false">마이마커</button>
+        <button class="menu-buttons" v-if="!LOGIN" @click="SHOW_LOGIN_FORM = true">로그인</button>
+        <button class="menu-buttons" v-if="LOGIN" @click="SHOW_USER_PROFILE = true">프로필</button>
       </div>
     </div>
     <div id="map_marker_wrapper">
-      <kakao-map :LOGIN="LOGIN" @showLoginForm="SHOW_LOGIN_FORM = true" @logout="setLogout"></kakao-map>
+      <kakao-map :LOGIN="LOGIN" :SHOW_FILTER="SHOW_FILTER" :SHOW_MY="SHOW_MY" :SHOW_SEARCH="SHOW_SEARCH" @menuCloseEvent="menuCloseEvent" @showLoginForm="SHOW_LOGIN_FORM = true" @logout="setLogout"></kakao-map>
     </div>
     <transition name="fade">
       <div id="login-background" v-if="SHOW_LOGIN_FORM" @click="SHOW_LOGIN_FORM = false">
@@ -47,8 +50,9 @@ export default {
       LOGIN: false,
       SHOW_LOGIN_FORM: false,
       SHOW_USER_PROFILE: false,
-
-      ProfileButtonSrc: require("./assets/user.png")
+      SHOW_FILTER: false,
+      SHOW_SEARCH: false,
+      SHOW_MY: false,
     }
   },
   components: {
@@ -58,16 +62,21 @@ export default {
   },
   methods: {
 
-    setLogin: function(isAuto) {
+    setLogin: function() {
       this.LOGIN = true
       this.SHOW_LOGIN_FORM = false
     },
-
-    setLogout: function() {
-      alert("인증이 만료되었습니다. 다시 로그인 해주세요")
+    setLogout: function(cause) {
+      alert(`${cause}로그아웃 되었습니다.`)
       this.LOGIN = false
+    },
+    menuCloseEvent: function() {
+      this.SHOW_FILTER = false
+      this.SHOW_SEARCH = false
+      this.SHOW_MY = false
+      this.SHOW_LOGIN_FORM = false
+      this.SHOW_USER_PROFILE = false
     }
-
   }
 }
 </script>
@@ -104,75 +113,52 @@ input:focus {
 }
 
 #menu_bar {
-  padding: 25px 0px;
-  width: 80px;
-  background: rgb(25,75,130);
-  box-shadow: 2rem 0 2rem 5px rgba(100, 100, 100, 0.8);
+  padding: 0 20px;
+  height: 60px;
+  background: white;
   position: fixed;
   top: 0;
   left: 0;
-  bottom: 0;
+  right: 0;
   z-index: 5;
   text-align: center;
+  display: grid;
+  grid-template-columns: 5fr 1fr 5fr;
+}
+
+#menus {
   display: flex;
   justify-content: center;
-}
-
-#menu_bar img {
-  min-width: 50px;
-  width: 65%;
-}
-
-#menu_logo {
-  height: fit-content;
-}
-
-#profile {
-  position: absolute;
-  bottom: 5%;
-  display: flex;
-  justify-content: center;
-  -webkit-box-pack: center;
+  justify-items: center;
+  align-content: center;
   align-items: center;
-  -webkit-box-align: center;
 }
 
-.profile-img {
-  border-radius: 100%;
-  transition-duration: 0.3s;
-}
-
-.profile-img:hover {
-  background-color: rgb(170, 170, 170);
-}
-
-.main-login {
-  width: 70px;
-  height: 40px;
-  border-radius: 10px;
-  color: black;
+.menu-buttons {
+  margin: 0 20px;
+  height: 60px;
+  border: 0;
   background-color: white;
-  -webkit-transition-duration: 0.4s; /* Safari */
-  transition-duration: 0.4s;
-  border: 0px;
-  box-shadow: 0 5px 5px 0 rgba(0,0,0,0.5);
-  text-align: center;
-  font-size: 100%;
+  color: black;
+  font-family: Pretendard-Bold;
+  transition-duration: 0.2s;
 }
 
-.main-login:hover {
-  background-color: rgb(237,40,40);
-  color: white;
-  box-shadow: 0 5px 5px 3px (0,0,0,0.5);
+.menu-buttons:hover {
+  cursor: pointer;
+}
+
+.menu_logo {
+  height: 40px;
 }
 
 #map_marker_wrapper {
   position: fixed;
+  left: 0;
   right: 0;
-  top: 0;
   bottom: 0;
-  width: calc(100% - 80px);
-  height: 100%;
+  width: 100%;
+  height: calc(100% - 60px);
   z-index: 1;
 }
 
@@ -193,76 +179,14 @@ input:focus {
 }
 
 #login-foreground {
-  width: 450px;
-  height: 550px;
+  min-width: 300px;
+  width: 35%;
+  height: 400px;
   border-radius: 20px;
   background-color: white;
-  box-shadow: 0 1rem 1rem 5px rgba(0,0,0,0.5);
+  box-shadow: 0 1px 10px 1px #F3776B;
   text-align: center;
   z-index: 8;
-}
-#login-foreground input {
-  border: 0 0 2px 0 soled rgba(100, 50, 216, 0.7);
-}
-
-#dot-menu {
-  position: fixed;
-  right: 5%;
-  bottom: 5%;
-  background: rgb(25,75,130);
-  z-index: 3;
-}
-
-#dot-search {
-  position: fixed;
-  right: 5%;
-  bottom: 53%;
-  background: white;
-  z-index: 2;
-}
-
-#dot-filter {
-  position: fixed;
-  right: 5%;
-  bottom: 41%;
-  background: white;
-  z-index: 2;
-}
-
-#dot-like {
-  position: fixed;
-  right: 5%;
-  bottom: 29%;
-  background: white;
-  z-index: 2;
-}
-
-#dot-my {
-  position: fixed;
-  right: 5%;
-  bottom: 17%;
-  background: white;
-  z-index: 2;
-}
-
-.dots {
-  border-radius: 100%;
-  width: 80px;
-  height: 80px;
-  box-shadow: 0 0 1rem 5px rgba(100, 100, 100, 0.8);
-  -webkit-transition-duration: 0.3s;
-  transition-duration: 0.3s;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.dots img {
-  width: 50%;
-}
-
-.dots:hover {
-  margin-bottom: 20px;
 }
 
 .container {
@@ -271,52 +195,25 @@ input:focus {
   font-size: 2rem;
 }
 
-.fade-in-enter-active {
-  -webkit-animation: fade-in 0.4s ease-out;
-  animation: fade-in 0.4s ease-out;
+.just-fade-in-enter-active {
+  -webkit-animation: fade-in 0.2s ease;
+  animation: fade-in 0.2s ease;
 }
 
 .fade-enter-active {
-  -webkit-animation: fade-in 0.4s ease-out;
-  animation: fade-in 0.4s ease-out;
+  -webkit-animation: fade-in 0.2s ease-out;
+  animation: fade-in 0.2s ease-out;
 }
 
 .fade-leave-active {
-  -webkit-animation: fade-out 0.4s ease-out;
-  animation: fade-out 0.4s ease-out;
+  -webkit-animation: fade-out 0.2s ease-out;
+  animation: fade-out 0.2s ease-out;
 }
 
-.dot-search-enter-active {
-  -webkit-animation: dot-search-in 0.4s ease-out;
-  animation: dot-search-in 0.4s ease-out;
-}
-.dot-search-leave-active {
-  -webkit-animation: dot-search-out 0.4s ease-out;
-  animation: dot-search-out 0.4s ease-out;
-}
-.dot-filter-enter-active {
-  -webkit-animation: dot-filter-in 0.4s ease-out;
-  animation: dot-filter-in 0.4s ease-out;
-}
-.dot-filter-leave-active {
-  -webkit-animation: dot-filter-out 0.4s ease-out;
-  animation: dot-filter-out 0.4s ease-out;
-}
-.dot-like-enter-active {
-  -webkit-animation: dot-like-in 0.4s ease-out;
-  animation: dot-like-in 0.4s ease-out;
-}
-.dot-like-leave-active {
-  -webkit-animation: dot-like-out 0.4s ease-out;
-  animation: dot-like-out 0.4s ease-out;
-}
-.dot-my-enter-active {
-  -webkit-animation: dot-my-in 0.4s ease-out;
-  animation: dot-my-in 0.4s ease-out;
-}
-.dot-my-leave-active {
-  -webkit-animation: dot-my-out 0.4s ease-out;
-  animation: dot-my-out 0.4s ease-out;
+@media screen and (max-width: 768px){
+  .menu-buttons {
+    font-size: 14px;
+  }
 }
 
 @-webkit-keyframes fade-in {
@@ -371,139 +268,23 @@ input:focus {
     height: 25px;
   }
 }
-@-webkit-keyframes dot-search-in {
-  0% {
-    bottom: 5%;
-  }
-  100% {
-    bottom: 53%;
-  }
-}
-@keyframes dot-search-in {
-  0% {
-    bottom: 5%;
-  }
-  100% {
-    bottom: 53%;
-  }
-}
-@-webkit-keyframes dot-filter-in {
-  0% {
-    bottom: 5%;
-  }
-  100% {
-    bottom: 41%;
-  }
-}
-@keyframes dot-filter-in {
-  0% {
-    bottom: 5%;
-  }
-  100% {
-    bottom: 41%;
-  }
-}
-@-webkit-keyframes dot-like-in {
-  0% {
-    bottom: 5%;
-  }
-  100% {
-    bottom: 29%;
-  }
-}
-@keyframes dot-like-in {
-  0% {
-    bottom: 5%;
-  }
-  100% {
-    bottom: 29%;
-  }
-}
-@-webkit-keyframes dot-my-in {
-  0% {
-    bottom: 5%;
-  }
-  100% {
-    bottom: 17%;
-  }
-}
-@keyframes dot-my-in {
-  0% {
-    bottom: 5%;
-  }
-  100% {
-    bottom: 17%;
-  }
-}
-@-webkit-keyframes dot-search-out {
-  0% {
-    bottom: 53%;
-  }
-  100% {
-    bottom: 5%;
-  }
-}
-@keyframes dot-search-out {
-  0% {
-    bottom: 53%;
-  }
-  100% {
-    bottom: 5%;
-  }
-}
-@-webkit-keyframes dot-filter-out {
-  0% {
-    bottom: 41%;
-  }
-  100% {
-    bottom: 5%;
-  }
-}
-@keyframes dot-filter-out {
-  0% {
-    bottom: 41%;
-  }
-  100% {
-    bottom: 5%;
-  }
-}
-@-webkit-keyframes dot-like-out {
-  0% {
-    bottom: 29%;
-  }
-  100% {
-    bottom: 5%;
-  }
-}
-@keyframes dot-like-out {
-  0% {
-    bottom: 29%;
-  }
-  100% {
-    bottom: 5%;
-  }
-}
-@-webkit-keyframes dot-my-out {
-  0% {
-    bottom: 17%;
-  }
-  100% {
-    bottom: 5%;
-  }
-}
-@keyframes dot-my-out {
-  0% {
-    bottom: 17%;
-  }
-  100% {
-    bottom: 5%;
-  }
-}
 
 @font-face {
     font-family: 'Pretendard-Regular';
     src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
     font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Pretendard-Bold';
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Pretendard-Black';
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Black.woff') format('woff');
+    font-weight: 900;
     font-style: normal;
 }
 
