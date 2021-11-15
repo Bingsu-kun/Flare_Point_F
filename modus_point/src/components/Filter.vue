@@ -60,7 +60,6 @@ export default {
 
       trendingTags: [],
       filteredMarkers: [],
-      likes: [],
       likedMarkerIds: [],
       throwMarkers: [],
 
@@ -134,27 +133,10 @@ export default {
       else 
         return this.starOff
     },
-    getMyMarkers: async function() {
-      try {
-        await axios({
-          method: 'GET',
-          url: 'http://3.34.252.182:8080/marker/mylikelist',
-          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-          withCredentials: true
-        }).then((res) => {
-
-          if (res.data.success === false) {
-            console.log('get liked markers failed.')
-          }
-          else {
-            res.data.response.forEach((element) => {
-              this.likedMarkerIds.push(element.markerId)
-            })
-          }
-        })
-      } catch (error) {
-        console.log('To see am I liked, need login first.')
-      }
+    getLikedMarkerIds: function() {
+      JSON.parse(sessionStorage.getItem("liked")).forEach((element) => {
+        this.likedMarkerIds.push(element.markerId)
+      })
     },
     filtering: function() {
       const keywords = this.keyword.split(' ')

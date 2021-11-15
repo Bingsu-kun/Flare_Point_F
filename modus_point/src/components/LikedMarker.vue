@@ -1,9 +1,16 @@
 <template>
   <div id="liked-markers-container">
-    <div id="menu-title">마이마커</div>
+    <div style="margin-top: 20px; padding: 0 10px;" >
+      <button class="my-marker-nav">
+        <img alt="liked" :src="starOn">
+      </button>
+      <button class="my-marker-nav">
+        <img alt="hammer" :src="hammer">
+      </button>
+    </div>
     <button class="close" @click="menuCloseEvent"></button>
     <div v-if="LOGIN">
-      <h3>좋아요한 마커 목록</h3>
+      <div id="menu-title">마이마커</div>
       <div id="search-result" v-if="!noResult">
         <div @click="selectedEvent(result.latitude,result.longitude)" id="frag" class="filter-result-fragment" v-for="result in likedMarkers" :key="result.MarkerId">
           
@@ -28,8 +35,14 @@ export default {
   },
   data() {
     return {
-      noResult: true,
-      likedMarkers: []
+      LikedNoResult: true,
+      MyNoResult: true,
+      likedMarkers: [],
+      myMarkers: [],
+
+      starOn: require("../assets/star_on.png"),
+      starOff: require("../assets/star_off.png"),
+      hammer: require("../assets/hammer.png")
     }
   },
   props: ['LOGIN'],

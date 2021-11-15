@@ -50,8 +50,8 @@ export default {
     return {
       noResult: true,
       confirmDel: false,
-      likedMarkers: [],
-      myMarkers: [],
+      likedMarkers: JSON.parse(sessionStorage.getItem('liked')),
+      myMarkers: JSON.parse(sessionStorage.getItem('my')),
       likeCount: 0,
 
       starOn: require("../assets/star_on.png"),
@@ -60,52 +60,6 @@ export default {
   },
   props:['selected'],
   methods: {
-    getLikedMarkers: async function() {
-      try {
-        await axios({
-          method: 'GET',
-          url: 'http://3.34.252.182:8080/marker/mylikelist',
-          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-          withCredentials: true
-        }).then((res) => {
-
-          if (res.data.success === false) {
-            console.log('get liked markers failed.')
-          }
-          else {
-            this.likedmarkers = res.data.response
-            if (res.data.response !== []) {
-              this.noResult = false
-            }
-          }
-        })
-      } catch (error) {
-        this.logout()
-      }
-    },
-    getMyMarkers: async function() {
-      try {
-        await axios({
-          method: 'GET',
-          url: 'http://3.34.252.182:8080/marker/mymarkers',
-          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-          withCredentials: true
-        }).then((res) => {
-
-          if (res.data.success === false) {
-            console.log('get my markers failed.')
-          }
-          else {
-            this.myMarkers = res.data.response
-            if (res.data.response !== []) {
-              this.noResult = false
-            }
-          }
-        })
-      } catch (error) {
-        this.logout()
-      }
-    },
     getLikeCount: async function() {
       const id = this.selected.markerId
       try {

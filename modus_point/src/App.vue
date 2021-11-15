@@ -61,10 +61,51 @@ export default {
     User
   },
   methods: {
+    getLikedMarkers: async function() {
+      try {
+        await axios({
+          method: 'GET',
+          url: 'http://3.34.252.182:8080/marker/mylikelist',
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
+          withCredentials: true
+        }).then((res) => {
 
+          if (res.data.success === false) {
+            console.log('get liked markers failed.')
+          }
+          else {
+            sessionStorage.setItem('liked', JSON.stringify(res.data.response))
+          }
+        })
+      } catch (error) {
+        this.logout()
+      }
+    },
+    getMyMarkers: async function() {
+      try {
+        await axios({
+          method: 'GET',
+          url: 'http://3.34.252.182:8080/marker/mymarkers',
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
+          withCredentials: true
+        }).then((res) => {
+
+          if (res.data.success === false) {
+            console.log('get my markers failed.')
+          }
+          else {
+            sessionStorage.setItem('my', JSON.stringify(res.data.response))
+          }
+        })
+      } catch (error) {
+        this.logout()
+      }
+    },
     setLogin: function() {
       this.LOGIN = true
       this.SHOW_LOGIN_FORM = false
+      this.getLikedMarkers()
+      this.getMyMarkers()
     },
     setLogout: function(cause) {
       alert(`${cause}로그아웃 되었습니다.`)

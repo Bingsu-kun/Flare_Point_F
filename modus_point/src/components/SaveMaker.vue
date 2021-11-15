@@ -113,7 +113,7 @@ export default {
 }
 
 .marker-input:focus {
-  border: 3px solid rgb(237, 40, 40);
+  border: 2px solid #F3776B;
 }
 
 .marker-make-button {
@@ -122,10 +122,10 @@ export default {
   height: 40px;
   border-radius: 5px;
   color: white;
-  background-color: rgb(237, 40, 40);
+  background-color: #F3776B;
   -webkit-transition-duration: 0.4s; /* Safari */
   transition-duration: 0.4s;
-  border: 2px solid rgb(237, 40, 40);
+  border: 2px solid #F3776B;
   text-align: center;
 }
 
