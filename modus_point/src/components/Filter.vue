@@ -2,7 +2,7 @@
   <div id="menu-container">
     <loading :active="isLoading" :can-cancel="true" :color="loading_color" :is-full-page="fullscreen"/>
     <button class="close" @click="menuCloseEvent"></button>
-    <div id="menu-title">테마별마커</div>
+    <div id="menu-title">테마별 마커</div>
     <div id="search-form" style="margin-bottom: 5px;">
       <input class="search-input" :value="keyword" placeholder="원하는 마커를 검색" @input="keyword = $event.target.value" @keydown.enter="filtering">
       <button class="search-button" @click="filtering"></button>
@@ -12,30 +12,14 @@
       <span class="t-tag" @click="tagSelected(tag)" v-for="tag in trendingTags" :key="tag">{{ tag }}</span>
     </div>
     <div id="search-result" v-if="!noResult">
-      <div @click="selectedEvent(result.latitude,result.longitude)" id="frag" class="filter-result-fragment" v-for="result in filteredMarkers" :key="result.markerId">
-        <div id="frag-left">
-          <div id="marker-name">{{ result.name }}</div>
-          <div id="marker-address">{{ result.place_addr }}</div>
-          <div id="marker-tags">{{ result.tags }}</div>
-        </div>
-        <div id="frag-right">
-          <div class="frag-link">
-            <img alt="star" :src="isLiked(result.markerId)">
-            {{ getLikes(result.markerId) }}
-          </div>
-          <div class="frag-link" @click="kakaoUrl(result.latitude,result.longitude)">
-            <img alt="kakaomap" src="../assets/kakaomap.png">
-            길찾기
-          </div>
-          <div class="frag-link">
-            <img alt="share" src="../assets/share.png">
-            공유하기
-          </div>
-        </div>
-        <div id="divider"/>
-      </div>
+      <fragment @click="selectedEvent(result.latitude,result.longitude)" v-for="result in filteredMarkers" 
+      :key="result.markerId" :name="result.name" :address="result.address" :tags="result.tags"
+      :starSrc="isLiked(result.markerId)" :likes="getLikes(result.markerId)" :latitude="result.latitude" :longitude="result.longitude">
+      </fragment>
     </div>
-    <div id="no-search-result" v-if="noResult"/>
+    <div id="no-search-result" v-if="noResult">
+      <img alt="no result" src="../assets/no_markers.png">
+    </div>
   </div>
 </template>
 
@@ -43,6 +27,7 @@
 import axios from 'axios'
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
+import Fragment from './MarkerFragment.vue'
 
 export default {
   mounted() {
@@ -69,12 +54,8 @@ export default {
   },
   props: ['markers','allMarkersLikes'],
   components: {
-    Loading
-  },
-  computed: {
-    kakaoUrl: function(latitude, longitude) {
-      return `https://map.kakao.com/link/to/선택한마커,${latitude},${longitude}`
-    }
+    Loading,
+    Fragment
   },
   watch: {
     keyword: function() {
@@ -134,7 +115,7 @@ export default {
         return this.starOff
     },
     getLikedMarkerIds: function() {
-      JSON.parse(sessionStorage.getItem("liked")).forEach((element) => {
+      JSON.parse(sessionStorage.getItem("liked")).array.forEach((element) => {
         this.likedMarkerIds.push(element.markerId)
       })
     },
@@ -204,63 +185,4 @@ export default {
   background-color: rgba(223, 160, 157, 0.2);
 }
 
-#frag-left {
-  text-align: left;
-  display: flex;
-  align-content: flex-start;
-}
-
-#frag-right {
-  display: flex;
-  justify-content: center;
-  align-content: center;
-  align-items: center;
-}
-
-#marker-name {
-  font-family: Pretendard-Bold;
-  font-size: 16px;
-  overflow: hidden;
-}
-
-#marker-address {
-  font-size: 13px;
-  overflow: hidden;
-}
-
-#marker-tags {
-  font-size: 11px;
-  overflow: hidden;
-}
-
-.frag-link {
-  display: inline-flex;
-  align-items: center;
-  align-content: center;
-  justify-content: center;
-  font-size: 11px;
-}
-
-.frag-link img {
-  margin-right: 5px;
-  width: 10px;
-  height: 10px;
-}
-
-.frag-link:hover {
-  cursor: pointer;
-}
-
-.filter-result-fragment {
-  padding: 10px 20px 0 20px;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  width: inherit;
-  height: fit-content;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-.filter-result-fragment:hover {
-  background-color: rgba(223, 160, 157, 0.2);
-}
 </style>

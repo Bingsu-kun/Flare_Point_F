@@ -8,6 +8,11 @@
       </div>
     </transition>
     <transition name="menu">
+      <div class="menu-foreground" v-if="SHOW_UPDATE_MAKER">
+        <update-maker :selected="selected" @updateEvent="updateEvent"></update-maker>
+      </div>
+    </transition>
+    <transition name="menu">
       <div class="menu-foreground" v-if="SHOW_FILTER">
         <menu-filter :markers="markers" :allMarkersLikes="allMarkersLikes" @disableMarkers="disableMarkers" @selectedEvent="selectedEvent" @menuCloseEvent="enableMarkers(menuCloseEvent)"></menu-filter>
       </div>
@@ -19,12 +24,12 @@
     </transition>
     <transition name="menu">
       <div class="menu-foreground" v-if="SHOW_MY">
-        <menu-my :LOGIN="LOGIN" @logout="logout" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></menu-my>
+        <menu-my :LOGIN="LOGIN" :allMarkersLikes="allMarkersLikes" @logout="logout" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></menu-my>
       </div>
     </transition>
     <transition name="menu">
       <div class="menu-foreground" v-if="SHOW_THIS_MARKER">
-        <marker-overlay :selected="selected" @deleteEvent="deleteEvent" @showLoginForm="showLoginForm" @menuCloseEvent="SHOW_THIS_MARKER = false"></marker-overlay>
+        <marker-overlay :selected="selected" @doUpdate="editEvent" @deleteEvent="deleteEvent" @showLoginForm="showLoginForm" @overlayCloseEvent="SHOW_THIS_MARKER = false"></marker-overlay>
       </div>
     </transition>
   </div>
@@ -36,9 +41,10 @@ import 'vue-loading-overlay/dist/vue-loading.css';
 import axios from 'axios';
 
 import SaveMaker from './SaveMaker.vue'
+import UpdateMaker from './UpdateMaker.vue'
 import MenuFilter from './Filter.vue'
 import MenuSearch from './Search.vue'
-import MenuMy from './LikedMarker.vue'
+import MenuMy from './MyMarker.vue'
 import MarkerOverlay from './MarkerOverlay.vue'
 
 export default {
@@ -98,6 +104,7 @@ export default {
       
       SHOW_SAVE_MAKER: false,
       SHOW_THIS_MARKER: false,
+      SHOW_UPDATE_MAKER: false,
 
       SidebarButtonSrc: require("../assets/sidebar.png")
     }
@@ -106,6 +113,7 @@ export default {
   components: {
     Loading,
     SaveMaker,
+    UpdateMaker,
     MenuFilter,
     MenuSearch,
     MenuMy,
@@ -335,7 +343,6 @@ export default {
         }
       }
       const takeALook = () => {
-        this.menuCloseEvent()
         this.SHOW_THIS_MARKER = true
       }
     },
@@ -346,6 +353,14 @@ export default {
       //새로 생성된 마커를 배열에 추가
       this.markers.push(savedMarker)
       this.map.setLevel(3,{ animate: true })
+    },
+    updateEvent: function(updatedMarker) {
+      this.selected = updatedMarker
+      this.SHOW_THIS_MARKER = true
+    },
+    editEvent: function() {
+      this.SHOW_THIS_MARKER = false
+      this.SHOW_UPDATE_MAKER = true
     },
     deleteEvent: function(selected) {
       this.renderedMarkers.forEach((element) => {
@@ -433,7 +448,8 @@ export default {
 }
 
 #menu-container {
-  height: -webkit-fill-available;
+  height: 100%;
+  padding: 20px 0;
 }
 
 .menu-foreground {
@@ -441,8 +457,7 @@ export default {
   top: 0;
   left: 0;
   bottom: 0;
-  min-width: 320px;
-  width: 28%; 
+  width: 320px;
   height: 100%;
   border-radius: 0 20px 20px 0;
   background-color: white;
@@ -460,6 +475,7 @@ export default {
   color: black;
   background-color: white;
   border: 2px solid #F3776B;
+  transition-duration: 0.2s;
   overflow: hidden;
 }
 

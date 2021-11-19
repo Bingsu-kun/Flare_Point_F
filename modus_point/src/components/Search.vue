@@ -1,5 +1,6 @@
 <template>
   <div id="menu-container">
+    <loading :active="isLoading" :can-cancel="true" :color="loading_color" :is-full-page="fullscreen"/>
     <button class="close" @click="menuCloseEvent"></button>
     <div id="menu-title">위치 찾기</div>
     <div id="search-form">
@@ -17,20 +18,34 @@
         <div id="divider"/>
       </div>
     </div>
-    <div id="no-search-result" v-if="noResult"/>
+    <div id="no-search-result" v-if="noResult">
+      <img alt="no result" src="../assets/not_found.png">
+    </div>
   </div>
 </template>
+
 <script>
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
+
 export default {
   data() {
     return {
       keyword: '',
       searchResults: [],
-      noResult: false
+      noResult: false,
+
+      isLoading: false,
+      fullscreen: false,
+      loading_color: "#E2004B",
     }
+  },
+  components: {
+    Loading
   },
   methods: {
     search: function() {
+      this.isLoading = true
       const searchResult = new kakao.maps.services.Places()
       const keyword = this.keyword
       this.searchResults = []
@@ -39,6 +54,7 @@ export default {
         searchResult.keywordSearch( keyword, placeSearched )
       }
       setTimeout(() => {
+        this.isLoading = false
         if (this.searchResults.length === 0)
           this.noResult = true
       },2000)
@@ -102,7 +118,14 @@ export default {
 
 #menu-title {
   font-family: Pretendard-Black;
-  margin-top: 20px;
+  padding: 10px 0;
+  width: inherit;
+  height: fit-content;
+}
+#menu-subtitle {
+  font-family: Pretendard-Bold;
+  font-size: 13px;
+  text-align: left;
   padding: 10px 0;
   width: inherit;
   height: fit-content;
@@ -138,7 +161,8 @@ export default {
 }
 
 #search-result {
-  height: -webkit-fill-available;
+  box-sizing: border-box;
+  height: 480px;
   text-align: left;
   overflow: overlay;
   overflow-x: hidden;
@@ -146,11 +170,17 @@ export default {
 
 #no-search-result {
   width: inherit;
-  height: 400px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-image: url('../assets/not_found.png');
+  height: 480px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  justify-items: center;
+  align-content: center;
+  align-items: center;
+}
+
+#no-search-result img {
+  width: 50%;
 }
 
 #place-name {

@@ -1,72 +1,125 @@
 <template>
-  <div id="marker-overlay-container">
-    <button class="close" @click="menuCloseEvent"></button>
-    <!-- 마커 정보 표시 + 길찾기 버튼 
-    마커 이름 name 좋아요 버튼
-    만든 날짜 createdAt
-    태그 tags
-    내용 description
-    
-    만든 사람 fisherId
-    -->
-    <div id="marker-overlay-header">
-      <div>{{ selected.name }}</div>
-      <div>{{ selected.createdAt.slice(0,10) }}</div>
-      <span id="marker-tags" v-for="tag in selected.tags.split('#')" :key="tag">{{ tag }}</span>
+  <div id="menu-container">
+    <button class="close" @click="overlayCloseEvent"></button>
+    <div style="padding: 20px 0">
+      <div id="marker-title">{{ selected.name }}</div>
+      <div id="marker-tags">{{ selected.tags }}</div>
+      <div id="marker-date">업데이트 일자 : {{ selected.createdAt.slice(0,10) }}</div>
+      <div id="marker-link">
+        <div class="marker-link-buttons">
+          <img alt="star" v-if="iLiked" :src="starOn" @click="dislike">
+          <img alt="star" v-if="!iLiked" :src="starOff" @click="like">
+          <div id="marker-overlay-like" style="font-size: 11px">{{ getLikeCount(seleted.markerId) }}</div>
+        </div>
+        <div class="marker-link-buttons">
+          <img alt="kakaomap" :src="kakaomap" @click="findKakaoRoad(selected.latitude,selected.longitude)">
+          <div style="font-size: 11px">길찾기</div>
+        </div>
+        <div class="marker-link-buttons">
+          <img alt="share" :src="shareIcon">
+          <div style="font-size: 11px">공유하기</div>
+        </div>
+      </div>
+      <div id="marker-addr">주소: {{ selected.place_addr }}</div>
+      <div style="padding: 10px 20px">
+        <div style="margin-bottom: 10px; font-family: Pretendard-Bold; font-size: 16px; text-align: left;">마커 제작자의 한 마디</div>
+        <comment :comment="selected.description" :userProfImgName="makerProfImgName" :userName="makerName" :date="selected.createdAt.slice(0,10)"></comment>
+      </div>
     </div>
-    <div id="marker-overlay-description">{{ selected.description }}</div>
-    <div id="marker-overlay-buttons">
-      <button class="marker-overlay-like" @click="like">{{ likeCount }}</button>
-      <button class="marker-overlay-mine" v-if="itsMine" @click="confirmDel = true">삭제하기</button>
-      <br>
-      <button class="marker-overlay-findroad" @click="window.open(`https://map.kakao.com/link/to/선택한마커,${this.selected.latitude},${this.selected.longitude}`)">길찾기</button>
+    <button class="comment-button" v-if="!itsMine">방문 후기 남기기</button>
+    <div id="marker-link" v-if="itsMine">
+      <div class="marker-link-buttons">
+        <img alt="trash" @click="confirmDel" :src="trash">
+        <div style="font-size: 11px">삭제하기</div>
+      </div>
+      <div class="marker-link-buttons">
+        <img alt="fix" :src="fix" @click="notiOn = true">
+        <div style="font-size: 11px">수정하기</div>
+      </div>
     </div>
-    <div id="confirm-delete" v-if="confirmDel">
-      <h3>정말 마커를 삭제할까요?</h3>
-      <button class="negative-button" @click="confirmDel = false">아니요</button>
-      <button class="positive-button" @click="deleteMarker">네</button>
-    </div> 
+    <transition name="fade">
+      <div id="confirm-delete" v-if="confirmDel">
+        <div id="menu-title">정말 마커를 삭제할까요?!</div>
+        <button class="negative-button" @click="confirmDel = false">아니요</button>
+        <button class="positive-button" @click="deleteMarker">네</button>
+      </div> 
+    </transition>
+    <div v-if="commentsExist" style="width: -webkit-fill-available; height: 250px; display: flex; align-items: center; justify-content: center;">
+      <div>후기가 없습니다</div>
+    </div>
+    <transition name="noti">
+      <noti v-if="notiOn" @notiEvent="notiOn = false" :text="'기능 개발 중 입니다'"></noti>
+    </transition>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import comment from './Comment.vue'
+import noti from './Noti.vue'
 
 export default {
   mounted() {
-    this.getLikedMarkers()
-    this.getMyMarkers()
+    JSON.parse(sessionStorage.getItem('liked')).array.forEach(element => {
+      this.likedMarkers.push(element)
+    });
+    JSON.parse(sessionStorage.getItem('my')).array.forEach(element => {
+      this.myMarkers.push(element)
+    });
+    this.getMadeBy
   },
   computed: {
     iLiked: function() {
-      return this.checkMarker(this.likedMarkers)
+      if (this.likedMarkers)
+        return this.checkMarker(this.likedMarkers)
+      else
+        return false
     },
     itsMine: function() {
-      console.log(this.checkMarker(this.myMarkers))
-      return this.checkMarker(this.myMarkers)
+      if (this.myMarkers)
+        return this.checkMarker(this.myMarkers)
+      else
+        return false
+    },
+    commentsExist: function() {
+      if (this.comments.length !== 0)
+        return false
+      else
+        return true
     }
+  },
+  components: {
+    comment,
+    noti
   },
   data() {
     return {
       noResult: true,
       confirmDel: false,
-      likedMarkers: JSON.parse(sessionStorage.getItem('liked')),
-      myMarkers: JSON.parse(sessionStorage.getItem('my')),
-      likeCount: 0,
+      likedMarkers: [],
+      myMarkers: [],
+      makerProfImgName: '',
+      makerName: '',
+      comments: [],
 
+      notiOn: false,
+      
       starOn: require("../assets/star_on.png"),
-      starOff: require("../assets/star_off.png")
+      starOff: require("../assets/star_off.png"),
+      kakaomap: require("../assets/kakaomap.png"),
+      shareIcon: require("../assets/share.png"),
+      trash: require("../assets/trash.png"),
+      fix: require("../assets/hammer.png")
     }
   },
   props:['selected'],
   methods: {
-    getLikeCount: async function() {
-      const id = this.selected.markerId
+    getLikeCount: async function(markerId) {
       try {
         await axios({
           method: 'POST',
           url: 'http://3.34.252.182:8080/marker/thiscount',
-          data: { markerId: id },
+          data: { markerId: markerId },
           withCredentials: true
         }).then((res) => {
 
@@ -75,18 +128,40 @@ export default {
             this.likeCount = '?'
           }
           else {
-            this.likeCount = res.data.response.like
+            return res.data.response.like
           }
         })
       } catch (error) {
         this.likeCount = '?'
       }
     },
+    getMadeBy: async function() {
+      const id = this.selected.fisherId
+
+      try {
+        await axios({
+          method: 'GET',
+          url: `http://3.34.252.182:8080/fisher/${id}`,
+          withCredentials: true
+        }).then((res) => {
+          if (res.data.success === false) {
+            console.warn('get fisher failed.' + res.data.response)
+          }
+          else {
+            this.makerProfImgName = res.data.response.fisher.profImageName
+            this.makerName = res.data.response.fisher.fishername
+          }
+        })
+      } catch (error) {
+        console.warn(error)
+      }
+    },
     like: async function() {
       const id = this.selected.markerId
+
       if (!sessionStorage.getItem('id'))
         this.showLoginForm()
-      else if (!this.iLiked) {
+      else {
         try {
           await axios({
             method: 'POST',
@@ -101,33 +176,41 @@ export default {
             }
             else {
               this.likedMarkers.push(this.selected)
-              this.likeCount += 1
+              sessionStorage.setItem('liked',this.likedMarkers)
+              document.querySelector('#marker-overlay-like').innerText = document.querySelector('#marker-overlay-like').innerText + 1
             }
           })
         } catch (error) {
           console.log('bad connection.' + error)
         }
       }
-      else {
-        try {
-          await axios({
-            method: 'DELETE',
-            url: 'http://3.34.252.182:8080/marker/dislike', //좋아요 취소
-            headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-            data: { markerId: id },
-            withCredentials: true
-          }).then((res) => {
+    },
+    dislike: async function() {
+      const id = this.selected.markerId
 
-            if (res.data.success === false) {
-              console.log('get like failed.' + res.data.response)
+      try {
+        await axios({
+          method: 'DELETE',
+          url: 'http://3.34.252.182:8080/marker/dislike', //좋아요 취소
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
+          data: { markerId: id },
+          withCredentials: true
+        }).then((res) => {
+
+          if (res.data.success === false) {
+            console.log('get like failed.' + res.data.response)
+          }
+          else {
+            for (let mk of this.likedMarkers) {
+              if (mk.markerId === this.selected.markerId)
+                this.likedMarkers.pop(mk)
             }
-            else {
-              this.likeCount -= 1
-            }
-          })
-        } catch (error) {
-          console.log('bad connection.' + error)
-        }
+            sessionStorage.setItem('liked',this.likedMarkers)
+            document.querySelector('#marker-overlay-like').innerText = document.querySelector('#marker-overlay-like').innerText - 1
+          }
+        })
+      } catch (error) {
+        console.log('bad connection.' + error)
       }
     },
     deleteMarker: async function() {
@@ -164,11 +247,17 @@ export default {
           cnt++
       }
     },
-    menuCloseEvent: function() {
-      this.$emit("menuCloseEvent")
+    findKakaoRoad: function(latitude, longitude) {
+      window.open(`https://map.kakao.com/link/to/선택한마커,${latitude},${longitude}`)
+    },
+    overlayCloseEvent: function() {
+      this.$emit("overlayCloseEvent")
     },
     showLoginForm: function() {
       this.$emit("showLoginForm")
+    },
+    doUpdate: function() {
+      this.$emit("doUpdate")
     },
     deleteEvent: function(selected) {
       this.confirmDel = false
@@ -184,19 +273,47 @@ export default {
 
 <style>
 
-#marker-overlay-container {
-  padding: 20px;
+#marker-title {
+  padding: 5px 0;
+  font-family: Pretendard-Black;
+  font-size: 20px;
 }
 
-#marker-overlay-description {
-  width: inherit;
-  height: fit-content;
-  background-color: rgb(170, 170, 170);
-  border-radius: 20px;
+#marker-tags {
+  padding: 5px 0;
+  font-family: Pretendard-Bold;
+  font-size: 13px;
 }
 
-#marker-overlay-buttons {
-  bottom: 20px;
+#marker-date {
+  font-size: 11px;
+}
+
+#marker-addr {
+  padding: 5px 0;
+  font-size: 13px;
+}
+
+#marker-link {
+  margin: 10px 0;
+  padding: 0 40px;
+  height: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-content: center;
+  align-items: center;
+}
+
+#marker-link img {
+  height: 20px;
+}
+
+.marker-link-buttons {
+  margin: 0 20px;
+  width: 40px;
+}
+.marker-link-buttons img:hover {
+  cursor: pointer;
 }
 
 #confirm-delete {
@@ -210,11 +327,27 @@ export default {
   top: calc(50% - 65px);
 }
 
+.comment-button {
+  width: -webkit-fill-available;
+  height: 50px;
+  border: 0;
+  background-color: #cacaca;
+  font-family: Pretendard-Bold;
+  font-size: 13px;
+  transition-duration: 0.2s;
+}
+
+.comment-button:hover {
+  cursor: pointer;
+  background-color: #F3776B;
+  color: white;
+}
+
 .negative-button {
   width: 80px;
   height: 40px;
   margin: 0 20px;
-  background-color: rgb(237, 40, 40);
+  background-color: #F3776B;
   color: white;
   border: 0;
   border-radius: 5px;
@@ -240,58 +373,6 @@ export default {
 .positive-button:hover {
   width: 85px;
   height: 45px;
-}
-
-.marker-overlay-like {
-  width: 150px;
-  height: 50px;
-  background-image: url('../assets/star_on.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  border: 2px solid rgb(237, 40, 40);
-  background-color: white;
-  transition-duration: 0.3s;
-  color: black;
-  font: bold;
-}
-
-.marker-overlay-like:hover {
-  background-color: rgb(237, 40, 40);
-  color: white;
-}
-
-.marker-overlay-mine {
-  width: 150px;
-  height: 50px;
-  background-image: url('../assets/trash.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  border: 2px solid rgb(170, 170, 170);
-  background-color: white;
-  transition-duration: 0.3s;
-  color: black;
-  font: bold;
-}
-
-.marker-overlay-mine:hover {
-  background-color: rgb(170, 170, 170);
-  color: white;
-}
-
-.marker-overlay-findroad {
-  width: 150px;
-  height: 50px;
-  border: 2px solid rgb(254, 255, 200);
-  background-color: white;
-  transition-duration: 0.3s;
-  color: rgb(26, 62, 224);
-  font: bold;
-}
-
-.marker-overlay-findroad:hover {
-  background-color: rgb(254, 255, 200);
 }
 
 </style>

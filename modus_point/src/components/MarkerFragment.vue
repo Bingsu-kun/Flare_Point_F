@@ -1,29 +1,119 @@
 <template>
-  
+  <div id="frag" class="filter-result-fragment">
+    <div id="frag-left">
+      <div id="marker-name">{{ name }}</div>
+      <div id="marker-address">{{ address }}</div>
+      <div id="marker-tags">{{ tags }}</div>
+    </div>
+    <div id="frag-right">
+      <div class="frag-link">
+        <img alt="star" :src="starSrc">
+        {{ likes }}
+      </div>
+      <div class="frag-link" @click="findKakaoRoad(latitude,longitude)">
+        <img alt="kakaomap" src="../assets/kakaomap.png">
+        길찾기
+      </div>
+      <div class="frag-link">
+        <img alt="share" src="../assets/share.png">
+        공유하기
+      </div>
+    </div>
+    <div id="divider"/>
+    <transition name="noti">
+      <noti v-if="notiOn" @notiEvent="notiOn = false" :text="'기능 개발 중 입니다'"></noti>
+    </transition>
+  </div>
 </template>
 
 <script>
+import noti from './Noti.vue'
+
 export default {
 
-  props: ['name','address','tags','isLiked','likes','latitue','longitude']
+  components: {
+    noti
+  },
+  props: ['name','address','tags','starSrc','likes','latitude','longitude'],
+  methods: {
+    findKakaoRoad: function(latitude, longitude) {
+      window.open(`https://map.kakao.com/link/to/선택한마커,${latitude},${longitude}`)
+    }
+  }
 
 }
 </script>
 
 <style>
 
+.filter-result-fragment {
+  padding: 10px 20px 0 20px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  width: inherit;
+  height: fit-content;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+.filter-result-fragment:hover {
+  background-color: rgba(223, 160, 157, 0.2);
+}
+
+#frag-left {
+  text-align: left;
+  display: flex;
+  align-content: flex-start;
+}
+
+#frag-right {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
+
+#marker-name {
+  font-family: Pretendard-Bold;
+  font-size: 16px;
+  overflow: hidden;
+}
+
+#marker-address {
+  font-size: 13px;
+  overflow: hidden;
+}
+
+#marker-tags {
+  font-size: 11px;
+  overflow: hidden;
+}
+
+.frag-link {
+  display: inline-flex;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.frag-link img {
+  margin-right: 5px;
+  width: 10px;
+  height: 10px;
+}
+
+.frag-link:hover {
+  cursor: pointer;
+}
+
 </style>
 
 <!-- 이거 다음 할 일
-1.getLikedMarkers, getMyMarkers 함수 App.vue 로그인 됬을 때만 실행되는지 체크.
-모든 LikedMarkers, MyMarkers 참조 sessionStorage를 통하는지 체크
 
-2.이 컴포넌트 완성.
+6. User 리모델링. 
 
-3. MyMarker 완성. 
+7. signup 리모델링. 
 
-4. SaveMaker 리모델링.
+8. backend 띄우고 테스트
 
-5. MarkerOverlay 리모델링. (마커 수정 기능 추가)
-
-6. User 리모델링. (Fisher 엔티티에 프사 추가 찾아보기) -->
+9. netilyfy 설정 -->

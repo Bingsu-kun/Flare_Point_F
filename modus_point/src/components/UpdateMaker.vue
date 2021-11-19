@@ -11,7 +11,7 @@
       <input class="marker-input" placeholder="#차박#낚시#바베큐 (최대 10개)" style="font-size: 12px;" :value="tagString" @input="tagString = $event.target.value">
     </div>
     <div id="private-selector">나만보기<input type="checkbox" name="isPrivate" v-model="isPrivate"></div> <br>
-    <button @click="saveMarker" class="marker-make-button">저장</button>
+    <button @click="updateMarker" class="marker-make-button">저장</button>
   </div>
 </template>
 
@@ -22,23 +22,23 @@ import refresh from '../getRefreshedToken.js'
 export default {
   data() {
     return {
-      markerName: '',
-      description: '',
-      tagString: '',
-      isPrivate: false,
+      markerName: this.selected.name,
+      description: this.selected.description,
+      tagString: this.selected.tags,
+      isPrivate: this.selected.isPrivate,
 
       DescOver: false
     }
   },
-  props: ['latitude', 'longitude', 'place_addr'],
+  props: ['selected'],
   computed: {
     defaultMarkerName: function() {
       return `${sessionStorage.getItem('name')}님의 마커`
     }
   },
   methods: {
-    saveEvent: function(marker) {
-      this.$emit('saveEvent', marker)
+    updateEvent: function(marker) {
+      this.$emit('updateEvent', marker)
     },
     // description 100자 제한. (not byte)
     checklength: function() {
@@ -52,12 +52,14 @@ export default {
         this.DescOver = false
       }
     },
-    saveMarker: async function() {
+    updateMarker: async function() {
 
+      const markerId = this.selected.markerId
+      const fisherId = this.selected.fisherId
       let name = this.markerName
-      const latitude = this.latitude
-      const longitude = this.longitude
-      const place_addr = this.place_addr
+      const latitude = this.selected.latitude
+      const longitude = this.selected.longitude
+      const place_addr = this.selected.place_addr
       const isPrivate = this.isPrivate
       const tagString = this.tagString
       let description = this.description
@@ -69,9 +71,9 @@ export default {
       try {
         await axios({
           method: 'POST',
-          url: 'http://3.34.252.182:8080/marker/create',
+          url: 'http://3.34.252.182:8080/marker/update',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-          data: { name: name, latitude: latitude, longitude: longitude, place_addr: place_addr, isPrivate: isPrivate, tagString: tagString, description: description },
+          data: { markerId: markerId, fisherId: fisherId, name: name, latitude: latitude, longitude: longitude, place_addr: place_addr, isPrivate: isPrivate, tagString: tagString, description: description },
           withCredentials: true
         }).then((res) => {
           if (res.data.success === false) {
@@ -79,7 +81,7 @@ export default {
           }
           else {
             sessionStorage.setItem("apiToken", refresh(res.headers))
-            this.saveEvent(res.data.response)
+            this.updateEvent(res.data.response)
           }
         })
       } catch (error) {
@@ -91,53 +93,5 @@ export default {
 </script>
 
 <style>
-
-#private-selector {
-  font-size: 11px;
-  margin: 10px 0;
-  width: 80px;
-  height: 30px;
-  border: 1px solid #cacaca;
-  border-radius: 10px;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#maker-body {
-  width: -webkit-fill-available;
-  padding: 0 20px;
-}
-
-.marker-input {
-  margin: 10px 0;
-  width: inherit;
-  height: 30px;
-  border: 1px solid #cacaca;
-  border-radius: 10px;
-  white-space: normal;
-}
-
-.marker-input:focus {
-  border: 2px solid #F3776B;
-}
-
-.marker-make-button {
-  margin: 20px 0;
-  width: 60%;
-  height: 40px;
-  border-radius: 10px;
-  color: white;
-  background-color: #F3776B;
-  -webkit-transition-duration: 0.4s; /* Safari */
-  transition-duration: 0.4s;
-  border: 2px solid #F3776B;
-  text-align: center;
-}
-
-.marker-make-button:hover {
-  background-color: rgb(255,255,255);
-  color: black;
-}
 
 </style>

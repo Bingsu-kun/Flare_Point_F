@@ -1,41 +1,57 @@
 <template>
   <div>
     <transition name="just-fade-in">
-      <div id="login_input" v-if="isLogin">
-        <img style="margin: 20px 0; height: 40px;" :src="InlineLogo" alt="inline logo">
-        <p>이메일</p>
-        <input type="email" v-model="principal">
-        <p style="color: rgb(237,40,40)">{{ login_email_error }}</p>
-        <p>패스워드</p>
-        <input type="password" v-model="credentials" @keydown.enter="login">
-        <p>{{ login_password_error }}</p>
-        <div style="display: flex; justify-content: space-around; align-content: center; margin: 20px 0;">
-          <button class="login_button" @click="login">로그인</button>
-          <button class="login_button" @click="isLogin = false">회원가입</button>
+      <div id="las-input" v-if="isLogin">
+        <div style="display: flex; justify-content: center;">
+          <img id="las-logo" :src="InlineLogo" alt="inline logo">
+        </div>
+        <div>
+          <p>이메일</p>
+          <input type="email" v-model="principal">
+          <p style="color: rgb(237,40,40)">{{ login_email_error }}</p>
+          <p>패스워드</p>
+          <input type="password" v-model="credentials" @keydown.enter="login">
+          <p>{{ login_password_error }}</p>
+        </div>
+        <div id="las-footer">
+          <button class="las-button" @click="login">로그인</button>
+          <button class="las-button" @click="isLogin = false">회원가입</button>
         </div>
       </div>
     </transition>
     <transition name="just-fade-in">
-      <div id="signup_input" v-if="!isLogin">
+      <div id="las-input" v-if="!isLogin">
         <img class="back" :src="BackButtonSrc" @click="isLogin = true" alt="뒤로가기">
         <div>
-          <input id="signup_email_input" placeholder="이메일" type="email" v-model="principal" @keyup="autoEmailCheck">
-          <p v-if="email_error_message != null">{{ email_error_message }}</p>
-          <input placeholder="비밀번호(영문,숫자,특수문자 포함 6 ~ 20자)" type="password" v-model="credentials">
-          <input placeholder="비밀번호 확인" type="password" v-model="checkCredentials">
-          <input id="signup_name_input" placeholder="닉네임(2~10자)" type="text" :value="name" @input="name = $event.target.value" @keyup="autoNameCheck">
-          <p v-if="name_error_message != null">{{ name_error_message }}</p>
+          <img class="signup_profile_image" alt="profile image" :src="Image" @click="notiOn = true" >
+          <p style="font-size: 9px; color: #cacaca; text-align: center;">이미지 클릭 시 프로필 업로드</p>
+          <p>이메일</p>
+          <input placeholder="example@example.com" type="email" v-model="principal" @keyup="autoEmailCheck">
+          <p v-if="email_error_message !== null">{{ email_error_message }}</p>
+          <p>비밀번호</p>
+          <input placeholder="영문,숫자,특수문자 포함 8자 이상" type="password" v-model="credentials">
+          <p>비밀번호 확인</p>
+          <input placeholder="비밀번호를 한번 더 입력해 주세요" type="password" v-model="checkCredentials">
+          <p>닉네임</p>
+          <input placeholder="2자 이상 10자 이하" type="text" :value="name" @input="name = $event.target.value" @keyup="autoNameCheck">
+          <p v-if="name_error_message !== null">{{ name_error_message }}</p>
         </div>
         <p>{{ signup_error_message }}</p>
-        <button style="margin: 15px 30px 0 30px" class="login_button" @click="signup">회원가입</button>
+        <div id="las-footer">
+          <button class="las-button" @click="signup">회원가입</button>
+        </div>
       </div>
     </transition>
+    <transition name="noti">
+			<noti v-if="notiOn" @notiEvent="notiOn = false" :text="'기능 개발 중 입니다'"></noti>
+		</transition>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
 import refresh from '../getRefreshedToken.js'
+import Noti from './Noti.vue'
 
 export default {
 
@@ -49,6 +65,7 @@ export default {
 
       BackButtonSrc: require("./../assets/back.png"),
       InlineLogo: require("../assets/inline_logo.png"),
+      Image: require("../assets/user.png"),
 
       login_email_error: null,
       login_password_error: null,
@@ -66,10 +83,13 @@ export default {
 
       COOKIE_NAME: 'refreshToken',
 
-      timer: null
+      timer: null,
+      notiOn: false
     }
   },
-
+  components: {
+    Noti
+  },
   methods: {
 
     //--------------------------- login -----------------------------------
@@ -143,6 +163,9 @@ export default {
 
               this.loginEvent(false)
             }
+          }).catch((error) => {
+            console.warn(error)
+            console.log(error.response)
           })
         } catch (error) {
           this.login_email_error = "존재하지 않는 아이디입니다."
@@ -159,6 +182,8 @@ export default {
       // 비밀번호 확인 체크
       if (this.credentials !== this.checkCredentials)
         this.signup_error_message = "비밀번호와 비밀번호 확인이 일치하지 않습니다."
+      else if (this.credentials.length < 8)
+        this.signup_error_message = "비밀번호가 8자 미만입니다."
       // email 또는 닉네임 중복 체크 안했을 때.
       else if (this.emailChecked === false)
         this.signup_error_message = "이메일 중복체크를 진행해 주세요!"
@@ -169,7 +194,7 @@ export default {
           await axios({
             method: 'POST',
             url: 'http://3.34.252.182:8080/fisher/join',
-            data: { principal: this.principal.trim(), credentials: this.credentials, name: this.name.trim() },
+            data: { principal: this.principal.trim(), credentials: this.credentials, profImageName: 'default', name: this.name.trim() },
             withCredentials: true
           })
           .then((res) => {
@@ -180,7 +205,7 @@ export default {
             }
             else {
               sessionStorage.setItem("apiToken", res.data.response.apiToken)
-              sessionStorage.setItem("name", res.data.response.fisher.fishername)
+              sessionStorage.setItem("name", res.data.response.fisher.fisherName)
               sessionStorage.setItem("role", res.data.response.fisher.role)
               sessionStorage.setItem("email", res.data.response.fisher.email)
               sessionStorage.setItem("id", res.data.response.fisher.id)
@@ -295,16 +320,25 @@ export default {
 
 p {
   text-align: left;
-  font-size: 14px;
+  color: black;
+  font-size: 13px;
   font-family: Pretendard-Regular;
+  margin: 5px;
 }
 
-#login_input {
+#las-input {
   padding: 30px;
-  font-size: 20px;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
 }
 
-#login_input input {
+#las-logo {
+  margin: 20px;
+  width: 200px
+}
+
+#las-input input {
   width: -webkit-fill-available;
   height: 30px;
   font-size: 14px;
@@ -312,35 +346,35 @@ p {
   border-radius: 10px;
 }
 
-#signup_input {
-  padding: 30px;
-  font-size: 20px;
+.signup_profile_image {
+  padding: 5px;
+	width: 80px;
+	height: 80px;
+	border-radius: 100%;
+  border: 2px solid #cacaca
 }
-
-#signup_input input {
-  margin: 10px 0;
-  width: -webkit-fill-available;
-  height: 30px;
-  font-size: 14px;
-  border: 1px solid #cacaca;
-  border-radius: 10px;
+.signup_profile_image:hover {
+  cursor: pointer;
 }
 
 .back {
-  margin: 10px;
   width: 4rem;
   height: 4rem;
-  -webkit-transition-duration: 0.4;
-  transition-duration: 0.4;
   float: left;
 }
 
 .back:hover {
-  -webkit-animation: slide-left 0.5s ease-out alternate both;
-	animation: slide-left 0.5s ease-out alternate both;
+  cursor: pointer;
 }
 
-.login_button {
+#las-footer {
+  display: flex; 
+  justify-content: space-around; 
+  align-items: center;
+  margin: 20px 10px 0 10px;
+}
+
+.las-button {
   width: 80px;
   height: 40px;
   border-radius: 10px;
@@ -352,29 +386,10 @@ p {
   text-align: center;
 }
 
-.login_button:hover {
+.las-button:hover {
   background-color: rgb(255,255,255);
   color: black;
 }
-
-.signup_button {
-  margin: 20px 0 0 5px;
-  width: 60px;
-  height: 25px;
-  border-radius: 10px;
-  color: white;
-  background-color: #F3776B;
-  -webkit-transition-duration: 0.4s; /* Safari */
-  transition-duration: 0.4s;
-  border: 2px solid #F3776B;
-  font-size: 0.6rem;
-}
-
-.signup_button:hover {
-  background-color: rgb(255,255,255);
-  color: black;
-}
-
 
 @-webkit-keyframes slide-left {
   0% {

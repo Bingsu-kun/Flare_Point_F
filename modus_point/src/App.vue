@@ -26,10 +26,13 @@
     </transition>
     <transition name="fade">
       <div id="login-background" v-if="SHOW_USER_PROFILE" @click="SHOW_USER_PROFILE = false">
-        <div id="login-foreground" v-if="SHOW_USER_PROFILE" @click.stop>
-          <user @logout="setLogout"></user>
+        <div id="login-foreground" v-if="SHOW_USER_PROFILE" @click.stop style="width: 400px">
+          <user @menuCloseEvent="SHOW_USER_PROFILE = false" @logout="setLogout"></user>
         </div>
       </div>
+    </transition>
+    <transition name="noti">
+      <noti v-if="notiOn" @notiEvent="notiOn = false" :text="notiText"></noti>
     </transition>
   </div>
 </template>
@@ -38,12 +41,15 @@
 import LoginAndSignup from './components/LoginAndSignup.vue'
 import KakaoMap from './components/Map.vue'
 import User from './components/User.vue'
+import refresh from './getRefreshedToken.js'
+import axios from 'axios'
+import Noti from './components/Noti.vue'
 
 export default {
   name: 'App',
   mounted() {
     if (sessionStorage.getItem('apiToken'))
-      this.LOGIN = true
+      this.tokenAvailableCheck
   },
   data() {
     return {
@@ -53,12 +59,15 @@ export default {
       SHOW_FILTER: false,
       SHOW_SEARCH: false,
       SHOW_MY: false,
+      notiOn: false,
+      notiText: ''
     }
   },
   components: {
     LoginAndSignup,
     KakaoMap,
-    User
+    User,
+    Noti
   },
   methods: {
     getLikedMarkers: async function() {
@@ -75,10 +84,11 @@ export default {
           }
           else {
             sessionStorage.setItem('liked', JSON.stringify(res.data.response))
+            sessionStorage.setItem("apiToken", refresh(res.headers))
           }
         })
       } catch (error) {
-        this.logout()
+        this.setLogout('토큰이 만료되어서 ')
       }
     },
     getMyMarkers: async function() {
@@ -95,10 +105,31 @@ export default {
           }
           else {
             sessionStorage.setItem('my', JSON.stringify(res.data.response))
+            sessionStorage.setItem("apiToken", refresh(res.headers))
           }
         })
       } catch (error) {
-        this.logout()
+        this.setLogout('토큰이 만료되어서 ')
+      }
+    },
+    tokenAvailableCheck: async function() {
+      try {
+        await axios({
+          method: 'GET',
+          url: 'http://3.34.252.182:8080/fisher/me',
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
+          withCredentials: true
+        }).then((res) => {
+          if (res.data.success === false) {
+            this.setLogout('토큰이 만료되어서 ')
+          }
+          else {
+            sessionStorage.setItem("apiToken", refresh(res.headers))
+            this.LOGIN = true
+          }
+        })
+      } catch (error) {
+        this.setLogout('토큰이 만료되어서 ')
       }
     },
     setLogin: function() {
@@ -108,7 +139,9 @@ export default {
       this.getMyMarkers()
     },
     setLogout: function(cause) {
-      alert(`${cause}로그아웃 되었습니다.`)
+      this.notiOn = true
+      this.notiText = `${cause}로그아웃 되었습니다`
+      sessionStorage.clear
       this.LOGIN = false
     },
     menuCloseEvent: function() {
@@ -139,6 +172,7 @@ button {
 
 input {
   font-family: Pretendard-Regular;
+  padding: 1px 5px;
 }
 
 input:focus {
@@ -220,9 +254,8 @@ input:focus {
 }
 
 #login-foreground {
-  min-width: 300px;
-  width: 35%;
-  height: 400px;
+  width: 300px;
+  height: fit-content;
   border-radius: 20px;
   background-color: white;
   box-shadow: 0 1px 10px 1px #F3776B;
@@ -231,8 +264,8 @@ input:focus {
 }
 
 .container {
-  width: 100%;
-  height: 100%;
+  width: -webkit-fill-available;
+  height: -webkit-fill-available;
   font-size: 2rem;
 }
 

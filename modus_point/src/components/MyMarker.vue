@@ -1,62 +1,78 @@
 <template>
-  <div id="my-markers-container">
-    <button class="close" @click="menuCloseEvent"></button>
-    <div v-if="LOGIN">
-      <h3>내 마커 목록</h3>
-      <div id="search-result" v-if="!noResult">
-        <div @click="selectedEvent(result.latitude,result.longitude)" id="frag" class="filter-result-fragment" v-for="result in myMarkers" :key="result.MarkerId">
-          
-          <div id="marker-name">{{ result.name }}</div>
-          <span id="marker-tags" v-for="tag in result.tags.split('#')" :key="tag">{{ tag }}</span>
-          
-        </div>
-      </div>
-      <div id="no-search-result" v-if="noResult"/>
+  <div id="liked-markers-container">
+    <div v-if="LOGIN" style="margin-top: 20px; padding: 0 10px; display:flex; justify-content: space-around;" >
+      <button class="my-marker-nav">
+        <img alt="liked" @click="isLikedMenu = true" :src="starOn">
+      </button>
+      <button class="my-marker-nav">
+        <img alt="hammer" @click="isLikedMenu = false" :src="hammer">
+      </button>
     </div>
-    <div v-if="!LOGIN">
-      로그인 후 이용하실 수 있습니다
+    <button class="close" @click="menuCloseEvent"></button>
+    <div v-if="LOGIN" style="z-index: 2">
+      <div id="search-result" v-if="isLikedMenu && !LikedNoResult">
+        <div id="menu-title">좋아요 한 마커</div>
+        <fragment @click="selectedEvent(result.latitude,result.longitude)" v-for="result in likedMarkers" 
+        :key="result.markerId" :name="result.name" :address="result.address" :tags="result.tags"
+        :starSrc="starOn" :likes="getLikes(result.markerId)" :latitude="result.latitude" :longitude="result.longitude">
+        </fragment>
+      </div>
+      <div id="no-search-result" v-if="isLikedMenu && LikedNoResult">
+        <img alt="no result" src="../assets/no_markers.png">
+      </div>
+      <div id="search-result" v-if="!isLikedMenu && !MyNoResult">
+        <div id="menu-title">내가 만든 마커</div>
+        <fragment @click="selectedEvent(result.latitude,result.longitude)" v-for="result in myMarkers" 
+        :key="result.markerId" :name="result.name" :address="result.address" :tags="result.tags"
+        :starSrc="isLiked(result.markerId)" :likes="getLikes(result.markerId)" :latitude="result.latitude" :longitude="result.longitude">
+        </fragment>
+      </div>
+      <div id="no-search-result" v-if="!isLikedMenu && MyNoResult">
+        <img alt="no result" src="../assets/no_markers.png">
+      </div>
+    </div>
+    <div id="no-search-result" v-if="!LOGIN">
+      <div id="menu-title">
+        로그인이<br>필요합니다
+      </div>
     </div>
   </div>
 </template>
-
 <script>
-import axios from 'axios';
 
 export default {
-
-  mounted() {
-      this.getMyMarkers()
-  },
   data() {
-      return {
-          noResult: true,
-          myMarkers: [],
-      }
-  },
-  props: ['LOGIN'],
-  methods: {
-    getMyMarkers: async function() {
-      try {
-        await axios({
-          method: 'GET',
-          url: 'http://3.34.252.182:8080/marker/mymarkers',
-          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-          withCredentials: true
-        }).then((res) => {
+    return {
+      likedMarkers: JSON.parse(sessionStorage.getItem('liked')),
+      myMarkers: JSON.parse(sessionStorage.getItem('my')),
+      isLikedMenu: true,
 
-          if (res.data.success === false) {
-            console.log('get liked markers failed.')
-          }
-          else {
-            this.myMarkers = res.data.response
-            if (res.data.response !== []) {
-              this.noResult = false
-            }
-          }
-        })
-      } catch (error) {
-        this.logout()
-      }
+      starOn: require("../assets/star_on.png"),
+      starOff: require("../assets/star_off.png"),
+      hammer: require("../assets/hammer.png")
+    }
+  },
+  computed: {
+    LikedNoResult: function() {
+      return this.likedMarkers === [] || !this.likedMarkers ? true : false
+    },
+    MyNoResult: function() {
+      return this.myMarkers === [] || !this.myMarkers ? true : false
+    }
+  },
+  props: ['LOGIN','allMarkersLikes'],
+  methods: {
+    getLikes: function(markerId) {
+      this.allMarkersLikes.forEach((element) => {
+        if (element.markerId === markerId)
+          return element.like
+      })
+    },
+    isLiked: function(markerId) {
+      if (this.likedMarkerIds.includes(markerId))
+        return this.starOn
+      else 
+        return this.starOff
     },
     selectedEvent(Lat, Lng) {
         this.$emit('selectedEvent',Lat,Lng)
@@ -64,13 +80,28 @@ export default {
     menuCloseEvent: function() {
       this.$emit("menuCloseEvent")
     }
-  }
-
+  } 
 }
 </script>
-
 <style>
-#my-markers-container {
+#liked-markers-container {
   padding: 20px;
+}
+
+.my-marker-nav {
+  width: 120px;
+  height: 30px;
+  border: 0;
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 -5px 5px 1px #cacaca;
+  background-color: white;
+  transition-duration: 0.3s;
+}
+.my-marker-nav img {
+  height: 20px;
+}
+.my-marker-nav:hover {
+  cursor: pointer;
+  box-shadow: 0;
 }
 </style>
