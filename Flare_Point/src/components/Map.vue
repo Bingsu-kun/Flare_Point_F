@@ -219,7 +219,7 @@ export default {
         })
       },100)
     },
-    //모든 마커들을 서버또는 localStorage에서 가져온다.
+    //모든 마커들을 서버에서 가져온다.
     getAllMarkers: async function() {
 
       try {
@@ -229,7 +229,6 @@ export default {
           url: 'http://3.34.252.182:8080/marker/all',
           withCredentials: true
         }).then((res) => {
-          console.log(res.data.response)
 
           if (res.data.success === false) {
             console.log('marker loading failed by server issue.')
@@ -256,7 +255,6 @@ export default {
           data: { markerIds: markerIds },
           withCredentials: true
         }).then((res) => {
-          console.log(res.data.response)
 
           if (res.data.success === false) {
             console.log('marker loading failed by server issue.')

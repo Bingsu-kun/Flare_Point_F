@@ -11,7 +11,7 @@
           <p style="color: rgb(237,40,40)">{{ login_email_error }}</p>
           <p>패스워드</p>
           <input type="password" v-model="credentials" @keydown.enter="login">
-          <p>{{ login_password_error }}</p>
+          <p style="color: rgb(237,40,40)">{{ login_password_error }}</p>
         </div>
         <div id="las-footer">
           <button class="las-button" @click="login">로그인</button>
@@ -27,16 +27,16 @@
           <p style="font-size: 9px; color: #cacaca; text-align: center;">이미지 클릭 시 프로필 업로드</p>
           <p>이메일</p>
           <input placeholder="example@example.com" type="email" v-model="principal" @keyup="autoEmailCheck">
-          <p v-if="email_error_message !== null">{{ email_error_message }}</p>
+          <p v-if="email_error_message !== null" style="color: rgb(237,40,40)">{{ email_error_message }}</p>
           <p>비밀번호</p>
           <input placeholder="영문,숫자,특수문자 포함 8자 이상" type="password" v-model="credentials">
           <p>비밀번호 확인</p>
           <input placeholder="비밀번호를 한번 더 입력해 주세요" type="password" v-model="checkCredentials">
           <p>닉네임</p>
           <input placeholder="2자 이상 10자 이하" type="text" :value="name" @input="name = $event.target.value" @keyup="autoNameCheck">
-          <p v-if="name_error_message !== null">{{ name_error_message }}</p>
+          <p v-if="name_error_message !== null" style="color: rgb(237,40,40)">{{ name_error_message }}</p>
         </div>
-        <p>{{ signup_error_message }}</p>
+        <p style="color: rgb(237,40,40)">{{ signup_error_message }}</p>
         <div id="las-footer">
           <button class="las-button" @click="signup">회원가입</button>
         </div>
@@ -140,13 +140,6 @@ export default {
 
             if (res.data.success === false) {
               const statusCode = res.data.error.status
-        
-              if (statusCode === 401)
-                //unauthorized -> 비밀번호 불일치
-                this.login_password_error = "비밀번호가 일치하지 않습니다."
-              else if (statusCode === 406)
-                //not_acceptable -> 이메일 형식 불일치
-                this.login_email_error = "이메일 형식에 맞지 않습니다."
                 
             }
             else{
@@ -165,10 +158,15 @@ export default {
             }
           }).catch((error) => {
             console.warn(error)
-            console.log(error.response)
+            if (error.response.status === 401)
+              this.login_password_error = "비밀번호를 다시 입력해주세요."
+            else if (error.response.status === 406)
+              this.login_password_error = "이메일 또는 비밀번호를 다시 확인해주세요."
+            else
+              this.login_password_error = "존재하지 않는 이메일입니다."
           })
         } catch (error) {
-          this.login_email_error = "존재하지 않는 아이디입니다."
+          this.login_password_error = "아이디 또는 비밀번호를 잘못 입력하셨습니다."
         }
       }
       

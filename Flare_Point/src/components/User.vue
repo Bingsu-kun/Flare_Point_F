@@ -22,7 +22,7 @@
 				<div id="edit-title">닉네임 변경</div>
 			</div>
 			<div style="display: flex; flex-direction: column;">
-				<input :value="EditNick" @input="$event.target.value" id="edit-input" placeholder="변경할 닉네임을 입력해 주세요">
+				<input :value="EditNick" @input="EditNick = $event.target.value" id="edit-input" placeholder="변경할 닉네임을 입력해 주세요">
 				<div v-if="nickNameError !== ''" id="edit-error">{{ nickNameError }}</div>
 			</div>
 			<div style="display: flex; justify-content: center;">
@@ -34,10 +34,10 @@
 				<div id="edit-title">비밀번호 변경</div>
 			</div>
 			<div style="display: flex; flex-direction: column;">
-				<input :value="Pwd" @input="$event.target.value" id="edit-input" placeholder="기존 비밀번호를 입력해 주세요">
+				<input :value="Pwd" @input="Pwd = $event.target.value" id="edit-input" placeholder="기존 비밀번호를 입력해 주세요">
 				<div id="edit-error" style="color: grey">영어, 숫자, 특수문자를 포함한 8자 이상</div>
-				<input :value="EditPwd" @input="$event.target.value" id="edit-input" placeholder="새 비밀번호를 입력해 주세요">
-				<input :value="EditPwdCheck" @input="$event.target.value" id="edit-input" placeholder="새 비밀번호를 한번 더 입력해 주세요">
+				<input :value="EditPwd" @input="EditPwd = $event.target.value" id="edit-input" placeholder="새 비밀번호를 입력해 주세요">
+				<input :value="EditPwdCheck" @input="EditPwdCheck = $event.target.value" id="edit-input" placeholder="새 비밀번호를 한번 더 입력해 주세요">
 				<div v-if="pwdError !== ''" id="edit-error">{{ pwdError }}</div>
 			</div>
 			<div style="display: flex; justify-content: center; align-items: end;">

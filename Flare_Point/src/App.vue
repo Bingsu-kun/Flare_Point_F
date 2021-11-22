@@ -48,8 +48,10 @@ import Noti from './components/Noti.vue'
 export default {
   name: 'App',
   mounted() {
-    if (sessionStorage.getItem('apiToken'))
-      this.tokenAvailableCheck
+    if (sessionStorage.getItem('apiToken')){
+      this.tokenAvailableCheck()
+    }
+      
   },
   data() {
     return {
@@ -122,13 +124,15 @@ export default {
         }).then((res) => {
           if (res.data.success === false) {
             this.setLogout('토큰이 만료되어서 ')
+            console.log('need relogin')
           }
           else {
             sessionStorage.setItem("apiToken", refresh(res.headers))
-            this.LOGIN = true
+            this.setLogin()
           }
         })
       } catch (error) {
+        console.log('need relogin')
         this.setLogout('토큰이 만료되어서 ')
       }
     },
