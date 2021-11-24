@@ -55,7 +55,7 @@ export default {
     updateMarker: async function() {
 
       const markerId = this.selected.markerId
-      const fisherId = this.selected.fisherId
+      const mfId = this.selected.fisherId
       let name = this.markerName
       const latitude = this.selected.latitude
       const longitude = this.selected.longitude
@@ -70,10 +70,10 @@ export default {
       }
       try {
         await axios({
-          method: 'POST',
+          method: 'PUT',
           url: 'http://3.34.252.182:8080/marker/update',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-          data: { markerId: markerId, fisherId: fisherId, name: name, latitude: latitude, longitude: longitude, place_addr: place_addr, isPrivate: isPrivate, tagString: tagString, description: description },
+          data: { markerId: markerId, mfId: mfId, name: name, latitude: latitude, longitude: longitude, place_addr: place_addr, isPrivate: isPrivate, tagString: tagString, description: description },
           withCredentials: true
         }).then((res) => {
           if (res.data.success === false) {

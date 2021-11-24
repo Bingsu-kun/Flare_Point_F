@@ -59,12 +59,22 @@ export default {
       const longitude = this.longitude
       const place_addr = this.place_addr
       const isPrivate = this.isPrivate
-      const tagString = this.tagString
+      let tagString = this.tagString
       let description = this.description
 
       if (name === '') {
         const userName = sessionStorage.getItem("name")
         name = `${userName}님의 마커`
+        this.markerName = `${userName}님의 마커`
+      }
+      if (description === '') {
+        description = '내용이 없습니다'
+        this.description = '내용이 없습니다'
+      }
+      if (tagString === '') {
+        const userName = sessionStorage.getItem("name")
+        tagString = `#${userName}`
+        this.tagString = `#${userName}`
       }
       try {
         await axios({

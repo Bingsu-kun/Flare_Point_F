@@ -68,7 +68,7 @@ export default {
 				Name: sessionStorage.getItem('name'),
 				Image: require('../assets/user.png'),
 				Email: sessionStorage.getItem('email'),
-				Markers: /*JSON.parse(sessionStorage.getItem('my'))*/[1,2,3].length,
+				Markers: JSON.parse(sessionStorage.getItem('my')).length,
 				Likes: 0,
 
 				Editting: false,
@@ -139,12 +139,13 @@ export default {
       }
     },
 		changeName: async function() {
+			const name = this.EditNick
 			try {
 				await axios({
 					method: 'PUT',
 					url: 'http://3.34.252.182:8080/fisher/me/name/change',
 					headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-					data: { credentials: '', changeValue: this.EditNick },
+					data: { credentials: '', changeValue: name },
 					withCredentials: true
 				}).then((res) => {
 
@@ -155,6 +156,9 @@ export default {
 						this.notiOn = true
 						this.notiText = '성공적으로 변경되었습니다'
 						this.NickDuplicated = false
+						this.Name = name
+						this.EditNick = ''
+						sessionStorage.setItem("name",name)
 					}
 				}).catch((error) => {
 					if (error.response === 406)

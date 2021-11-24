@@ -145,7 +145,8 @@ export default {
             else{
               if (!sessionStorage.getItem("apiToken")){
                 sessionStorage.setItem("apiToken", res.data.response.apiToken)
-                sessionStorage.setItem("name", res.data.response.fisher.fishername)
+                sessionStorage.setItem("profImageName", res.data.response.fisher.profImageName)
+                sessionStorage.setItem("name", res.data.response.fisher.fisherName)
                 sessionStorage.setItem("role", res.data.response.fisher.role)
                 sessionStorage.setItem("email", res.data.response.fisher.email)
                 sessionStorage.setItem("id", res.data.response.fisher.id)

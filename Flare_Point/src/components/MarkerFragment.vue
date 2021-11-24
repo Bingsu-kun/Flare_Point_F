@@ -8,13 +8,13 @@
     <div id="frag-right">
       <div class="frag-link">
         <img alt="star" :src="starSrc">
-        {{ likes }}
+        <span>{{ likes }}</span>
       </div>
       <div class="frag-link" @click="findKakaoRoad(latitude,longitude)">
         <img alt="kakaomap" src="../assets/kakaomap.png">
         길찾기
       </div>
-      <div class="frag-link">
+      <div class="frag-link" @click="notiOn = true">
         <img alt="share" src="../assets/share.png">
         공유하기
       </div>
@@ -30,7 +30,11 @@
 import noti from './Noti.vue'
 
 export default {
-
+  data() {
+    return {
+      notiOn: false
+    }
+  },
   components: {
     noti
   },
@@ -47,7 +51,7 @@ export default {
 <style>
 
 .filter-result-fragment {
-  padding: 10px 20px 0 20px;
+  padding: 10px 20px 10px 20px;
   display: grid;
   grid-template-columns: 2fr 1fr;
   width: inherit;
@@ -63,6 +67,7 @@ export default {
   text-align: left;
   display: flex;
   align-content: flex-start;
+  flex-direction: column;
 }
 
 #frag-right {
@@ -70,6 +75,7 @@ export default {
   justify-content: center;
   align-content: center;
   align-items: center;
+  flex-direction: column;
 }
 
 #marker-name {

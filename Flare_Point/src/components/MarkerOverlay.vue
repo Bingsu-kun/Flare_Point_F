@@ -9,14 +9,14 @@
         <div class="marker-link-buttons">
           <img alt="star" v-if="iLiked" :src="starOn" @click="dislike">
           <img alt="star" v-if="!iLiked" :src="starOff" @click="like">
-          <div id="marker-overlay-like" style="font-size: 11px">{{ getLikeCount(seleted.markerId) }}</div>
+          <div style="font-size: 11px">{{ likeCount }}</div>
         </div>
         <div class="marker-link-buttons">
           <img alt="kakaomap" :src="kakaomap" @click="findKakaoRoad(selected.latitude,selected.longitude)">
           <div style="font-size: 11px">길찾기</div>
         </div>
         <div class="marker-link-buttons">
-          <img alt="share" :src="shareIcon">
+          <img alt="share" :src="shareIcon" @click="notiOn = true; notiText = '기능 개발 중 입니다'">
           <div style="font-size: 11px">공유하기</div>
         </div>
       </div>
@@ -26,14 +26,14 @@
         <comment :comment="selected.description" :userProfImgName="makerProfImgName" :userName="makerName" :date="selected.createdAt.slice(0,10)"></comment>
       </div>
     </div>
-    <button class="comment-button" v-if="!itsMine">방문 후기 남기기</button>
+    <button class="comment-button" v-if="!itsMine" @click="notiOn = true; notiText = '기능 개발 중 입니다'">방문 후기 남기기</button>
     <div id="marker-link" v-if="itsMine">
       <div class="marker-link-buttons">
-        <img alt="trash" @click="confirmDel" :src="trash">
+        <img alt="trash" @click="confirmDel = true" :src="trash">
         <div style="font-size: 11px">삭제하기</div>
       </div>
       <div class="marker-link-buttons">
-        <img alt="fix" :src="fix" @click="notiOn = true">
+        <img alt="fix" :src="fix" @click="doUpdate">
         <div style="font-size: 11px">수정하기</div>
       </div>
     </div>
@@ -48,7 +48,7 @@
       <div>후기가 없습니다</div>
     </div>
     <transition name="noti">
-      <noti v-if="notiOn" @notiEvent="notiOn = false" :text="'기능 개발 중 입니다'"></noti>
+      <noti v-if="notiOn" @notiEvent="notiOn = false" :text="notiText"></noti>
     </transition>
   </div>
 </template>
@@ -57,16 +57,29 @@
 import axios from 'axios';
 import comment from './Comment.vue'
 import noti from './Noti.vue'
+import refresh from '../getRefreshedToken'
 
 export default {
   mounted() {
-    JSON.parse(sessionStorage.getItem('liked')).array.forEach(element => {
-      this.likedMarkers.push(element)
-    });
-    JSON.parse(sessionStorage.getItem('my')).array.forEach(element => {
-      this.myMarkers.push(element)
-    });
-    this.getMadeBy
+    if (sessionStorage.getItem('apiToken')) {
+      if (sessionStorage.getItem('liked')) {
+        JSON.parse(sessionStorage.getItem('liked')).forEach(element => {
+          this.likedMarkers.push(element)
+        });
+      }
+      if (sessionStorage.getItem('my')) {
+        JSON.parse(sessionStorage.getItem('my')).forEach(element => {
+          this.myMarkers.push(element)
+        });
+      }
+    }
+    
+    this.getMadeBy()
+    this.getLikeCount(this.selected.markerId)
+  },
+  updated() {
+    this.getMadeBy()
+    this.getLikeCount(this.selected.markerId)
   },
   computed: {
     iLiked: function() {
@@ -101,8 +114,10 @@ export default {
       makerProfImgName: '',
       makerName: '',
       comments: [],
+      likeCount: 0,
 
       notiOn: false,
+      notiText: '',
       
       starOn: require("../assets/star_on.png"),
       starOff: require("../assets/star_off.png"),
@@ -128,7 +143,7 @@ export default {
             this.likeCount = '?'
           }
           else {
-            return res.data.response.like
+            this.likeCount = res.data.response
           }
         })
       } catch (error) {
@@ -148,8 +163,8 @@ export default {
             console.warn('get fisher failed.' + res.data.response)
           }
           else {
-            this.makerProfImgName = res.data.response.fisher.profImageName
-            this.makerName = res.data.response.fisher.fishername
+            this.makerProfImgName = res.data.response.profImageName
+            this.makerName = res.data.response.fisherName
           }
         })
       } catch (error) {
@@ -176,8 +191,9 @@ export default {
             }
             else {
               this.likedMarkers.push(this.selected)
-              sessionStorage.setItem('liked',this.likedMarkers)
-              document.querySelector('#marker-overlay-like').innerText = document.querySelector('#marker-overlay-like').innerText + 1
+              sessionStorage.setItem('apiToken',refresh(res.headers))
+              sessionStorage.setItem('liked',JSON.stringify(this.likedMarkers))
+              this.likeCount += 1
             }
           })
         } catch (error) {
@@ -205,8 +221,9 @@ export default {
               if (mk.markerId === this.selected.markerId)
                 this.likedMarkers.pop(mk)
             }
-            sessionStorage.setItem('liked',this.likedMarkers)
-            document.querySelector('#marker-overlay-like').innerText = document.querySelector('#marker-overlay-like').innerText - 1
+            sessionStorage.setItem('liked',JSON.stringify(this.likedMarkers))
+            sessionStorage.setItem('apiToken',refresh(res.headers))
+            this.likeCount -= 1
           }
         })
       } catch (error) {
@@ -228,14 +245,15 @@ export default {
             console.log('deleting failed.' + res.data.response)
           }
           else {
+            sessionStorage.setItem('apiToken',refresh(res.headers))
             this.deleteEvent(this.selected)
-            alert("삭제되었습니다.")
           }
         })
       } catch (error) {
         console.log('bad connection.' + error)
       }
     },
+    //좋아요 한 마커 또는 만든 마커 리스트에 포함되어 있는지 체크하는 함수
     checkMarker: function(markers) {
       let cnt = 0
       for (let mk of markers) {
@@ -261,7 +279,7 @@ export default {
     },
     deleteEvent: function(selected) {
       this.confirmDel = false
-      this.menuCloseEvent()
+      this.$emit("overlayCloseEvent")
       this.$emit("deleteEvent",selected)
     }
 
@@ -346,7 +364,7 @@ export default {
 .negative-button {
   width: 80px;
   height: 40px;
-  margin: 0 20px;
+  margin: 10px 20px;
   background-color: #F3776B;
   color: white;
   border: 0;
@@ -362,7 +380,7 @@ export default {
 .positive-button {
   width: 80px;
   height: 40px;
-  margin: 0 20px;
+  margin: 10px 20px;
   background-color: rgb(170,170,170);
   color: black;
   border: 0;

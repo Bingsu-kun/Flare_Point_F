@@ -24,12 +24,12 @@
     </transition>
     <transition name="menu">
       <div class="menu-foreground" v-if="SHOW_MY">
-        <menu-my :LOGIN="LOGIN" :allMarkersLikes="allMarkersLikes" @logout="logout" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></menu-my>
+        <menu-my :allMarkersLikes="allMarkersLikes" @logout="logout" @selectedEvent="selectedEvent" @menuCloseEvent="menuCloseEvent"></menu-my>
       </div>
     </transition>
     <transition name="menu">
       <div class="menu-foreground" v-if="SHOW_THIS_MARKER">
-        <marker-overlay :selected="selected" @doUpdate="editEvent" @deleteEvent="deleteEvent" @showLoginForm="showLoginForm" @overlayCloseEvent="SHOW_THIS_MARKER = false"></marker-overlay>
+        <marker-overlay :LOGIN="LOGIN" :selected="selected" @doUpdate="editEvent" @deleteEvent="deleteEvent" @showLoginForm="showLoginForm" @overlayCloseEvent="SHOW_THIS_MARKER = false"></marker-overlay>
       </div>
     </transition>
   </div>
@@ -164,6 +164,8 @@ export default {
         kakao.maps.event.addListener(map, 'rightclick', function(mouseEvent) {
           let beforeMaker = document.querySelector('#marker-maker')
           map.panTo(new kakao.maps.LatLng(mouseEvent.latLng.Ma, mouseEvent.latLng.La))
+          sessionStorage.setItem('rightLat',mouseEvent.latLng.Ma)
+          sessionStorage.setItem('rightLng',mouseEvent.latLng.La)
           if (beforeMaker === null) {
             const markermaker = new kakao.maps.CustomOverlay({
               map: map,
@@ -186,17 +188,16 @@ export default {
             })
           }
         })
-        // 센터 기준으로 어디까지 마커 검색해서 불러올지 로직 작성
+        
         return map;
       }
     },
     initMarkerButtonListener: function() {
       const button = document.querySelector('.marker-button')
       const maker = document.querySelector('#marker-maker')
-      const center = this.map.getCenter()
-      this.centerLat = center.Ma
-      this.centerLng = center.La
       const geocoder = new kakao.maps.services.Geocoder();
+      this.centerLat = sessionStorage.getItem('rightLat')
+      this.centerLng = sessionStorage.getItem('rightLng')
       const coord = new kakao.maps.LatLng(this.centerLat, this.centerLng);
       const callback = (result, status) => {
         if (status === kakao.maps.services.Status.OK) {
@@ -245,7 +246,7 @@ export default {
     getAllMarkersLikes: async function() {
       let markerIds = []
       for (let i = 0; i < this.markers.length; i++) {
-        markerIds.push(this.markers[i])
+        markerIds.push(this.markers[i].markerId)
       }
       try {
         //axios로 모든 마커 가져오기
@@ -260,12 +261,8 @@ export default {
             console.log('marker loading failed by server issue.')
           }
           else {
-            const like = (markerId, like) => {
-              this.markerId = markerId,
-              this.like = like
-            }
             for (let i = 0; i < markerIds.length; i++) {
-              this.allMarkersLikes.push(new like(markerIds[i],res.data.response[i]))
+              this.allMarkersLikes.push([markerIds[i],res.data.response[i]])
             }
           }
 
@@ -309,7 +306,7 @@ export default {
         kakao.maps.event.addListener(marker,'click',() => {
           this.map.panTo(new kakao.maps.LatLng(Lat,Lng))
           this.selected = findSelected(this.markers,Lat,Lng)
-          takeALook
+          this.SHOW_THIS_MARKER = true
         })
     
         this.renderedMarkers.push(marker)
@@ -328,7 +325,7 @@ export default {
           kakao.maps.event.addListener(marker,'click',() => {
             this.map.panTo(new kakao.maps.LatLng(Lat,Lng))
             this.selected = findSelected(this.markers,Lat,Lng)
-            takeALook
+            this.SHOW_THIS_MARKER = true
           })
 
           this.renderedMarkers.push(marker)
@@ -340,9 +337,6 @@ export default {
             return mk
         }
       }
-      const takeALook = () => {
-        this.SHOW_THIS_MARKER = true
-      }
     },
     saveEvent: function(savedMarker) {
       this.SHOW_SAVE_MAKER = false
@@ -350,10 +344,14 @@ export default {
 
       //새로 생성된 마커를 배열에 추가
       this.markers.push(savedMarker)
+      const my = JSON.parse(sessionStorage.getItem('my'))
+      my.push(savedMarker)
+      sessionStorage.setItem('my',JSON.stringify(my))
       this.map.setLevel(3,{ animate: true })
     },
     updateEvent: function(updatedMarker) {
       this.selected = updatedMarker
+      this.SHOW_UPDATE_MAKER = false
       this.SHOW_THIS_MARKER = true
     },
     editEvent: function() {
@@ -363,12 +361,13 @@ export default {
     deleteEvent: function(selected) {
       this.renderedMarkers.forEach((element) => {
         if (selected.markerId === parseInt(element.getTitle()))
-          element.setVisible(false)
+          element.setMap(false)
       })
-      this.markers.forEach((element) => {
-        if (element.markerId === selected.markerId)
-          this.markers.pop(element)
-      })
+      for (let i = 0; i < this.markers.length; i++) {
+        if (this.markers[i].markerId === selected.markerId)
+          this.markers.splice(i,0)
+          break
+      }
     },
     selectedEvent: function(Lat,Lng) {
       this.map.panTo(new kakao.maps.LatLng(Lat,Lng))
@@ -393,16 +392,6 @@ export default {
     },
     showLoginForm: function() {
       this.$emit("showLoginForm")
-    },
-    reRender: function() {
-      this.isLoading = true
-      this.renderedMarkers.forEach((element) => {
-        element.remove()
-      })
-      for (let mk of this.markers) {
-        this.renderMarker(mk)
-      }
-      this.isLoading = false
     },
     logout: function(cause) {
       this.$emit('logout',cause)

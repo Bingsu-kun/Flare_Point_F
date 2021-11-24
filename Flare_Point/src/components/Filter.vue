@@ -9,11 +9,13 @@
     </div>
     <div id="trending-tags">
       <span>인기: </span>
-      <span class="t-tag" @click="tagSelected(tag)" v-for="tag in trendingTags" :key="tag">{{ tag }}</span>
+      <span class="t-tag" @click="tagSelected(tag)" v-for="tag in trendingTags" :key="tag">
+        <div>{{ tag }}</div>
+      </span>
     </div>
     <div id="search-result" v-if="!noResult">
       <fragment @click="selectedEvent(result.latitude,result.longitude)" v-for="result in filteredMarkers" 
-      :key="result.markerId" :name="result.name" :address="result.address" :tags="result.tags"
+      :key="result.markerId" :name="result.name" :address="result.place_addr" :tags="result.tags"
       :starSrc="isLiked(result.markerId)" :likes="getLikes(result.markerId)" :latitude="result.latitude" :longitude="result.longitude">
       </fragment>
     </div>
@@ -33,6 +35,7 @@ export default {
   mounted() {
     this.isLoading = true
     this.getTrendingTags()
+    this.getLikedMarkerIds()
   },
   data() {
     return {
@@ -62,6 +65,9 @@ export default {
       document.querySelectorAll('.t-tag').forEach((element) => {
         if (this.keyword.includes(element.innerText)) {
           element.style.backgroundColor = '#F3776B'
+        }
+        else {
+          element.style.backgroundColor = 'white'
         }
       })
     }
@@ -103,10 +109,10 @@ export default {
       }
     },
     getLikes: function(markerId) {
-      this.allMarkersLikes.forEach((element) => {
-        if (element.markerId === markerId)
-          return element.like
-      })
+      for (let mk of this.allMarkersLikes) {
+        if (mk[0] === markerId)
+          return mk[1]
+      }
     },
     isLiked: function(markerId) {
       if (this.likedMarkerIds.includes(markerId))
@@ -115,7 +121,7 @@ export default {
         return this.starOff
     },
     getLikedMarkerIds: function() {
-      JSON.parse(sessionStorage.getItem("liked")).array.forEach((element) => {
+      JSON.parse(sessionStorage.getItem("liked")).forEach((element) => {
         this.likedMarkerIds.push(element.markerId)
       })
     },
@@ -124,20 +130,20 @@ export default {
       this.filteredMarkers = []
       this.throwMarkers = []
 
-      this.markers.forEach(element => {
-        if (this.keyword === '') {
-          this.filteredMarkers.push(element)
-        }
-        else {
-          this.filteredMarkers.push(element)
+      if (this.keyword === '') {
+        this.filteredMarkers = this.markers
+      } else {
+        for (let mk of this.markers) {
+          this.filteredMarkers.push(mk)
           for (let key of keywords) {
-            if (element.name.indexOf(key) === -1 && element.tags.indexOf(key) === -1){
-              this.throwMarkers.push(element)
+            if (mk.name.indexOf(key) === -1 && mk.tags.indexOf(key) === -1) {
+              this.throwMarkers.push(mk)
               this.filteredMarkers.pop()
+              break
             }
           }
         }
-      });
+      }
       if (this.filteredMarkers.length === 0)
         this.noResult = true
       else
@@ -172,12 +178,17 @@ export default {
 }
 
 .t-tag {
-  width: 40px;
+  padding: 0 10px;
+  width: fit-content;
   height: 20px;
   border: 0;
   border-radius: 10px;
   background-color: white;
   box-shadow: 1px 1px 5px 1px #cacaca;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
 }
 
 .t-tag:hover {
