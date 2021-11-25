@@ -35,7 +35,8 @@ export default {
   mounted() {
     this.isLoading = true
     this.getTrendingTags()
-    this.getLikedMarkerIds()
+    if (sessionStorage.getItem('apiToken'))
+      this.getLikedMarkerIds()
   },
   data() {
     return {

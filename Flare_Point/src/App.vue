@@ -34,6 +34,7 @@
     <transition name="noti">
       <noti v-if="notiOn" @notiEvent="notiOn = false" :text="notiText"></noti>
     </transition>
+    <on-boarding v-if="onBoardingOn" @onBoardingCloseEvent="onBoardingOn = false"></on-boarding>
   </div>
 </template>
 
@@ -44,6 +45,7 @@ import User from './components/User.vue'
 import refresh from './getRefreshedToken.js'
 import axios from 'axios'
 import Noti from './components/Noti.vue'
+import OnBoarding from './components/OnBoarding.vue'
 
 export default {
   name: 'App',
@@ -51,7 +53,7 @@ export default {
     if (sessionStorage.getItem('apiToken')){
       this.tokenAvailableCheck()
     }
-      
+    this.onBoardingCheck()
   },
   data() {
     return {
@@ -62,14 +64,16 @@ export default {
       SHOW_SEARCH: false,
       SHOW_MY: false,
       notiOn: false,
-      notiText: ''
+      notiText: '',
+      onBoardingOn: true
     }
   },
   components: {
     LoginAndSignup,
     KakaoMap,
     User,
-    Noti
+    Noti,
+    OnBoarding
   },
   methods: {
     getLikedMarkers: async function() {
@@ -135,6 +139,10 @@ export default {
         console.log('need relogin')
         this.setLogout('토큰이 만료되어서 ')
       }
+    },
+    onBoardingCheck: function() {
+      if (localStorage.getItem('check') === 'false')
+        this.onBoardingOn = false
     },
     setLogin: function() {
       this.LOGIN = true
@@ -290,7 +298,19 @@ input:focus {
 
 @media screen and (max-width: 768px){
   .menu-buttons {
-    font-size: 14px;
+    font-size: 11px;
+  }
+}
+@media screen and (max-width: 550px){
+  .menu-buttons {
+    font-size: 5px;
+    margin: 0 10px;
+  }
+}
+@media screen and (max-width: 450px){
+  .menu-buttons {
+    font-size: 3px;
+    margin: 0 5px;
   }
 }
 
