@@ -121,7 +121,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'https://3.34.252.182:8080/marker/mylikecount',
+          url: 'https://3.34.252.182/marker/mylikecount',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
@@ -143,7 +143,7 @@ export default {
 			try {
 				await axios({
 					method: 'PUT',
-					url: 'https://3.34.252.182:8080/fisher/me/name/change',
+					url: 'https://3.34.252.182/fisher/me/name/change',
 					headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
 					data: { credentials: '', changeValue: name },
 					withCredentials: true
@@ -174,7 +174,7 @@ export default {
 			try {
 					await axios({
 						method: 'GET',
-						url: 'https://3.34.252.182:8080/fisher/me/password/change',
+						url: 'https://3.34.252.182/fisher/me/password/change',
 						headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
 						data: { credentials: this.Pwd, changeValue: this.EditPwd },
 						withCredentials: true

@@ -80,7 +80,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'https://3.34.252.182:8080/marker/mylikelist',
+          url: 'https://3.34.252.182/marker/mylikelist',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
@@ -101,7 +101,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'https://3.34.252.182:8080/marker/mymarkers',
+          url: 'https://3.34.252.182/marker/mymarkers',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
@@ -122,7 +122,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'https://3.34.252.182:8080/fisher/me',
+          url: 'https://3.34.252.182/fisher/me',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {

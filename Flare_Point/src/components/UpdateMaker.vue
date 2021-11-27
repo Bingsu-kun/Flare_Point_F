@@ -71,7 +71,7 @@ export default {
       try {
         await axios({
           method: 'PUT',
-          url: 'https://3.34.252.182:8080/marker/update',
+          url: 'https://3.34.252.182/marker/update',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           data: { markerId: markerId, mfId: mfId, name: name, latitude: latitude, longitude: longitude, place_addr: place_addr, isPrivate: isPrivate, tagString: tagString, description: description },
           withCredentials: true

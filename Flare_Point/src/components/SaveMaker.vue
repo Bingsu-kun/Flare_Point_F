@@ -79,7 +79,7 @@ export default {
       try {
         await axios({
           method: 'POST',
-          url: 'https://3.34.252.182:8080/marker/create',
+          url: 'https://3.34.252.182/marker/create',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           data: { name: name, latitude: latitude, longitude: longitude, place_addr: place_addr, isPrivate: isPrivate, tagString: tagString, description: description },
           withCredentials: true
