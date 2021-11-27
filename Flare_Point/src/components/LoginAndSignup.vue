@@ -98,7 +98,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'http://3.34.252.182:8080/fisher/me',
+          url: 'https://3.34.252.182:8080/fisher/me',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
@@ -132,7 +132,7 @@ export default {
         try {
           await axios({
             method: 'POST',
-            url: 'http://3.34.252.182:8080/fisher/login',
+            url: 'https://3.34.252.182:8080/fisher/login',
             data: { principal: this.principal.trim(), credentials: this.credentials },
             headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
             withCredentials: true
@@ -192,7 +192,7 @@ export default {
         try {
           await axios({
             method: 'POST',
-            url: 'http://3.34.252.182:8080/fisher/join',
+            url: 'https://3.34.252.182:8080/fisher/join',
             data: { principal: this.principal.trim(), credentials: this.credentials, profImageName: 'default', name: this.name.trim() },
             withCredentials: true
           })
@@ -249,7 +249,7 @@ export default {
       try {
         await axios({
           method: 'POST',
-          url: 'http://3.34.252.182:8080/fisher/join/email/exists',
+          url: 'https://3.34.252.182:8080/fisher/join/email/exists',
           data: { req: this.principal.trim() }
         })
         .then((res) => {
@@ -282,7 +282,7 @@ export default {
         try {
         await axios({
           method: 'POST',
-          url: 'http://3.34.252.182:8080/fisher/join/name/exists',
+          url: 'https://3.34.252.182:8080/fisher/join/name/exists',
           data: { req: this.name.trim() }
         })
         .then((res) => {

@@ -80,15 +80,14 @@ export default {
 
       try {
         await axios({
-          method: 'POST',
-          url: 'http://3.34.252.182:8080/tag/top',
-          data: { count: TOP }
+          method: 'GET',
+          url: `https://3.34.252.182:8080/tag/top/${TOP}`
         }).then((res) => {
           if (res.data.success === false) {
             console.log('get trending tag is failed.')
           }
           else {
-            for (let i = 0; i < TOP; i++) {
+            for (let i = 0; i < res.data.response.length; i++) {
               this.trendingTags.push(res.data.response[i].tag)
             }
           }
