@@ -81,7 +81,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: `https://3.34.252.182/tag/top/${TOP}`
+          url: `https://api.flarepoint.kro.kr/tag/top/${TOP}`
         }).then((res) => {
           if (res.data.success === false) {
             console.log('get trending tag is failed.')

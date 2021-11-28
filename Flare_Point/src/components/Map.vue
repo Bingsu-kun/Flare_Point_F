@@ -227,7 +227,7 @@ export default {
         //axios로 모든 마커 가져오기
         await axios({
           method: 'GET',
-          url: 'https://3.34.252.182/marker/all',
+          url: 'https://api.flarepoint.kro.kr/marker/all',
           withCredentials: true
         }).then((res) => {
 
@@ -252,7 +252,7 @@ export default {
         //axios로 모든 마커 가져오기
         await axios({
           method: 'POST',
-          url: 'https://3.34.252.182/marker/likes',
+          url: 'https://api.flarepoint.kro.kr/marker/likes',
           data: { markerIds: markerIds },
           withCredentials: true
         }).then((res) => {
