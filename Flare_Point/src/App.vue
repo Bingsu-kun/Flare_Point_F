@@ -46,13 +46,13 @@ import refresh from './getRefreshedToken.js'
 import axios from 'axios'
 import Noti from './components/Noti.vue'
 import OnBoarding from './components/OnBoarding.vue'
+import getCookie from './getCookie.js'
 
 export default {
   name: 'App',
   mounted() {
-    if (sessionStorage.getItem('apiToken')){
+    if (sessionStorage.getItem('apiToken') || getCookie("refreshToken"))
       this.tokenAvailableCheck()
-    }
     this.onBoardingCheck()
   },
   data() {
@@ -107,6 +107,7 @@ export default {
         }).then((res) => {
 
           if (res.data.success === false) {
+            this.setLogout('토큰이 만료되어서 ')
             console.log('get my markers failed.')
           }
           else {

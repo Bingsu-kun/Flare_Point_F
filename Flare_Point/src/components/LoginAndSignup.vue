@@ -177,7 +177,7 @@ export default {
 
     signup: async function() {
       //회원가입 처리
-
+      this.signup_error_message = ''
       // 비밀번호 확인 체크
       if (this.credentials !== this.checkCredentials)
         this.signup_error_message = "비밀번호와 비밀번호 확인이 일치하지 않습니다."
@@ -212,6 +212,10 @@ export default {
               alert(`가입되었습니다! 환영합니다 ${this.name.trim()}님:)`)
 
               this.isLogin = true
+            }
+          }).catch ((error) => {
+            if (error.response.status === 406) {
+              this.signup_error_message = "이메일 또는 비밀번호가 형식에 맞지 않습니다."
             }
           })
         } catch (error) {
