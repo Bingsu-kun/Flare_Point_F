@@ -8,10 +8,9 @@
         <div>
           <p>이메일</p>
           <input type="email" v-model="principal">
-          <p style="color: rgb(237,40,40)">{{ login_email_error }}</p>
           <p>패스워드</p>
           <input type="password" v-model="credentials" @keydown.enter="login">
-          <p style="color: rgb(237,40,40)">{{ login_password_error }}</p>
+          <p style="color: rgb(237,40,40)">{{ login_error }}</p>
         </div>
         <div id="las-footer">
           <button class="las-button" @click="login">로그인</button>
@@ -28,6 +27,7 @@
           <p>이메일</p>
           <input placeholder="example@example.com" type="email" v-model="principal" @keyup="autoEmailCheck">
           <p v-if="email_error_message !== null" style="color: rgb(237,40,40)">{{ email_error_message }}</p>
+          <p v-if="emailChecked" style="color: rgb(75,100,255)">{{ email_success_message }}</p>
           <p>비밀번호</p>
           <input placeholder="영문,숫자,특수문자 포함 8자 이상" type="password" v-model="credentials">
           <p>비밀번호 확인</p>
@@ -35,6 +35,7 @@
           <p>닉네임</p>
           <input placeholder="2자 이상 10자 이하" type="text" :value="name" @input="name = $event.target.value" @keyup="autoNameCheck">
           <p v-if="name_error_message !== null" style="color: rgb(237,40,40)">{{ name_error_message }}</p>
+          <p v-if="nameChecked" style="color: rgb(75,100,255)">{{ name_success_message }}</p>
         </div>
         <p style="color: rgb(237,40,40)">{{ signup_error_message }}</p>
         <div id="las-footer">
@@ -67,10 +68,11 @@ export default {
       InlineLogo: require("../assets/inline_logo.png"),
       Image: require("../assets/user.png"),
 
-      login_email_error: null,
-      login_password_error: null,
+      login_error: null,
       email_error_message: null,
-      name_error_message: null, 
+      email_success_message: null,
+      name_error_message: null,
+      name_success_message: null,
       signup_error_message: null,
 
       principal: null,
@@ -89,6 +91,16 @@ export default {
   },
   components: {
     Noti
+  },
+  computed: {
+    signup_error_message: function() {
+      if (this.credentials !== this.checkCredentials)
+        return "비밀번호와 비밀번호 확인이 일치하지 않습니다."
+      else if (this.credentials.length < 8)
+        return "비밀번호가 8자 미만입니다."
+      else
+        return ''
+    }
   },
   methods: {
 
@@ -121,14 +133,10 @@ export default {
 
       //axios를 이용해서 백에 /login 
       if (this.principal === null || this.credentials === null) {
-        if (this.principal === null)
-          this.login_email_error = "이메일은 필수로 입력해 주세요!"
-        if (this.credentials === null)
-          this.login_password_error = "비밀번호는 필수로 입력해 주세요!"
+        this.login_error = "이메일과 비밀번호는 필수로 입력해 주세요!"
       }
       else {
-        this.login_email_error = null
-        this.login_password_error = null
+        this.login_error = null
         try {
           await axios({
             method: 'POST',
@@ -160,14 +168,14 @@ export default {
           }).catch((error) => {
             console.warn(error)
             if (error.response.status === 401)
-              this.login_password_error = "비밀번호를 다시 입력해주세요."
+              this.login_error = "비밀번호를 다시 입력해주세요."
             else if (error.response.status === 406)
-              this.login_password_error = "이메일 또는 비밀번호를 다시 확인해주세요."
+              this.login_error = "이메일 또는 비밀번호를 다시 확인해주세요."
             else
-              this.login_password_error = "존재하지 않는 이메일입니다."
+              this.login_error = "존재하지 않는 이메일입니다."
           })
         } catch (error) {
-          this.login_password_error = "아이디 또는 비밀번호를 잘못 입력하셨습니다."
+          this.login_error = "아이디 또는 비밀번호를 잘못 입력하셨습니다."
         }
       }
       
@@ -179,16 +187,7 @@ export default {
       //회원가입 처리
       this.signup_error_message = ''
       // 비밀번호 확인 체크
-      if (this.credentials !== this.checkCredentials)
-        this.signup_error_message = "비밀번호와 비밀번호 확인이 일치하지 않습니다."
-      else if (this.credentials.length < 8)
-        this.signup_error_message = "비밀번호가 8자 미만입니다."
-      // email 또는 닉네임 중복 체크 안했을 때.
-      else if (this.emailChecked === false)
-        this.signup_error_message = "이메일 중복체크를 진행해 주세요!"
-      else if (this.nameChecked === false)
-        this.signup_error_message = "닉네임 중복체크를 진행해 주세요!"
-      else {
+      if (this.credentials === this.checkCredentials && this.credentials.length < 8){
         try {
           await axios({
             method: 'POST',
@@ -222,7 +221,6 @@ export default {
           console.error("unexpected error occured" + error)
         }
       }
-
     },
 
     //------------------------------------ exist check ---------------------------------------
@@ -261,15 +259,16 @@ export default {
           if (res.data.success === false) {
             const statusCode = res.data.error.status
 
-            if (statusCode === 400)
-              this.email_error_message = "이메일 형식에 맞지 않습니다."
-            else if (statusCode === 409) 
+            if (statusCode === 409) 
               this.email_error_message = "이미 같은 이메일이 존재합니다.."
           }
           else {
             this.emailChecked = true
-            this.email_error_message = "사용 가능한 이메일입니다!"
+            this.email_success_message = "사용 가능한 이메일입니다!"
           }
+        }).catch((error) => {
+          if (error.response.status === 406)
+            this.email_error_message = "이메일 형식에 맞지 않습니다."
         })
       } catch (error) {
         console.warn("unexpected error occured" + error)
@@ -299,7 +298,7 @@ export default {
           }
           else{
             this.nameChecked = true
-            this.name_error_message = "사용 가능한 닉네임입니다!"
+            this.name_success_message = "사용 가능한 닉네임입니다!"
           }
         })
       } catch (error) {
@@ -390,7 +389,7 @@ p {
 }
 
 .las-button:hover {
-  background-color: rgb(255,255,255);
+  background-color: rgb(255, 255, 255);
   color: black;
 }
 

@@ -29,7 +29,7 @@
     </transition>
     <transition name="menu">
       <div class="menu-foreground" v-if="SHOW_THIS_MARKER">
-        <marker-overlay :LOGIN="LOGIN" :selected="selected" @doUpdate="editEvent" @deleteEvent="deleteEvent" @showLoginForm="showLoginForm" @overlayCloseEvent="SHOW_THIS_MARKER = false"></marker-overlay>
+        <marker-overlay :LOGIN="LOGIN" :selected="selected" @likeUpdate="getAllMarkersLikes" @doUpdate="editEvent" @deleteEvent="deleteEvent" @showLoginForm="showLoginForm" @overlayCloseEvent="SHOW_THIS_MARKER = false"></marker-overlay>
       </div>
     </transition>
   </div>
@@ -314,7 +314,7 @@ export default {
       else {
         //isPrivate가 true일 경우 제작자가 지금 로그인한 사람과 같은지 확인 후 렌더한다.
         const id = sessionStorage.getItem('id')
-        if (id === mk.fisherId ){
+        if (parseInt(id) === mk.fisherId ){
           const marker = new kakao.maps.Marker({
             position: new kakao.maps.LatLng(Lat,Lng), // 마커의 좌표
             image : new kakao.maps.MarkerImage(markerImageUrl(likes), new kakao.maps.Size(36, 36), { offset : new kakao.maps.Point(18, 36) }), // 마커의 이미지

@@ -55,6 +55,7 @@ export default {
       }
       setTimeout(() => {
         this.isLoading = false
+        this.keyword = ''
         if (this.searchResults.length === 0)
           this.noResult = true
       },2000)

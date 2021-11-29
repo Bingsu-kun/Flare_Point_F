@@ -134,14 +134,29 @@ export default {
         this.filteredMarkers = this.markers
       } else {
         for (let mk of this.markers) {
-          this.filteredMarkers.push(mk)
-          for (let key of keywords) {
-            if (mk.name.indexOf(key) === -1 && mk.tags.indexOf(key) === -1) {
-              this.throwMarkers.push(mk)
-              this.filteredMarkers.pop()
-              break
+          if (mk.isPrivate === false){
+            this.filteredMarkers.push(mk)
+            for (let key of keywords) {
+              if (mk.name.indexOf(key) === -1 && mk.tags.indexOf(key) === -1) {
+                this.throwMarkers.push(mk)
+                this.filteredMarkers.pop()
+                break
+              }
             }
           }
+          else {
+            if (parseInt(sessionStorage.getItem('id')) === mk.fisherId) {
+              this.filteredMarkers.push(mk)
+              for (let key of keywords) {
+                if (mk.name.indexOf(key) === -1 && mk.tags.indexOf(key) === -1) {
+                  this.throwMarkers.push(mk)
+                  this.filteredMarkers.pop()
+                  break
+                }
+              }
+            }
+          }
+          
         }
       }
       if (this.filteredMarkers.length === 0)

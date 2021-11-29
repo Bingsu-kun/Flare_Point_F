@@ -281,6 +281,9 @@ export default {
       this.confirmDel = false
       this.$emit("overlayCloseEvent")
       this.$emit("deleteEvent",selected)
+    },
+    likeUpdate: function() {
+      this.$emit("likeUpdate")
     }
 
   },
