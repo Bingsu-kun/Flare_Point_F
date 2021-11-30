@@ -190,6 +190,7 @@ export default {
               console.log('get like failed.' + res.data.response)
             }
             else {
+              this.likeUpdate()
               this.likedMarkers.push(this.selected)
               sessionStorage.setItem('apiToken',refresh(res.headers))
               sessionStorage.setItem('liked',JSON.stringify(this.likedMarkers))
@@ -221,6 +222,7 @@ export default {
               if (mk.markerId === this.selected.markerId)
                 this.likedMarkers.pop(mk)
             }
+            this.likeUpdate()
             sessionStorage.setItem('liked',JSON.stringify(this.likedMarkers))
             sessionStorage.setItem('apiToken',refresh(res.headers))
             this.likeCount -= 1

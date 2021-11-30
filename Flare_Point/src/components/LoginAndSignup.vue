@@ -73,11 +73,10 @@ export default {
       email_success_message: null,
       name_error_message: null,
       name_success_message: null,
-      signup_error_message: null,
 
       principal: null,
-      credentials: null,
-      checkCredentials: null,
+      credentials: '',
+      checkCredentials: '',
       name: null,
 
       emailChecked: false,
@@ -96,7 +95,7 @@ export default {
     signup_error_message: function() {
       if (this.credentials !== this.checkCredentials)
         return "비밀번호와 비밀번호 확인이 일치하지 않습니다."
-      else if (this.credentials.length < 8)
+      else if (this.credentials.length > 0 && this.credentials.length < 8)
         return "비밀번호가 8자 미만입니다."
       else
         return ''
@@ -105,29 +104,6 @@ export default {
   methods: {
 
     //--------------------------- login -----------------------------------
-
-    autoLogin: async function() {
-      try {
-        await axios({
-          method: 'GET',
-          url: 'https://api.flarepoint.kro.kr/fisher/me',
-          headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
-          withCredentials: true
-        }).then((res) => {
-
-          if (res.data.success === false) {
-            console.log('refreshToken is expired.')
-          }
-          else {
-            sessionStorage.setItem('apiToken', refresh(res.headers))
-
-            this.loginEvent()
-          }
-        })
-      } catch (error) {
-        console.log(error)
-      }
-    },
 
     login: async function() {
 
@@ -185,9 +161,8 @@ export default {
 
     signup: async function() {
       //회원가입 처리
-      this.signup_error_message = ''
       // 비밀번호 확인 체크
-      if (this.credentials === this.checkCredentials && this.credentials.length < 8){
+      if (this.credentials === this.checkCredentials && this.credentials.length > 7){
         try {
           await axios({
             method: 'POST',
@@ -214,7 +189,7 @@ export default {
             }
           }).catch ((error) => {
             if (error.response.status === 406) {
-              this.signup_error_message = "이메일 또는 비밀번호가 형식에 맞지 않습니다."
+              alert("이메일 또는 비밀번호가 형식에 맞지 않습니다.")
             }
           })
         } catch (error) {
@@ -265,6 +240,7 @@ export default {
           else {
             this.emailChecked = true
             this.email_success_message = "사용 가능한 이메일입니다!"
+            this.email_error_message = null
           }
         }).catch((error) => {
           if (error.response.status === 406)
@@ -299,6 +275,7 @@ export default {
           else{
             this.nameChecked = true
             this.name_success_message = "사용 가능한 닉네임입니다!"
+            this.name_error_message = null
           }
         })
       } catch (error) {

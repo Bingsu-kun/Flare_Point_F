@@ -222,7 +222,7 @@ export default {
     },
     //모든 마커들을 서버에서 가져온다.
     getAllMarkers: async function() {
-
+      this.markers = []
       try {
         //axios로 모든 마커 가져오기
         await axios({
@@ -248,6 +248,7 @@ export default {
       for (let i = 0; i < this.markers.length; i++) {
         markerIds.push(this.markers[i].markerId)
       }
+      this.allMarkersLikes = []
       try {
         //axios로 모든 마커 가져오기
         await axios({
