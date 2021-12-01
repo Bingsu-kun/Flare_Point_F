@@ -152,9 +152,10 @@ export default {
       this.getMyMarkers()
     },
     setLogout: function(cause) {
-      this.notiOn = true
       this.notiText = `${cause}로그아웃 되었습니다`
-      sessionStorage.clear
+      this.notiOn = true
+      this.SHOW_USER_PROFILE = false
+      sessionStorage.clear()
       this.LOGIN = false
     },
     menuCloseEvent: function() {
@@ -230,6 +231,10 @@ input:focus {
   color: black;
   font-family: Pretendard-Bold;
   transition-duration: 0.2s;
+}
+
+.menu-buttons:hover {
+  color: #F3776B
 }
 
 .menu-buttons:hover {

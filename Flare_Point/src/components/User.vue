@@ -45,6 +45,7 @@
 			</div>
 		</div>
 		<div style="display: flex; justify-content: space-around; align-item: center; padding: 10px 40px;">
+			<button class="prof-btn" @click="logout" >로그아웃</button>
 			<button v-if="!Editting" class="prof-btn" @click="Editting = true">수정</button>
 			<button class="prof-btn" @click="menuCloseEvent" >닫기</button>
 		</div>
