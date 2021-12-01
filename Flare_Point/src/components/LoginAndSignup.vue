@@ -29,7 +29,7 @@
           <p v-if="email_error_message !== null" style="color: rgb(237,40,40)">{{ email_error_message }}</p>
           <p v-if="emailChecked" style="color: rgb(75,100,255)">{{ email_success_message }}</p>
           <p>비밀번호</p>
-          <input placeholder="영문,숫자,특수문자 포함 8자 이상" type="password" v-model="credentials">
+          <input placeholder="영문,숫자,특수문자 포함 8자 이상. 연속된 문자 3자 이상 X" type="password" style="font-size: 7px;" v-model="credentials">
           <p>비밀번호 확인</p>
           <input placeholder="비밀번호를 한번 더 입력해 주세요" type="password" v-model="checkCredentials">
           <p>닉네임</p>
@@ -51,7 +51,6 @@
 
 <script>
 import axios from 'axios';
-import refresh from '../getRefreshedToken.js'
 import Noti from './Noti.vue'
 
 export default {
@@ -74,10 +73,10 @@ export default {
       name_error_message: null,
       name_success_message: null,
 
-      principal: null,
+      principal: '',
       credentials: '',
       checkCredentials: '',
-      name: null,
+      name: '',
 
       emailChecked: false,
       nameChecked: false,
@@ -97,6 +96,8 @@ export default {
         return "비밀번호와 비밀번호 확인이 일치하지 않습니다."
       else if (this.credentials.length > 0 && this.credentials.length < 8)
         return "비밀번호가 8자 미만입니다."
+      else if (this.principal.includes(this.credentials))
+        return "비밀번호가 이메일에 포함되지 않게 해주세요."
       else
         return ''
     }
@@ -162,7 +163,7 @@ export default {
     signup: async function() {
       //회원가입 처리
       // 비밀번호 확인 체크
-      if (this.credentials === this.checkCredentials && this.credentials.length > 7){
+      if (this.nameChecked === true && this.emailChecked === true && this.credentials === this.checkCredentials && this.credentials.length > 7){
         try {
           await axios({
             method: 'POST',
