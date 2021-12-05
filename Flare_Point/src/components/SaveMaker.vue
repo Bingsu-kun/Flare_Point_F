@@ -5,7 +5,7 @@
       <div id="menu-subtitle">마커이름</div>
       <input class="marker-input" :placeholder="defaultMarkerName" :value="markerName" @input="markerName = $event.target.value">
       <div id="menu-subtitle">마커 제작자의 한마디</div>
-      <textarea id="description" :value="description" @input="description = $event.target.value" @keyup="checklength" class="marker-input" placeholder="마커를 설명해 주세요 (최대 200자)" style="height: 200px; resize: none; word-break: break-all; text-overflow: clip;"></textarea>
+      <textarea id="description" :value="description" @input="description = $event.target.value" @keyup="checklength" class="marker-input" placeholder="마커를 설명해 주세요 (최대 200자)" style="padding: 5px; font-family: Pretendard-Regular; height: 200px; resize: none; word-break: break-all; text-overflow: clip;"></textarea>
       <p v-if="DescOver" style="color: rgb(237,40,40)" >최대 200자 까지만 가능합니다!</p>
       <div id="menu-subtitle">태그</div>
       <input class="marker-input" placeholder="#차박#낚시#바베큐 (최대 10개)" style="font-size: 12px;" :value="tagString" @input="tagString = $event.target.value">
