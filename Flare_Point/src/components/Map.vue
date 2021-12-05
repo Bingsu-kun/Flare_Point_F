@@ -65,14 +65,14 @@ export default {
       }
     }
     else {
+      const script = document.createElement('script');
       try {
-        const script = document.createElement('script');
-        script.onload = () => kakao.maps.load(this.initKakaoMap());
         script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=12658ca88c9c540ede74d413df66f251&libraries=services'
         document.body.appendChild(script);
       } catch(e) {
         console.warn("Fail to load Kakao map." + e)
       } finally {
+        script.onload = () => kakao.maps.load(this.initKakaoMap());
         setTimeout(() => {
           loadMarker(() => {
             this.isLoading = false
