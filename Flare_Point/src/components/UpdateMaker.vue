@@ -71,7 +71,7 @@ export default {
       try {
         await axios({
           method: 'PUT',
-          url: 'https://api.flarepoint.kro.kr/marker/update',
+          url: 'https://flarepoint.herokuapp.com/marker/update',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           data: { markerId: markerId, mfId: mfId, name: name, latitude: latitude, longitude: longitude, place_addr: place_addr, isPrivate: isPrivate, tagString: tagString, description: description },
           withCredentials: true

@@ -122,7 +122,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'https://api.flarepoint.kro.kr/marker/mylikecount',
+          url: 'https://flarepoint.herokuapp.com/marker/mylikecount',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
@@ -144,7 +144,7 @@ export default {
 			try {
 				await axios({
 					method: 'PUT',
-					url: 'https://api.flarepoint.kro.kr/fisher/me/name/change',
+					url: 'https://flarepoint.herokuapp.com/fisher/me/name/change',
 					headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
 					data: { credentials: '', changeValue: name },
 					withCredentials: true
@@ -175,7 +175,7 @@ export default {
 			try {
 					await axios({
 						method: 'GET',
-						url: 'https://api.flarepoint.kro.kr/fisher/me/password/change',
+						url: 'https://flarepoint.herokuapp.com/fisher/me/password/change',
 						headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
 						data: { credentials: this.Pwd, changeValue: this.EditPwd },
 						withCredentials: true

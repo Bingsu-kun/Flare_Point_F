@@ -80,7 +80,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'https://api.flarepoint.kro.kr/marker/mylikelist',
+          url: 'https://flarepoint.herokuapp.com/marker/mylikelist',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
@@ -101,7 +101,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'https://api.flarepoint.kro.kr/marker/mymarkers',
+          url: 'https://flarepoint.herokuapp.com/marker/mymarkers',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {
@@ -123,7 +123,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: 'https://api.flarepoint.kro.kr/fisher/me',
+          url: 'https://flarepoint.herokuapp.com/fisher/me',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           withCredentials: true
         }).then((res) => {

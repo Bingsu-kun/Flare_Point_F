@@ -133,7 +133,7 @@ export default {
       try {
         await axios({
           method: 'POST',
-          url: 'https://api.flarepoint.kro.kr/marker/thiscount',
+          url: 'https://flarepoint.herokuapp.com/marker/thiscount',
           data: { markerId: markerId },
           withCredentials: true
         }).then((res) => {
@@ -156,7 +156,7 @@ export default {
       try {
         await axios({
           method: 'GET',
-          url: `https://api.flarepoint.kro.kr/fisher/${id}`,
+          url: `https://flarepoint.herokuapp.com/fisher/${id}`,
           withCredentials: true
         }).then((res) => {
           if (res.data.success === false) {
@@ -180,7 +180,7 @@ export default {
         try {
           await axios({
             method: 'POST',
-            url: 'https://api.flarepoint.kro.kr/marker/like', // 좋아요
+            url: 'https://flarepoint.herokuapp.com/marker/like', // 좋아요
             headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
             data: { markerId: id },
             withCredentials: true
@@ -208,7 +208,7 @@ export default {
       try {
         await axios({
           method: 'DELETE',
-          url: 'https://api.flarepoint.kro.kr/marker/dislike', //좋아요 취소
+          url: 'https://flarepoint.herokuapp.com/marker/dislike', //좋아요 취소
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           data: { markerId: id },
           withCredentials: true
@@ -238,7 +238,7 @@ export default {
       try {
         await axios({
           method: 'DELETE',
-          url: 'https://api.flarepoint.kro.kr/marker/delete',
+          url: 'https://flarepoint.herokuapp.com/marker/delete',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}`},
           data: { markerId: id, mfId: mfId },
           withCredentials: true

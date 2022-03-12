@@ -61,23 +61,19 @@ export default {
           this.getAllMarkers(() => {
             this.isLoading = false
           })
-        }, 8000)
+        }, 6000)
       }
     }
     else {
-      const script = document.createElement('script');
       try {
-        script.src = '//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=12658ca88c9c540ede74d413df66f251&libraries=services'
-        document.body.appendChild(script);
-      } catch(e) {
-        console.warn("Fail to load Kakao map." + e)
-      } finally {
-        script.onload = () => kakao.maps.load(this.initKakaoMap());
+        document.getElementById('kakaoScript').onload = () => kakao.maps.load(this.initKakaoMap());
         setTimeout(() => {
           loadMarker(() => {
             this.isLoading = false
           })
         }, 6000)
+      } catch(e) {
+        console.warn("Fail to load Kakao map." + e)
       }
     }
     const loadMarker = async (callback) => {
@@ -227,7 +223,7 @@ export default {
         //axios로 모든 마커 가져오기
         await axios({
           method: 'GET',
-          url: 'https://api.flarepoint.kro.kr/marker/all',
+          url: 'https://flarepoint.herokuapp.com/marker/all',
           withCredentials: true
         }).then((res) => {
 
@@ -253,7 +249,7 @@ export default {
         //axios로 모든 마커 가져오기
         await axios({
           method: 'POST',
-          url: 'https://api.flarepoint.kro.kr/marker/likes',
+          url: 'https://flarepoint.herokuapp.com/marker/likes',
           data: { markerIds: markerIds },
           withCredentials: true
         }).then((res) => {

@@ -79,7 +79,7 @@ export default {
       try {
         await axios({
           method: 'POST',
-          url: 'https://api.flarepoint.kro.kr/marker/create',
+          url: 'https://flarepoint.herokuapp.com/marker/create',
           headers: { Authorization: `Bearer ${sessionStorage.getItem('apiToken')}` },
           data: { name: name, latitude: latitude, longitude: longitude, place_addr: place_addr, isPrivate: isPrivate, tagString: tagString, description: description },
           withCredentials: true
