@@ -66,7 +66,7 @@ export default {
     }
     else {
       try {
-        document.getElementById('kakaoScript').onload = () => kakao.maps.load(this.initKakaoMap());
+        document.getElementById('kakaoScript').onload = () => kakao.maps.load(this.initKakaoMap);
         setTimeout(() => {
           loadMarker(() => {
             this.isLoading = false
