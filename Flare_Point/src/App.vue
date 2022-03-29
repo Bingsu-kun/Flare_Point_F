@@ -1,14 +1,14 @@
 <template>
   <div class="container" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
     <div id="menu_bar" >
-      <div id="menus" style="padding: 0 20px; justify-content: end;">
+      <div id="menus" class="left-menu">
         <button class="menu-buttons" @click="SHOW_FILTER = !SHOW_FILTER; SHOW_SEARCH = false; SHOW_MY = false">테마별마커</button>
         <button class="menu-buttons" @click="SHOW_SEARCH = !SHOW_SEARCH; SHOW_FILTER = false; SHOW_MY = false">위치찾기</button>
       </div>
-      <div id="menus">
+      <div id="menus" style="justify-content: center;">
         <img class="menu_logo" alt="main_logo" title="플레어포인트" src="./assets/logo.png">
       </div>
-      <div id="menus" style="padding: 0 20px; justify-content: start;">
+      <div id="menus" class="right-menu">
         <button class="menu-buttons" @click="SHOW_MY = !SHOW_MY; SHOW_FILTER = false; SHOW_SEARCH = false">마이마커</button>
         <button class="menu-buttons" v-if="!LOGIN" @click="SHOW_LOGIN_FORM = true">로그인</button>
         <button class="menu-buttons" v-if="LOGIN" @click="SHOW_USER_PROFILE = true">프로필</button>
@@ -217,14 +217,22 @@ input:focus {
 
 #menus {
   display: flex;
-  justify-content: center;
   justify-items: center;
   align-content: center;
   align-items: center;
 }
 
+.left-menu {
+  justify-content: flex-end;
+}
+
+.right-menu {
+  justify-content: flex-start;
+}
+
 .menu-buttons {
   margin: 0 20px;
+  padding: 0;
   height: 60px;
   border: 0;
   background-color: white;
@@ -305,18 +313,19 @@ input:focus {
 @media screen and (max-width: 768px){
   .menu-buttons {
     font-size: 11px;
+    margin: 0 15px;
+  }
+  .left-menu {
+    justify-content: space-around;
+  }
+  .right-menu {
+    justify-content: space-around;
   }
 }
-@media screen and (max-width: 550px){
+@media screen and (max-width: 400px){
   .menu-buttons {
-    font-size: 5px;
+    font-size: 9px;
     margin: 0 10px;
-  }
-}
-@media screen and (max-width: 450px){
-  .menu-buttons {
-    font-size: 3px;
-    margin: 0 5px;
   }
 }
 

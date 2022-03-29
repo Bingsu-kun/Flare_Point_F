@@ -1,5 +1,10 @@
 <template>
   <div id="map" @contextmenu="initMarkerButtonListener">
+    <div id="loading-text-container" v-if="isLoading">
+      <div id="loading-text">
+        {{loadingText}}
+      </div>
+    </div>
     <loading :active="isLoading" :can-cancel="true" :color="loading_color" :is-full-page="fullscreen"/>
     <div id="menu-background" v-if="SHOW_SAVE_MAKER" @click="SHOW_SAVE_MAKER = !SHOW_SAVE_MAKER"/>
     <transition name="menu">
@@ -54,14 +59,13 @@ export default {
     if (window.kakao && window.kakao.maps) {
       try {
         this.initKakaoMap();
-      } catch(e) {
-        console.log("Fail to load Kakao map." + e)
-      } finally {
         setTimeout(() => {
-          this.getAllMarkers(() => {
+          loadMarker(() => {
             this.isLoading = false
           })
         }, 6000)
+      } catch(e) {
+        console.log("Fail to load Kakao map." + e)
       }
     }
     else {
@@ -77,6 +81,7 @@ export default {
       }
     }
     const loadMarker = async (callback) => {
+      this.loadingText = '마커를 불러오는 중...'
       await this.getAllMarkers()
       await this.getAllMarkersLikes()
       callback()
@@ -90,6 +95,7 @@ export default {
       allMarkersLikes: [],
       selected: null,
       
+      loadingText: '테스트 텍스트',
       isLoading: false,
       fullscreen: false,
       loading_color: "#E2004B",
@@ -119,6 +125,7 @@ export default {
     // 카카오 맵 초기화 메서드
     initKakaoMap: function() {
       this.isLoading = true
+      this.loadingText = '맵을 불러오는 중...'
       const mapContainer = document.querySelector("#map");
       navigator.geolocation.getCurrentPosition((position) => {
         this.lat = position.coords.latitude
@@ -403,6 +410,32 @@ export default {
   width: 100%;
   height: 100%;
   z-index: 2;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+}
+
+#loading-text-container {
+  display: flex;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+#loading-text {
+  display: flex;
+  height: 130px;
+  font-family: 'Pretendard-Black';
+  z-index: 9999;
+  color:#F3776B;
+  text-align: center;
+  align-items: flex-end;
 }
 
 #marker-maker {
